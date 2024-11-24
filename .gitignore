@@ -46,7 +46,8 @@ yarn-error.log
 # screenshots whenever they are needed.
 # For more information about the recommended setup visit:
 # https://docs.fastlane.tools/best-practices/source-control/
-/android/app/google-services.json
+android/app/google-services.json
+
 
 **/fastlane/report.xml
 **/fastlane/Preview.html
