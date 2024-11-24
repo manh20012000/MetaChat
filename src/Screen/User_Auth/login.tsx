@@ -39,11 +39,11 @@ import {
 import { login } from '../../Redux_Toolkit/Reducer/auth.slice.ts';
 GoogleSignin.configure({
   // Ép kiểu để bỏ qua kiểm tra TypeScript
-  client_id: '445932894409-0dv0eet5aero8g05phlft3ue0jfvmsbt.apps.googleusercontent.com',
+  client_id: '',
 } as any);
 // GoogleSignin.configure({
 //   // Ép kiểu để bỏ qua kiểm tra TypeScript
-//   webClientId: '445932894409-0dv0eet5aero8g05phlft3ue0jfvmsbt.apps.googleusercontent.com',
+//   webClientId: '',
 // } as any);
 import FlashMessage, { showMessage } from 'react-native-flash-message';
 const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
