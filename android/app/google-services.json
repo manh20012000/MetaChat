@@ -20,6 +20,10 @@
             "package_name": "com.metachat",
             "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
           }
+        },
+        {
+          "client_id": "445932894409-jf9vv9tqdi7vaatm2joadhe7tht59vgh.apps.googleusercontent.com",
+          "client_type": 3
         }
       ],
       "api_key": [
@@ -29,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "445932894409-jf9vv9tqdi7vaatm2joadhe7tht59vgh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
