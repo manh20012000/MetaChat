@@ -1,0 +1,105 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/Fredoka-Bold.ttf",
+      "sha1": "49a29e15ae38e96548e70ae3f09c21da2ba7da65"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka-Light.ttf",
+      "sha1": "358f7fd527e77fc5e95a9db210d1a0e74ce2f37e"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka-Medium.ttf",
+      "sha1": "dac864c17432337b69775a6a04a7f9673857a101"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka-Regular.ttf",
+      "sha1": "753b91e83586d517b993f5ae5666cb4f2f29cbbe"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka-SemiBold.ttf",
+      "sha1": "10738d8e8510bbd602eff944e35fc57254425f2e"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka_Condensed-Bold.ttf",
+      "sha1": "02636c1ffe6f1915eba35d3e1163edf0e55e7f45"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka_Condensed-Light.ttf",
+      "sha1": "a7d1d0254288a0ef797c013c4192203ae3d9d692"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka_Condensed-Medium.ttf",
+      "sha1": "0e102406e3b2a7911a4f3602b671807821638493"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka_Condensed-Regular.ttf",
+      "sha1": "d2472b57a3b7b9a54239a3806f66b2b8471352cc"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka_Condensed-SemiBold.ttf",
+      "sha1": "d8616fe83b20c17870c49b59a0e55dcfa8d77645"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka_Expanded-Bold.ttf",
+      "sha1": "82098789e26538b714e8510d0057375744854be0"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka_Expanded-Light.ttf",
+      "sha1": "d8f8119483dd24dce7b6bae7fb603214369e0069"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka_Expanded-Medium.ttf",
+      "sha1": "ba86de91d66e8b77d64a2fbf6c0977166eb363b5"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka_Expanded-Regular.ttf",
+      "sha1": "de95242ad3f1d2e0d580b3f91daf56494f653823"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka_Expanded-SemiBold.ttf",
+      "sha1": "29a8b26a8e2fd74045d3d8963f9e4418955bc3db"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka_SemiCondensed-Bold.ttf",
+      "sha1": "ad1aaa9c3404498d9e17628d99db178c5783f98d"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka_SemiCondensed-Light.ttf",
+      "sha1": "8d7b3ab820f6be820cd0ce68339fcbbc49cdd691"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka_SemiCondensed-Medium.ttf",
+      "sha1": "698e09ef3b7e3e6baa85fbba9af5afd50b673bb5"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka_SemiCondensed-Regular.ttf",
+      "sha1": "888f2e887e1c05910ff6d6deca470dc3b8e3e93f"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka_SemiCondensed-SemiBold.ttf",
+      "sha1": "8ff59e5d7af132f08e4fe14283aaa94a35e7697e"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka_SemiExpanded-Bold.ttf",
+      "sha1": "ea18c140b8760336a8e3e27898e2c7911833c9cb"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka_SemiExpanded-Light.ttf",
+      "sha1": "e97bf791a2322aee369b6ba7e0695330cf2c1d7d"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka_SemiExpanded-Medium.ttf",
+      "sha1": "11fd8ae12dd67ffb477b3d44d836039e8db5398d"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka_SemiExpanded-Regular.ttf",
+      "sha1": "2f996f36727abd04d3904e4b69bab0df3c9b9ddb"
+    },
+    {
+      "path": "src/assets/fonts/Fredoka_SemiExpanded-SemiBold.ttf",
+      "sha1": "3b1733ad48dd0f35f9e9973a9ea16afa21646f10"
+    }
+  ]
+}
