@@ -39,7 +39,7 @@ import {
 import { login } from '../../Redux_Toolkit/Reducer/auth.slice.ts';
 GoogleSignin.configure({
   // Ép kiểu để bỏ qua kiểm tra TypeScript
-  client_id: '',
+  client_id: process.env.OAUTH_KEY,
 } as any);
 // GoogleSignin.configure({
 //   // Ép kiểu để bỏ qua kiểm tra TypeScript
