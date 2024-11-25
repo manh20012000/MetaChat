@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import React, { useState, useEffect, useContext } from 'react';
 // import {AuthContext} from '../Navigation/useContext';
-import styles from './StyleLogin.js';
+import styles from './StyleLogin.tsx';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../../confige/resfull_api.ts';
