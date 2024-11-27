@@ -22,8 +22,6 @@ const Navigation: React.FC = () => {
       try {
         const user_String: any = await AsyncStorage.getItem('user');
         const userObject = JSON.parse(user_String);
-
-
         if (userObject !== null) {
 
           const decoded: JwtPayload = jwtDecode(userObject.refresh_token);

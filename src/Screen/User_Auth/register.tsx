@@ -31,7 +31,7 @@ import * as Yup from 'yup';
 import { Formik } from 'formik';
 import Spinner from 'react-native-loading-spinner-overlay';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
-import { postData, postFormData, API_URL } from '../../confige/resfull_api';
+import { postData, postFormData, API_URL } from '../../service/resfull_api';
 const Register: React.FC<{ navigation: any }> = ({ navigation }) => {
   const color = useSelector((state: any) => state.colorApp.value);
   const insets = useSafeAreaInsets();
@@ -240,7 +240,7 @@ const Register: React.FC<{ navigation: any }> = ({ navigation }) => {
                   value={values.email}
                   keyboardType="email-address"
                   autoCapitalize="none" // Ngăn viết hoa
-       
+
                   style={[styles.textinput, { flex: 1 }]}
                 />
                 {touched.email && errors.email && (
@@ -256,7 +256,7 @@ const Register: React.FC<{ navigation: any }> = ({ navigation }) => {
                   placeholderTextColor={color.gray}
                   onChangeText={handleChange('phone')}
                   onBlur={handleBlur('phone')}
-                  
+
                   value={values.phone}
                   style={[styles.textinput, { flex: 1 }]}
                 />

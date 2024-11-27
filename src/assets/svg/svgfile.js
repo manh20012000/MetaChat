@@ -1,4 +1,5 @@
 import SvgBack from '../svg/back-svgrepo-com.svg';
+import Pen from '../svg/Pen.svg';
 import Avatar_user from '../svg/avatar-svgrepo-com.svg';
 import Passkey from '../svg/password.svg';
 import Showeyes from '../svg/showeys.svg';
@@ -27,7 +28,7 @@ import Map from '../svg/Map.svg';
 import Loock from '../svg/Loock.svg';
 import Public from '../svg/Public.svg';
 export {
-  Add,Loock,Public,
+  Add, Loock, Public,Pen,
   Map,
   Images,
   Mention,

@@ -5,11 +5,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '../Navigation/useContext';
 import axios from 'axios';
 import path from './path_confige';
-import { API_URL } from '../confige/resfull_api';
+import { API_URL } from '../service/resfull_api';
 export class HandlerNotification {
   static userData = '';
   static checknotificationPemision = async datauser => {
-    await AsyncStorage.removeItem('user');
+
     await AsyncStorage.setItem('user', JSON.stringify(datauser));
     const authStatus = await messaging().requestPermission();
     this.userData = datauser;
@@ -66,7 +66,7 @@ export class HandlerNotification {
   };
   static update = async (fcmtoken, auth) => {
     try {
-      console.log(auth._id, 'caap nhat laij fcmtoken1', this.userData._id, fcmtoken);
+ 
       const { data } = await axios.put(
         `${API_URL}/api/user/fcmtoken/${auth._id}`,
         { fcmtoken },

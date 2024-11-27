@@ -25,29 +25,28 @@ import { store } from './src/Redux_Toolkit/Store'
 import Navigation from './src/navigation/navigation'
 import FlashMessage from 'react-native-flash-message';
 import { SocketProvider } from './src/util/socket.io.tsx';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import changeNavigationBarColor, {
+  hideNavigationBar,
+  showNavigationBar,
+} from 'react-native-navigation-bar-color';
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
-
+  changeNavigationBarColor('translucent', false);
+  // changeNavigationBarColor('#000000', true);
   return (
     <Provider store={store}>
-
-      {/* <StatusBar
-          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-          backgroundColor={backgroundStyle.backgroundColor}
-        /> */}
-      <FlashMessage
-        position="top"
-        style={{ borderRadius: 10, width: '90%', alignSelf: 'center', marginTop: '5%' }}
-      />
-      <SocketProvider>
-        <Navigation />
-      </SocketProvider>
-
-
+        <FlashMessage
+          position="top"
+          style={{ borderRadius: 10, width: '90%', alignSelf: 'center', marginTop: '5%' }}
+        />
+        <SocketProvider>
+          <Navigation />
+        </SocketProvider>
     </Provider >
   );
 }

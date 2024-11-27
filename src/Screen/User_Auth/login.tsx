@@ -12,7 +12,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import styles from './StyleLogin.tsx';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_URL } from '../../confige/resfull_api.ts';
+import { API_URL } from '../../service/resfull_api.ts';
 import path from '../../util/path_confige.js';
 import { HandlerNotification } from '../../util/checking_fcmtoken.js';
 import { useSelector, useDispatch } from 'react-redux';
@@ -55,6 +55,7 @@ const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const hanlderlogin = async () => {
     try {
+      console.log(API_URL)
       if (emailphone === '' || matkhau === '') {
         showMessage({
           message: 'Tài khoản hoặc password không đúng!',
@@ -66,7 +67,7 @@ const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
         return;
       }
       setLoading(true);
-      console.log('nhảy login');
+
       const { data } = await axios.post(
         `${API_URL}/api/user/login`,
         {
@@ -83,7 +84,7 @@ const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
       if (data.success) {
 
         const user = data.data;
-
+        console.log(user, 'âhahahh');
         dispatch(login(user));
         await HandlerNotification.checknotificationPemision(user);
         await AsyncStorage.setItem(
