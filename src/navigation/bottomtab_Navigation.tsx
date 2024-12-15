@@ -17,6 +17,7 @@ import changeNavigationBarColor, {
   hideNavigationBar,
   showNavigationBar,
 } from 'react-native-navigation-bar-color';
+
 const Tab = createBottomTabNavigator();
 
 const Bottomtab_Navigation: React.FC<{ navigation: any }> = ({ navigation }) => {

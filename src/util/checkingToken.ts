@@ -4,19 +4,23 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { login } from '../Redux_Toolkit/Reducer/auth.slice';
 import { API_URL } from '../service/resfull_api';
 import { useDispatch } from 'react-redux';
+import User_interface from '../interface/user.Interface';
 
-export const checkAndRefreshToken = async () => {
+export const checkAndRefreshToken = async (): Promise<User_interface | null> => {
   // Lấy token từ AsyncStorage
   const user_json = await AsyncStorage.getItem('user');
+  if (!user_json) {
+    return null; // Trả về null nếu không có token
+  }
   const user = JSON.parse(user_json);
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   try {
     if (!user) {
       // Nếu không có token, trả về false
       return null;
     }
 
-    const decoded = jwtDecode(user.access_token);
+    const decoded: any = jwtDecode(user.access_token);
 
     const isTokenExpired = decoded.exp * 1000 < Date.now(); // Kiểm tra token hết hạn
 

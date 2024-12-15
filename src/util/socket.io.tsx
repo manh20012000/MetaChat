@@ -21,7 +21,7 @@ export const SocketProvider: React.FC<HomeProviderProps> = ({ children }) => {
 
   const [socket, setSocket] = useState<Socket | null>(null);
   const user = useSelector((state: any) => state.auth.value);
-
+  console.log(API_URL)
   useEffect(() => {
     const connectToSocketServer = async () => {
       if (user) {

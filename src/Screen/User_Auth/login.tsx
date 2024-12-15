@@ -46,6 +46,7 @@ GoogleSignin.configure({
 //   webClientId: '',
 // } as any);
 import FlashMessage, { showMessage } from 'react-native-flash-message';
+import Statusbar from '../Component/StatusBar.tsx';
 const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
   const color = useSelector((state: any) => state.colorApp.value);
   const dispatch = useDispatch();
@@ -84,7 +85,7 @@ const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
       if (data.success) {
 
         const user = data.data;
-        console.log(user, 'âhahahh');
+
         dispatch(login(user));
         await HandlerNotification.checknotificationPemision(user);
         await AsyncStorage.setItem(

@@ -27,8 +27,10 @@ import Images from '../svg/Images.svg';
 import Map from '../svg/Map.svg';
 import Loock from '../svg/Loock.svg';
 import Public from '../svg/Public.svg';
+import Send from '../svg/Send.svg';
+import WhiteBack from '../svg/WhiteBack.svg';
 export {
-  Add, Loock, Public,Pen,
+  Add, Loock, Public, Pen, Send,WhiteBack,
   Map,
   Images,
   Mention,

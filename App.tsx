@@ -26,20 +26,23 @@ import Navigation from './src/navigation/navigation'
 import FlashMessage from 'react-native-flash-message';
 import { SocketProvider } from './src/util/socket.io.tsx';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import changeNavigationBarColor, {
   hideNavigationBar,
   showNavigationBar,
 } from 'react-native-navigation-bar-color';
+import { color } from './src/assets/color/color.js';
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
-  changeNavigationBarColor('translucent', false);
-  // changeNavigationBarColor('#000000', true);
+  // changeNavigationBarColor('translucent', false);
+  changeNavigationBarColor('#000000', true);
   return (
     <Provider store={store}>
+      <GestureHandlerRootView style={{ backgroundColor: color.black, flex: 1}}>
         <FlashMessage
           position="top"
           style={{ borderRadius: 10, width: '90%', alignSelf: 'center', marginTop: '5%' }}
@@ -47,6 +50,7 @@ function App(): React.JSX.Element {
         <SocketProvider>
           <Navigation />
         </SocketProvider>
+      </GestureHandlerRootView>
     </Provider >
   );
 }
