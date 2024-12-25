@@ -1,7 +1,7 @@
 
 import { URL } from '@env';
 const API_URL = URL;
-console.log(URL, 'log ra uli')
+console.log('hahah', API_URL)
 import axios from 'axios';
 import { checkAndRefreshToken } from '../util/checkingToken';
 import User_interface from '../interface/user.Interface';
@@ -74,18 +74,17 @@ const getData = async (route: string, params: any,) => {
 }
 const getResearch = async (route: string, params: any,) => {
   try {
-
-    const response: any = await axios.get(`${API_URL}/${route}`, {
-      params: params ?? {},
+    const response: any = await axios.get(`${API_URL}${route}`, {
+      params: { text: params } ?? {},
       headers: {
         'Content-Type': 'application/json',
       },
-    }); console.log(API_URL)
+    });
+    console.log(API_URL)
     return response.data;
   } catch (error) {
     console.error('GET Error:', error);
     throw error;
-
 
   };
 }

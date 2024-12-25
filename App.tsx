@@ -5,9 +5,10 @@
  * @format
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type { PropsWithChildren } from 'react';
 import {
+  Alert,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -27,6 +28,7 @@ import FlashMessage from 'react-native-flash-message';
 import { SocketProvider } from './src/util/socket.io.tsx';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import NetInfo from '@react-native-community/netinfo';
 import changeNavigationBarColor, {
   hideNavigationBar,
   showNavigationBar,
@@ -34,19 +36,32 @@ import changeNavigationBarColor, {
 import { color } from './src/assets/color/color.js';
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
-
+  const [isConnected, setIsConnected] = useState<boolean | null>(null);
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
   // changeNavigationBarColor('translucent', false);
   changeNavigationBarColor('#000000', true);
+  useEffect(() => {
+    // Đăng ký lắng nghe trạng thái kết nối
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsConnected(state.isConnected);
+    });
+
+    // Dọn dẹp khi component unmount
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (isConnected === false) {
+      Alert.alert('No Internet Connection', 'Your network connection is too weak or unavailable.');
+    }
+  }, [isConnected]);
+
   return (
     <Provider store={store}>
-      <GestureHandlerRootView style={{ backgroundColor: color.black, flex: 1}}>
-        <FlashMessage
-          position="top"
-          style={{ borderRadius: 10, width: '90%', alignSelf: 'center', marginTop: '5%' }}
-        />
+      <GestureHandlerRootView style={{ backgroundColor: color.black, flex: 1 }}>
+
         <SocketProvider>
           <Navigation />
         </SocketProvider>

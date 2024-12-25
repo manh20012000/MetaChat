@@ -1,7 +1,14 @@
 import React from 'react';
-import {View, Animated, StyleSheet} from 'react-native';
+import { View, Animated, StyleSheet } from 'react-native';
 
-const Skeleton = ({width, height, borderRadius, status = true}) => {
+interface SkeletonProps {
+  width: number;
+  height: number;
+  borderRadius: number;
+  status?: boolean;
+}
+
+const Skeleton: React.FC<SkeletonProps> = ({ width, height, borderRadius, status = true }) => {
   const animatedValue = React.useMemo(() => new Animated.Value(0), []);
 
   React.useEffect(() => {

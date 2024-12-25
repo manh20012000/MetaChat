@@ -13,7 +13,7 @@ import styles from './StyleLogin.tsx';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../../service/resfull_api.ts';
-import path from '../../util/path_confige.js';
+// import path from '../../util/path_confige.js';
 import { HandlerNotification } from '../../util/checking_fcmtoken.js';
 import { useSelector, useDispatch } from 'react-redux';
 import {
@@ -25,6 +25,7 @@ import {
   statusCodes,
   User,
 } from '@react-native-google-signin/google-signin';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Spinner from 'react-native-loading-spinner-overlay';
 import messaging from '@react-native-firebase/messaging';
 import {
@@ -49,14 +50,18 @@ import FlashMessage, { showMessage } from 'react-native-flash-message';
 import Statusbar from '../Component/StatusBar.tsx';
 const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
   const color = useSelector((state: any) => state.colorApp.value);
+  const insets = useSafeAreaInsets();
   const dispatch = useDispatch();
   const [emailphone, setName] = useState('');
   const [matkhau, setPass] = useState('');
   const [hienthi, setHienthi] = useState(true);
   const [loading, setLoading] = useState<boolean>(false);
   const hanlderlogin = async () => {
+    const timeout = setTimeout(() => {
+      setLoading(false);
+    }, 10000)
     try {
-      console.log(API_URL)
+
       if (emailphone === '' || matkhau === '') {
         showMessage({
           message: 'Tài khoản hoặc password không đúng!',
@@ -68,7 +73,7 @@ const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
         return;
       }
       setLoading(true);
-
+      console.log(API_URL, 'lấy giá trị API')
       const { data } = await axios.post(
         `${API_URL}/api/user/login`,
         {
@@ -85,7 +90,6 @@ const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
       if (data.success) {
 
         const user = data.data;
-
         dispatch(login(user));
         await HandlerNotification.checknotificationPemision(user);
         await AsyncStorage.setItem(
@@ -131,6 +135,8 @@ const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
         duration: 3000, // Thời gian hiển thị thông báo (3 giây)
       });
       setLoading(false);
+    } finally {
+      clearTimeout(timeout);
     }
   };
   const [eye, setEys] = useState(false);
@@ -179,7 +185,7 @@ const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
           };
           console.log(gguser, token, 'hahahh');
           const { data } = await axios.post(
-            `${path}/api/user/siginGoogle`,
+            `${API_URL}/api/user/siginGoogle`,
             user,
             {
               headers: {
@@ -212,7 +218,7 @@ const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
     console.log('logout');
   };
   return (
-    <ScrollView style={[styles.container]}>
+    <ScrollView style={[styles.container,]}>
       <StatusBar
         translucent={true}
         // hidden={false}
@@ -221,6 +227,7 @@ const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
       />
       <View style={[styles.header]}>
         <FlashMessage
+
           position="top"
           style={{ borderRadius: 10, width: '90%', alignSelf: 'center' }}
         />

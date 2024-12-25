@@ -47,7 +47,6 @@ export class HandlerNotification {
 
   static updatatokenforuser = async token => {
     try {
-
       if (this.userData) {
         const { fcmtoken } = this.userData;
 
@@ -56,7 +55,7 @@ export class HandlerNotification {
           // console.log(Object.isFrozen(fcmToken)); // Kiểm tra xem mảng có bị đóng băng không
           // fcmToken.push(token);
           const arraysToken = [...fcmtoken, token];
-
+                 console.log('nhảy xuống cập nhật token ')
           await this.update(arraysToken, this.userData);
         }
       }
@@ -66,7 +65,7 @@ export class HandlerNotification {
   };
   static update = async (fcmtoken, auth) => {
     try {
-
+      console.log('upadet token ')
       const { data } = await axios.put(
         `${API_URL}/api/user/fcmtoken/${auth._id}`,
         { fcmtoken },
@@ -77,16 +76,20 @@ export class HandlerNotification {
         },
       );
       if (data.status === 200) {
+        await AsyncStorage.removeItem('user')
+   
         const dataUser = {
           _id: data.data._id,
-          name: data.data.name,
+          account: data.data.account,
           avatar: data.data.avatar,
           email: data.data.email,
-          fcmToken: data.data.fcmToken,
-          accessToken: this.userData.accessToken,
-          refreshToken: this.userData.refreshToken,
+          fcmtoken: data.data.fcmtoken,
+          access_token: this.userData.access_token,
+          refresh_token: this.userData.refresh_token,
         };
+        console.log(dataUser,'guhuhuh')
         await AsyncStorage.setItem('user', JSON.stringify(dataUser));
+        console.log('thành côbg ')
       }
     } catch (err) {
       console.log('can not update token fail err', err);

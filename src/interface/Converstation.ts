@@ -1,6 +1,6 @@
 interface Conversation {
     _id: string; // ID của cuộc trò chuyện
-    name: string | null; // Tên của nhóm hoặc tên động được tạo từ các thành viên
+    account: string | null; // Tên của nhóm hoặc tên động được tạo từ các thành viên
     avatar: string | null // Ảnh đại diện nhóm hoặc danh sách ảnh đại diện
     type: string; // Loại cuộc trò chuyện (vd: "group" hoặc "direct") 
     admin: string; // ID của admin nếu cần (tuỳ chọn)
@@ -8,7 +8,7 @@ interface Conversation {
     background: string; // Background của nhóm (nếu có)
     participants: { // Danh sách các thành viên
         _id: string; // ID của thành viên
-        name: string; // Tên của thành viên
+        account: string; // Tên của thành viên
         avatar: string; // Ảnh đại diện
     }[];
     lastMessage?: {

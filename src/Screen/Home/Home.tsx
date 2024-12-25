@@ -22,15 +22,15 @@ export default function Home({ navigation }: { navigation: any }) {
     const insets = useSafeAreaInsets();
     const conversation: Conversation = {
         _id: "123456789",
-        name: null,
+        account: null,
         avatar: null,
         type: "group",
         admin: "admin_id",
         color: "#FFFFFF",
         background: "#000000",
         participants: [
-            { _id: "user1", name: "Alice", avatar: "https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png" },
-            { _id: "user2", name: "Bob", avatar: "https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png" },
+            { _id: "user1", account: "Alice", avatar: "https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png" },
+            { _id: "user2", account: "Bob", avatar: "https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png" },
         ],
         lastMessage: {
             _id: "msg1",
@@ -49,15 +49,15 @@ export default function Home({ navigation }: { navigation: any }) {
     };
     const conversation2: Conversation = {
         _id: "123456789",
-        name: 'example',
+        account: 'example',
         avatar: 'https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png',
         type: "group",
         admin: "admin_id",
         color: "#FFFFFF",
         background: "#000000",
         participants: [
-            { _id: "user1", name: "Alice", avatar: "https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png" },
-            { _id: "user2", name: "Bob", avatar: "https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png" },
+            { _id: "user1", account: "Alice", avatar: "https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png" },
+            { _id: "user2", account: "Bob", avatar: "https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png" },
         ],
         lastMessage: {
             _id: "msg1",
@@ -203,10 +203,10 @@ export default function Home({ navigation }: { navigation: any }) {
                                             numberOfLines={1} // Giới hạn chỉ hiển thị 1 dòng
                                             ellipsizeMode="tail" // Hiển thị "..." khi vượt quá kích thước
                                         >
-                                            {item.name
-                                                ? item.name // Hiển thị tên nhóm nếu có
+                                            {item.account
+                                                ? item.account // Hiển thị tên nhóm nếu có
                                                 : item.participants
-                                                    .map((participant) => participant.name)
+                                                    .map((participant) => participant.account)
                                                     .join(', ')} {/* Ghép tên các thành viên */}
                                         </Text>
                                         <Text style={{ fontSize: 14, color: 'gray' }}>
