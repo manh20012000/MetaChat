@@ -16,6 +16,7 @@ import { itemuser } from "../../../interface/search_User";
 import SearchItemUser from "./Search_item_user";
 const SearchScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const color = useSelector((state: any) => state.colorApp.value)
+    const user_Status = useSelector((state: any) => state.statusUser.value)
     const { width, height } = useWindowDimensions()
     const isPortrait = height > width
     const insets = useSafeAreaInsets();
@@ -132,9 +133,12 @@ const SearchScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     <FlatList
                         data={userSearch}
                         keyExtractor={(item: any) => item._id}
-                        renderItem={({ item }) => (
-                            <SearchItemUser item={{ ...item, navigation }} /> // Ensure item structure is correct
-                        )}
+                        renderItem={({ item, index }) => {
+                            const statusUser = user_Status.includes(item._id);
+                            return (
+                            <SearchItemUser item={{ ...item, navigation,statusUser }} /> // Ensure item structure is correct
+                            )
+                        }}
                     />
                 </View>
             </View>

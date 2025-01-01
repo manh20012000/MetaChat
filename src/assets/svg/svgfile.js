@@ -25,12 +25,16 @@ import Mention from '../svg/Mention.svg';
 import Tagname from '../svg/Tagname.svg';
 import Images from '../svg/Images.svg';
 import Map from '../svg/Map.svg';
+import BackChat from '../svg/BackChat.svg';
 import Loock from '../svg/Loock.svg';
 import Public from '../svg/Public.svg';
 import Send from '../svg/Send.svg';
 import WhiteBack from '../svg/WhiteBack.svg';
+import Call from '../svg/Call.svg';
+import VideoCall from '../svg/VideoCall.svg';
+import Infor from '../svg/Infor.svg';
 export {
-  Add, Loock, Public, Pen, Send,WhiteBack,
+  Add, Loock, Public, Pen, Send,WhiteBack,Call,VideoCall,Infor,BackChat,
   Map,
   Images,
   Mention,

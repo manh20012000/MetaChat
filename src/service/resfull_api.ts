@@ -1,11 +1,11 @@
 
 import { URL } from '@env';
-const API_URL = URL;
-console.log('hahah', API_URL)
+const API_URL = "http://14.225.36.70";
+console.log('hahah', URL)
 import axios from 'axios';
 import { checkAndRefreshToken } from '../util/checkingToken';
 import User_interface from '../interface/user.Interface';
-// Hàm POST
+
 const postData = async (route: string, data: any) => {
   const checking = await checkAndRefreshToken();
   if (checking === null) {

@@ -73,7 +73,7 @@ const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
         return;
       }
       setLoading(true);
-      console.log(API_URL, 'lấy giá trị API')
+ 
       const { data } = await axios.post(
         `${API_URL}/api/user/login`,
         {
