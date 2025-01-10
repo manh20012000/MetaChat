@@ -13,6 +13,10 @@ import {
   Home_icon,
   User_icon,
 } from '../assets/svg/svgfile.js';
+import changeNavigationBarColor, {
+  hideNavigationBar,
+  showNavigationBar,
+} from 'react-native-navigation-bar-color';
 
 const Tab = createBottomTabNavigator();
 
@@ -20,9 +24,9 @@ const Bottomtab_Navigation: React.FC<{ navigation: any }> = ({ navigation }) => 
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-
-        tabBarActiveTintColor: 'black', // Màu icon/text khi được chọn
-        tabBarInactiveTintColor: 'black', // Màu icon/text khi không được chọn
+        animation: 'fade',
+        tabBarActiveTintColor: 'red', // Màu icon/text khi được chọn
+        tabBarInactiveTintColor: 'white', // Màu icon/text khi không được chọn
         headerShown: false,
         tabBarStyle: { backgroundColor: 'black' },
         tabBarIcon: ({ focused, color, size }) => {
@@ -30,8 +34,9 @@ const Bottomtab_Navigation: React.FC<{ navigation: any }> = ({ navigation }) => 
           if (route.name === 'Home') {
             iconComponent = (
               <Home_icon
-                width={28}
-                height={28}
+                width={30}
+                height={30}
+
                 size={focused ? 32 : 28}
                 stroke={focused ? 'white' : '#888888'}
                 fill={focused ? 'white' : '#888888'}
@@ -40,19 +45,31 @@ const Bottomtab_Navigation: React.FC<{ navigation: any }> = ({ navigation }) => 
           } else if (route.name === 'Watch') {
             iconComponent = (
               <Video_icon
-                width={28}
-                height={28}
-                size={focused ? 32 : 28}
+                width={30}
+                height={30}
+                size={focused ? 33 : 30}
                 stroke={focused ? 'white' : '#888888'}
                 fill={focused ? 'white' : '#888888'}
+              />
+            );
+          }
+          else if (route.name === '  ') {
+            iconComponent = (
+              <Add_icon
+                name=" "
+                width={36}
+                height={36}
+                stroke={focused ? 'white' : '#888888'}
+                fill={focused ? 'white' : '#888888'}
+                style={{ marginTop: '25%' }}
               />
             );
           } else if (route.name === 'Notifi') {
             iconComponent = (
               <Notifi_icon
-                width={32}
-                height={32}
-                size={focused ? 32 : 28}
+                width={33}
+                height={33}
+                size={focused ? 33 : 30}
                 stroke={focused ? 'white' : '#888888'}
                 fill={focused ? 'white' : '#888888'} // Thay đổi thuộc tính fill
               />
@@ -65,7 +82,7 @@ const Bottomtab_Navigation: React.FC<{ navigation: any }> = ({ navigation }) => 
                   marginTop: 10,
                 }}
                 stroke={focused ? 'white' : '#888888'}
-                size={focused ? 28 : 24}
+                size={focused ? 33 : 30}
                 fill={focused ? 'white' : '#888888'} // Thay đổi thuộc tính fill
               />
             );
@@ -79,21 +96,7 @@ const Bottomtab_Navigation: React.FC<{ navigation: any }> = ({ navigation }) => 
       <Tab.Screen
         name="  "
         component={Media_screen}
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <Add_icon
-              name=" "
-              width={32}
-              height={32}
-              fill={'white'}
-              stroke={'white'}
-              style={{
-                marginTop: 10,
-                backgroundColor: 'white',
-              }}
-            />
-          ),
-        }}
+
         listeners={({ navigation }) => ({
           blur: () => navigation.setParams({}), // Reset params hoặc thực hiện unmount.
         })}

@@ -1,4 +1,5 @@
 import SvgBack from '../svg/back-svgrepo-com.svg';
+import Pen from '../svg/Pen.svg';
 import Avatar_user from '../svg/avatar-svgrepo-com.svg';
 import Passkey from '../svg/password.svg';
 import Showeyes from '../svg/showeys.svg';
@@ -24,10 +25,27 @@ import Mention from '../svg/Mention.svg';
 import Tagname from '../svg/Tagname.svg';
 import Images from '../svg/Images.svg';
 import Map from '../svg/Map.svg';
+import BackChat from '../svg/BackChat.svg';
 import Loock from '../svg/Loock.svg';
 import Public from '../svg/Public.svg';
+import Send from '../svg/Send.svg';
+import WhiteBack from '../svg/WhiteBack.svg';
+import Call from '../svg/Call.svg';
+import VideoCall from '../svg/VideoCall.svg';
+import Infor from '../svg/Infor.svg';
+import Mic from '../svg/Mic.svg';
 export {
-  Add,Loock,Public,
+  Add,
+  Loock,
+  Public,
+  Pen,
+  Send,
+  WhiteBack,
+  Call,
+  VideoCall,
+  Infor,
+  BackChat,
+  Mic,
   Map,
   Images,
   Mention,

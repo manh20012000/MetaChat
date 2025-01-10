@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import socketIOClient, { io, Socket } from 'socket.io-client';
-import { API_URL } from '../confige/resfull_api';
+import { API_URL } from '../service/resfull_api.ts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -18,15 +18,17 @@ import { Status } from '../Redux_Toolkit/Reducer/status.User';
 
 export const SocketProvider: React.FC<HomeProviderProps> = ({ children }) => {
   const dispatch = useDispatch();
+
   const [socket, setSocket] = useState<Socket | null>(null);
   const user = useSelector((state: any) => state.auth.value);
-
+  const api_socket = API_URL
+  console.log('socket_pia', API_URL)
   useEffect(() => {
     const connectToSocketServer = async () => {
       if (user) {
         try {
           const userToken: string | null = await AsyncStorage.getItem('user');
-          console.log(userToken);
+
           const parsedToken = userToken ? JSON.parse(userToken) : null;
           const accessToken = parsedToken?.access_token;
           const iduser = parsedToken?._id;
@@ -34,8 +36,8 @@ export const SocketProvider: React.FC<HomeProviderProps> = ({ children }) => {
           if (!accessToken) {
             throw new Error('JWT token not found');
           }
-
-          const newSocket: Socket = socketIOClient('http://192.168.51.101:8080', {
+          console.log(api_socket, 'api')
+          const newSocket: Socket = socketIOClient(`${api_socket}`, {
             transports: ['websocket'],
             reconnection: true,
             reconnectionDelay: 1000,
@@ -81,4 +83,4 @@ export const SocketProvider: React.FC<HomeProviderProps> = ({ children }) => {
       {children}
     </SocketContext.Provider>
   );
-};
+}; 

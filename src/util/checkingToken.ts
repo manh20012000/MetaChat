@@ -1,9 +1,12 @@
-import { jwtDecode } from 'jwt-decode';
+import { jwtDecode, JwtPayload } from 'jwt-decode';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { login } from '../Redex/Reducer/auth.slice';
-import path from './config';
-export const checkAndRefreshToken = async (dispatch, user) => {
+import { login } from '../Redux_Toolkit/Reducer/auth.slice';
+import { API_URL } from '../service/resfull_api';
+import { useDispatch } from 'react-redux';
+import User_interface from '../interface/user.Interface';
+import { API_ROUTE } from '../service/api_enpoint';
+export const checkAndRefreshToken = async (dispatch: any, user:User_interface) => {
   // Lấy token từ AsyncStorage
 
   try {
@@ -12,16 +15,16 @@ export const checkAndRefreshToken = async (dispatch, user) => {
       return false;
     }
 
-    const decoded = jwtDecode(user.accessToken);
+    const decoded: JwtPayload = jwtDecode(user.access_token);
 
-    const isTokenExpired = decoded.exp * 1000 < Date.now(); // Kiểm tra token hết hạn
+    const isTokenExpired = decoded.exp ? decoded.exp * 1000 < Date.now() : true;
 
     if (isTokenExpired) {
       // Token hết hạn, cần làm mới token
       try {
         const response = await axios.post(
-          `${path}/user/refreshToken`,
-          { refreshToken: user.refreshToken },
+          `${API_URL}${API_ROUTE}`,
+          {refreshtoken: user.refresh_token},
           {
             headers: {
               'Content-Type': 'application/json',
