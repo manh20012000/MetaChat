@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Text, Image, Pressable, View } from 'react-native'
 import { itemuser } from '../../../interface/search_User';
-import { useSelector } from 'react-redux';
-const SearchItemUser: React.FC<{ item: itemuser }> = ({ item }) => {
+import { useSelector } from 'react-redux';  
+const SearchItemUser: React.FC<{ item: itemuser,navigation:any }> = ({ item,navigation }) => {
     const color = useSelector((state: any) => state.colorApp.value)
+
     return (
         <Pressable
             onPress={() => {
-                item.navigation.navigate('HomeChatPersion', { item: item });
+                navigation.navigate('HomeChatPersion', { item: item });
             }}
             style={({ pressed }) => [
                 {

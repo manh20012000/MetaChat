@@ -80,7 +80,6 @@ export const SocketProvider: React.FC<HomeProviderProps> = ({ children }) => {
 
   return (
     <SocketContext.Provider value={socket}>
-      
       {children}
     </SocketContext.Provider>
   );

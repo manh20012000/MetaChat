@@ -28,7 +28,7 @@ const SearchScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const handler_getuser_search_localdata = async () => {
         try {
             const data = await get_userSearch();
-
+         
             if (data) {
                 const formattedData: User_search[] = data.map((item: any) => ({
                     _id: item._id,
@@ -136,7 +136,7 @@ const SearchScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                         renderItem={({ item, index }) => {
                             const statusUser = user_Status.includes(item._id);
                             return (
-                            <SearchItemUser item={{ ...item, navigation,statusUser }} /> // Ensure item structure is correct
+                            <SearchItemUser item={{ ...item,statusUser }} navigation={navigation} /> // Ensure item structure is correct
                             )
                         }}
                     />

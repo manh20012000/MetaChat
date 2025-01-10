@@ -1,35 +1,30 @@
-import { jwtDecode } from 'jwt-decode';
+import { jwtDecode, JwtPayload } from 'jwt-decode';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { login } from '../Redux_Toolkit/Reducer/auth.slice';
 import { API_URL } from '../service/resfull_api';
 import { useDispatch } from 'react-redux';
 import User_interface from '../interface/user.Interface';
-
-export const checkAndRefreshToken = async (): Promise<User_interface | null> => {
+import { API_ROUTE } from '../service/api_enpoint';
+export const checkAndRefreshToken = async (dispatch: any, user:User_interface) => {
   // Lấy token từ AsyncStorage
-  const user_json = await AsyncStorage.getItem('user');
-  if (!user_json) {
-    return null; // Trả về null nếu không có token
-  }
-  const user = JSON.parse(user_json);
-  const dispatch = useDispatch();
+
   try {
     if (!user) {
       // Nếu không có token, trả về false
-      return null;
+      return false;
     }
 
-    const decoded: any = jwtDecode(user.access_token);
+    const decoded: JwtPayload = jwtDecode(user.access_token);
 
-    const isTokenExpired = decoded.exp * 1000 < Date.now(); // Kiểm tra token hết hạn
+    const isTokenExpired = decoded.exp ? decoded.exp * 1000 < Date.now() : true;
 
     if (isTokenExpired) {
       // Token hết hạn, cần làm mới token
       try {
         const response = await axios.post(
-          `${API_URL}/user/refreshToken`,
-          { refreshToken: user.refresh_token },
+          `${API_URL}${API_ROUTE}`,
+          {refreshtoken: user.refresh_token},
           {
             headers: {
               'Content-Type': 'application/json',
@@ -42,8 +37,8 @@ export const checkAndRefreshToken = async (): Promise<User_interface | null> => 
         if (response.status === 200 && data) {
           // Lưu token mới vào AsyncStorage
           const userDataString = JSON.stringify(data.data);
-          const accessTokenNew = data.data.access_token;
-          const refreshTokenNew = data.data.refresh_token;
+          const accessTokenNew = data.data.accessToken;
+          const refreshTokenNew = data.data.refreshToken;
 
           await AsyncStorage.setItem('user', userDataString);
           await AsyncStorage.setItem('access_token', accessTokenNew);
@@ -55,11 +50,11 @@ export const checkAndRefreshToken = async (): Promise<User_interface | null> => 
           return data.data; // Trả về user mới với token mới
         } else {
           // Làm mới token thất bại
-          return null;
+          return false;
         }
       } catch (error) {
         console.error('Lỗi khi làm mới token:', error);
-        return null;
+        return false;
       }
     } else {
       // Token còn hợp lệ, trả về user

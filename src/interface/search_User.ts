@@ -10,7 +10,5 @@ export interface itemuser {
   _id: string;
   account: string;
   avatar: string;
-  navigation: NavigationProp<'detailChat'>; // Kiểu navigation
   statusUser: boolean; //
-
 }

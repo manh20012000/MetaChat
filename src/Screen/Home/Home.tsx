@@ -12,69 +12,76 @@ import Statusbar from "../Component/StatusBar";
 import { Pen } from "../../assets/svg/svgfile";
 import BottonsheetHome from "./homeComponent/BottomsheetHome";
 import Conversation from "../../interface/Converstation";
+import { getData } from "../../service/resfull_api";
+import { API_ROUTE } from "../../service/api_enpoint";
+
+import { getConversations,createConversation } from "../../cache_data/exportdata.ts/chat_convert_datacache";
 export default function Home({ navigation }: { navigation: any }) {
     const { width, height } = useWindowDimensions()
     const [color] = useState(useSelector((state: any) => state.colorApp.value))
     const [user] = useState(useSelector((state: any) => state.auth.value));
- 
+   const dispatch = useDispatch();
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
     const isPortrait = height > width;
     const insets = useSafeAreaInsets();
-    const conversation: Conversation = {
-        _id: "123456789",
-        account: null,
-        avatar: null,
-        type: "group",
-        admin: "admin_id",
-        color: "#FFFFFF",
-        background: "#000000",
-        participants: [
-            { _id: "user1", account: "Alice", avatar: "https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png" },
-            { _id: "user2", account: "Bob", avatar: "https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png" },
-        ],
-        lastMessage: {
-            _id: "msg1",
-            sender: "user1",
-            name_send: 'user1',
-            createdAt: new Date(),
-            content: {
-                type: "text",
-                content: "Hello, everyone!"
-            }
-        },
-        read_user: [
-            { _id: "user1", avatar: "https://example.com/avatar1.png", account: "Alice" },
-            { _id: "user2", avatar: "https://example.com/avatar2.png", account: "Bob" }
-        ]
-    };
-    const conversation2: Conversation = {
-        _id: "123456789",
-        account: 'example',
-        avatar: 'https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png',
-        type: "group",
-        admin: "admin_id",
-        color: "#FFFFFF",
-        background: "#000000",
-        participants: [
-            { _id: "user1", account: "Alice", avatar: "https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png" },
-            { _id: "user2", account: "Bob", avatar: "https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png" },
-        ],
-        lastMessage: {
-            _id: "msg1",
-            sender: "user1",
-            createdAt: new Date(),
-            name_send: 'user',
-            content: {
-                type: "text",
-                content: "Hello, everyone!"
-            }
-        },
-        read_user: [
-            { _id: "user1", avatar: "https://example.com/avatar1.png", account: "Alice" },
-            { _id: "user2", avatar: "https://example.com/avatar2.png", account: "Bob" }
-        ]
-    };
-    const [data, setData] = useState<Conversation[]>([conversation, conversation2])
+    
+
+    // const conversation: Conversation = {
+    //     _id: "123456789",
+    //     account: null,
+    //     avatar: null,
+    //     type: "group",
+    //     admin: "admin_id",
+    //     color: "#FFFFFF",
+    //     background: "#000000",
+    //     participants: [
+    //         { _id: "user1", account: "Alice", avatar: "https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png" },
+    //         { _id: "user2", account: "Bob", avatar: "https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png" },
+    //     ],
+    //     lastMessage: {
+    //         _id: "msg1",
+    //         sender: "user1",
+    //         name_send: 'user1',
+    //         createdAt: new Date(),
+    //         content: {
+    //             type: "text",
+    //             content: "Hello, everyone!"
+    //         }
+    //     },
+    //     read_user: [
+    //         { _id: "user1", avatar: "https://example.com/avatar1.png", account: "Alice" },
+    //         { _id: "user2", avatar: "https://example.com/avatar2.png", account: "Bob" }
+    //     ]
+    // };
+    // const conversation2: Conversation = {
+    //     _id: "123456789",
+    //     account: 'example',
+    //     avatar: 'https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png',
+    //     type: "group",
+    //     admin: "admin_id",
+    //     color: "#FFFFFF",
+    //     background: "#000000",
+    //     participants: [
+    //         { _id: "user1", account: "Alice", avatar: "https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png" },
+    //         { _id: "user2", account: "Bob", avatar: "https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png" },
+    //     ],
+    //     lastMessage: {
+    //         _id: "msg1",
+    //         sender: "user1",
+    //         createdAt: new Date(),
+    //         name_send: 'user',
+    //         content: {
+    //             type: "text",
+    //             content: "Hello, everyone!"
+    //         }
+    //     },
+    //     read_user: [
+    //         { _id: "user1", avatar: "https://example.com/avatar1.png", account: "Alice" },
+    //         { _id: "user2", avatar: "https://example.com/avatar2.png", account: "Bob" }
+    //     ]
+    // };
+    const [data_convertstation, setData_convertStation] = useState()
+    const [skip,setSkiped]=useState(0)
     const [orientation, setOrientation] = useState(
         Dimensions.get('window').height > Dimensions.get('window').width ? 'portrait' : 'landscape'
     );
@@ -85,6 +92,38 @@ export default function Home({ navigation }: { navigation: any }) {
     const handleSheetChanges = useCallback((index: number) => {
         console.log('handleSheetChanges', index);
     }, []);
+    const get_data = async (skip: number) => {
+         console.log(API_ROUTE.GET_CONVERTSTATION_CHAT)
+        const data_api = await getData(API_ROUTE.GET_CONVERTSTATION_CHAT, null, skip,{dispatch,user})
+        console.log(data_api.data)
+        setData_convertStation(data_api.data)
+        setSkiped(data_api.data.length); 
+        if (data_api.data.length > 0) {
+           data_api.data.array.forEach(async (element:Conversation) => {
+            await createConversation(element)
+           });
+       }
+    }
+    useEffect(() => { 
+        const getChatuser = async () => {
+            try {
+                let data_converstation = await getConversations();
+                const skip_convert=data_converstation.length
+                if (data_converstation) {
+                //   await get_data(skip_convert)
+                } else {
+                    setData_convertStation(data_converstation)
+               }
+           
+            } catch (error: any) {
+                console.log(error,'error convert api GET_CONVERTSTATION_CHAT ')
+                throw new Error;
+                
+            }
+       }
+       getChatuser()
+    },[])
+
     return (
         <BottomSheetModalProvider >
             <View style={{ flex: 1, backgroundColor: color.white, paddingTop: insets.top }}>
@@ -109,13 +148,12 @@ export default function Home({ navigation }: { navigation: any }) {
                             </TouchableOpacity>
                         </View>
                     </View>
-                    <View style={{ flex: 1 }}>
-                        <FlatList
-                            refreshing
-                            style={{ flex: 1, backgroundColor: color.dark, width: '100%' }}
-                            ListHeaderComponent={<HeaderHome navigation={navigation} />}
+                   
+                   <FlatList
+                          refreshing
+                           ListHeaderComponent={<HeaderHome navigation={navigation} />}
                             initialNumToRender={10}
-                            data={data}
+                            data={data_convertstation}
                             // Sử dụng _id làm khóa duy nhất
                             renderItem={({ item }: { item: Conversation }) => (
                                 <Pressable
@@ -203,21 +241,20 @@ export default function Home({ navigation }: { navigation: any }) {
                                             numberOfLines={1} // Giới hạn chỉ hiển thị 1 dòng
                                             ellipsizeMode="tail" // Hiển thị "..." khi vượt quá kích thước
                                         >
-                                            {item.account
-                                                ? item.account // Hiển thị tên nhóm nếu có
+                                            {item.roomName
+                                                ? item.roomName // Hiển thị tên nhóm nếu có
                                                 : item.participants
                                                     .map((participant) => participant.account)
                                                     .join(', ')} {/* Ghép tên các thành viên */}
                                         </Text>
-                                        <Text style={{ fontSize: 14, color: 'gray' }}>
-                                            {item.lastMessage?.content.content}
-                                        </Text>
+                                        {/* <Text style={{ fontSize: 14, color: 'gray' }}>
+                                            {item.lastMessage[item.lastMessage.length]?.content.content}
+                                        </Text> */}
                                     </View>
                                 </Pressable>
                             )}
 
-                        />
-                    </View>
+                     />
 
                 </View>
             </View>

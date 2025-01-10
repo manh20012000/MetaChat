@@ -47,7 +47,6 @@ function App(): React.JSX.Element {
     const unsubscribe = NetInfo.addEventListener((state) => {
       setIsConnected(state.isConnected);
     });
-
     // Dọn dẹp khi component unmount
     return () => unsubscribe();
   }, []);

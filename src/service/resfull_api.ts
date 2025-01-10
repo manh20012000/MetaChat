@@ -6,8 +6,8 @@ import axios from 'axios';
 import { checkAndRefreshToken } from '../util/checkingToken';
 import User_interface from '../interface/user.Interface';
 
-const postData = async (route: string, data: any) => {
-  const checking = await checkAndRefreshToken();
+const postData = async (route: string, data: any ,check:any) => {
+  const checking = await checkAndRefreshToken(check.dispatch,check.user);
   if (checking === null) {
     return null;
   } else {
@@ -15,7 +15,7 @@ const postData = async (route: string, data: any) => {
       const response = await axios.post(`${API_URL}/${route}`, data, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${checking.access_token} `,
+          authorization: `Bearer ${checking.access_token} `,
         },
 
       });
@@ -27,8 +27,8 @@ const postData = async (route: string, data: any) => {
   }
 
 };
-const postFormData = async (route: string, data: any) => {
-  const checking = await checkAndRefreshToken()
+const postFormData = async (route: string, data: any,check:any) => {
+  const checking = await checkAndRefreshToken(check.dispatch, check.user);
   if (checking === null) {
     return null
   } else {
@@ -37,7 +37,7 @@ const postFormData = async (route: string, data: any) => {
       const response = await axios.post(`${API_URL}/${route}`, data, {
         headers: {
           'Content-Type': "multipart/form-data",
-          Authorization: `Bearer ${checking.access_token}`,
+          authorization: `Bearer ${checking.access_token}`,
 
         },
         data: JSON.stringify(data), // Chuyển dữ liệu thành JSON
@@ -50,17 +50,19 @@ const postFormData = async (route: string, data: any) => {
   }
 }
 // Hàm GET
-const getData = async (route: string, params: any,) => {
-  const checking = await checkAndRefreshToken()
+const getData = async (route: string, query: any, param: any,check:any) => {
+  console.log('hahahahh')
+  const checking =await checkAndRefreshToken(check.dispatch, check.user);
   if (checking === null) {
     return null
-  } else {
+  } 
     try {
-      const response = await axios.get(`${API_URL}/${route}`, {
-        params: params ?? {},
+      console.log('hahah222')
+      const response = await axios.get(`${API_URL}/${route}/${param}`, {
+        params: query ?? {},
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${checking.access_token} `,
+          authorization: `Bearer ${checking.access_token} `,
         },
 
         // Tham số truyền qua query
@@ -70,7 +72,7 @@ const getData = async (route: string, params: any,) => {
       console.error('GET Error:', error);
       throw error;
     }
-  };
+  
 }
 const getResearch = async (route: string, params: any,) => {
   try {
@@ -90,8 +92,8 @@ const getResearch = async (route: string, params: any,) => {
 }
 
 // Hàm PUT
-const putData = async (route: string, data: any) => {
-  const checking = await checkAndRefreshToken()
+const putData = async (route: string, data: any,check:any) => {
+  const checking = await checkAndRefreshToken(check.dispatch, check.user);
   if (checking === null) {
     return null
   } else {
@@ -99,7 +101,7 @@ const putData = async (route: string, data: any) => {
       const response = await axios.put(`${API_URL}/${route}`, data, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${checking.access_token} `,
+          authorization: `Bearer ${checking.access_token} `,
         },
 
       });
@@ -112,8 +114,8 @@ const putData = async (route: string, data: any) => {
 }
 
 // Hàm PATCH
-const patchData = async (route: string, data: any) => {
-  const checking = await checkAndRefreshToken()
+const patchData = async (route: string, data: any,check:any) => {
+  const checking = await checkAndRefreshToken(check.dispatch, check.user);
   if (checking === null) {
     return null
   } else {
@@ -123,7 +125,7 @@ const patchData = async (route: string, data: any) => {
           headers:
           {
             'Content-Type': 'application/json JSON',
-            Authorization: `Bearer ${checking.access_token} `,
+            authorization: `Bearer ${checking.access_token} `,
           }
         });
       return response.data;
@@ -135,8 +137,8 @@ const patchData = async (route: string, data: any) => {
 }
 
 // Hàm DELETE
-const deleteData = async (route: string) => {
-  const checking = await checkAndRefreshToken()
+const deleteData = async (route: string,check:any) => {
+  const checking = await checkAndRefreshToken(check.dispatch, check.user);
   if (checking === null) {
     return null
   } else {
@@ -144,7 +146,7 @@ const deleteData = async (route: string) => {
       const response = await axios.delete(`${API_URL}/${route}`, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${checking.access_token} `,
+          authorization: `Bearer ${checking.access_token} `,
         },
 
         // Tham số truyền qua query

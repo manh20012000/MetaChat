@@ -1,15 +1,13 @@
-import Realm from 'realm';
-import { UserSchema } from '../Schema/searchUser_schema.ts';
-import { User_search } from '../../interface/search_User.ts';
-// Khởi tạo Realm với schema
-const realm = new Realm({ schema: [UserSchema] });
 
-const create_userSearch = (users: User_search[]) => {
+import { User_search } from '../../interface/search_User.ts';
+import { realm } from '../Schema/schemaModel.tsx';
+
+const create_userSearch = async(users: User_search[]) => {
     try {
 
         realm.write(() => {
             users.forEach((user) => {
-                console.log(user, 'mỗi kết quá')
+            
                 realm.create('UserSearch', user);
             });
         });
@@ -18,15 +16,16 @@ const create_userSearch = (users: User_search[]) => {
 
     };
 }
-const get_userSearch = () => {
+const get_userSearch = async() => {
     try {
-        const user = realm.objects('UserSearch').map((user) => ({
+        const user =await realm.objects('UserSearch').map((user) => ({
             _id: user._id,
             account: user.account,
             avatar: user.avatar,
         }));
+    
         return user
-        console.log(user, 'ahah')
+      
     } catch (error) {
         console.error('Error retrieving users:', error);
 

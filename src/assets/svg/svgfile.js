@@ -33,8 +33,19 @@ import WhiteBack from '../svg/WhiteBack.svg';
 import Call from '../svg/Call.svg';
 import VideoCall from '../svg/VideoCall.svg';
 import Infor from '../svg/Infor.svg';
+import Mic from '../svg/Mic.svg';
 export {
-  Add, Loock, Public, Pen, Send,WhiteBack,Call,VideoCall,Infor,BackChat,
+  Add,
+  Loock,
+  Public,
+  Pen,
+  Send,
+  WhiteBack,
+  Call,
+  VideoCall,
+  Infor,
+  BackChat,
+  Mic,
   Map,
   Images,
   Mention,
