@@ -16,7 +16,8 @@ import {Bubble, Day, GiftedChat, InputToolbar} from 'react-native-gifted-chat';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {API_ROUTE} from '../../../service/api_enpoint';
+import { API_ROUTE } from '../../../service/api_enpoint';
+import {BSON, EJSON, ObjectId} from 'bson';
 interface GifchatUserProps {
   // Add any props you need here
 }
@@ -29,7 +30,6 @@ import {
 import GetAllMedia_Bottomsheet from '../homeComponent/GetAllMedia';
 import CustomInputToolbar from './RenderInputToolbar';
 import { renderSend } from './Gited_Chat.component';
-import renderCustomInputToolbar from './RenderInputToolbar';
 import { postData, postFormData } from '../../../service/resfull_api';
 import useCheckingService from '../../../service/Checking_service';
 
@@ -52,6 +52,7 @@ const GifchatUser = (props: GifchatUserProps) => {
   const [buttonScale] = useState(new Animated.Value(1));
   const [maginTextInput, setMaginTextInput] = useState<boolean>(false);
   const [selectedMessages, setSelectedMessages] = useState<string[]>([]); // Lưu trữ ID của tin nhắn đã chọn
+  const [participate, setParticipate] = useState<string[]>([]); // Lưu trữ ID của tin nhắn đã chọn
   //danh mục dành cho bootomsheet
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['40%', '90%'], []);

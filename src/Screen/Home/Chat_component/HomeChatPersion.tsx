@@ -1,6 +1,6 @@
 import React from "react";
 import { Image, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
-import { itemuser } from "../../../interface/search_User";
+import { itemuser } from "../../../interface/search_user.interface";
 import { useDispatch, useSelector } from "react-redux";
 import Statusbar from "../../Component/StatusBar";
 import { BackChat, Backsvg, Call, Infor, VideoCall } from "../../../assets/svg/svgfile";
@@ -13,7 +13,7 @@ import { GiftedChat, InputToolbar } from "react-native-gifted-chat";
 const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, navigation }) => {
     const color = useSelector((value: any) => value.colorApp.value)
     const insert = useSafeAreaInsets()
-
+    
     const { width, height } = useWindowDimensions()
     const isPortrait = height > width
     const user_persion: itemuser = route.params.item;
@@ -68,7 +68,7 @@ const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, nav
               numberOfLines={1} // Số dòng tối đa hiển thị
               ellipsizeMode="tail"
               style={{color: color.white, fontSize: 18, fontWeight: 'bold'}}>
-              {user_persion.account}
+              {user_persion.roomName ? user_persion.roomName : user_persion.account}
             </Text>
           </TouchableOpacity>
           <View
@@ -118,9 +118,8 @@ const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, nav
             width: width,
             height: '1%',
           }}></View>
-        
-        <GifchatUser />
 
+        <GifchatUser />
       </View>
     );
 }

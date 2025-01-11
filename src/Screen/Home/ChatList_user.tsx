@@ -2,7 +2,7 @@ import { View, Text, Image, useWindowDimensions, TouchableOpacity } from "react-
 import React from "react";
 import { Backsvg } from "../../assets/svg/svgfile";
 import { useSelector, } from "react-redux";
-import Conversation from "../../interface/Converstation";
+import Conversation from "../../interface/Converstation.interface";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const ChatScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, route }) => {
     const color = useSelector((status: any) => status.colorApp.value)

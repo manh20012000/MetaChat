@@ -8,13 +8,15 @@ interface Conversation {
   color: string; // Màu sắc của nhóm (nếu có)
   icon: string; //
   background: string; // Background của nhóm (nếu có)
+  messages: Message_interface[];
   participants: {
     // Danh sách các thành viên
     _id: string; // ID của thành viên
-    account: string; // Tên của thành viên
+    nickname: string; // Tên của thành viên
     avatar: string; // Ảnh đại diện
     role: string;
   }[];
-lastMessage?: Message_interface[];
+  lastMessage?:Message_interface;
+  firstMessageTime?: Date;
 }
 export default Conversation;

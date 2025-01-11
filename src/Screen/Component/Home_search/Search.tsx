@@ -10,9 +10,9 @@ import { postData, getResearch } from "../../../service/resfull_api";
 import User_interface from "../../../interface/user.Interface";
 import { API_ROUTE } from "../../../service/api_enpoint";
 import { clearUserSearch, create_userSearch, get_userSearch } from "../../../cache_data/exportdata.ts/userSearch_data";
-import { User_search } from "../../../interface/search_User";
+import { User_search } from "../../../interface/search_user.interface";
 import Skeleton from "../Skeleton";
-import { itemuser } from "../../../interface/search_User";
+import { itemuser } from "../../../interface/search_user.interface";
 import SearchItemUser from "./Search_item_user";
 const SearchScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const color = useSelector((state: any) => state.colorApp.value)
@@ -31,9 +31,10 @@ const SearchScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
          
             if (data) {
                 const formattedData: User_search[] = data.map((item: any) => ({
-                    _id: item._id,
-                    account: item.account,
-                    avatar: item.avatar,
+                  _id: item._id,
+                  account: item.account,
+                  avatar: item.avatar,
+                  roomName: item.roomName ?? null, // Nếu `roomName` là `null` hoặc `undefined`, trả về null
                 }));
 
                 setUserSearch(formattedData);
@@ -136,7 +137,7 @@ const SearchScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                         renderItem={({ item, index }) => {
                             const statusUser = user_Status.includes(item._id);
                             return (
-                            <SearchItemUser item={{ ...item,statusUser }} navigation={navigation} /> // Ensure item structure is correct
+                            <SearchItemUser item={{ ...item,statusUser, }} navigation={navigation} /> // Ensure item structure is correct
                             )
                         }}
                     />

@@ -7,6 +7,7 @@ export interface IMessage {
     name: string;
     avatar: string;
   };
+  voice: string;
   conversationId: string; // ID cuộc hội thoại
   sent?: boolean;
   pending?: boolean;

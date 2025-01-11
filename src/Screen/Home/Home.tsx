@@ -11,7 +11,7 @@ import {
 import Statusbar from "../Component/StatusBar";
 import { Pen } from "../../assets/svg/svgfile";
 import BottonsheetHome from "./homeComponent/BottomsheetHome";
-import Conversation from "../../interface/Converstation";
+import Conversation from "../../interface/Converstation.interface";
 import { getData } from "../../service/resfull_api";
 import { API_ROUTE } from "../../service/api_enpoint";
 

@@ -1,5 +1,5 @@
 
-import { User_search } from '../../interface/search_User.ts';
+import { User_search } from '../../interface/search_user.interface.ts';
 import { realm } from '../Schema/schemaModel.tsx';
 
 const create_userSearch = async(users: User_search[]) => {
@@ -18,10 +18,11 @@ const create_userSearch = async(users: User_search[]) => {
 }
 const get_userSearch = async() => {
     try {
-        const user =await realm.objects('UserSearch').map((user) => ({
-            _id: user._id,
-            account: user.account,
-            avatar: user.avatar,
+        const user = await realm.objects('UserSearch').map(user => ({
+          _id: user._id,
+          account: user.account,
+          avatar: user.avatar,
+          roomName: user.roomName ?? null, // Nếu `roomName` là `null` hoặc `undefined`, trả về null
         }));
     
         return user
