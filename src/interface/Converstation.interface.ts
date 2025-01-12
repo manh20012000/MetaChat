@@ -12,11 +12,11 @@ interface Conversation {
   participants: {
     // Danh sách các thành viên
     _id: string; // ID của thành viên
-    nickname: string; // Tên của thành viên
+    account: string; // Tên của thành viên
     avatar: string; // Ảnh đại diện
     role: string;
   }[];
-  lastMessage?:Message_interface;
+  lastMessage?: Message_interface;
   firstMessageTime?: Date;
 }
 export default Conversation;

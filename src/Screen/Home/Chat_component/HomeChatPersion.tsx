@@ -10,13 +10,15 @@ import BackIcon from "../../../assets/svg/SvgIcon";
 import Icon from "../../../assets/svg/Customsvg";
 import { TextInput } from "react-native-gesture-handler";
 import { GiftedChat, InputToolbar } from "react-native-gifted-chat";
+import Conversation from "../../../interface/Converstation.interface";
 const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, navigation }) => {
     const color = useSelector((value: any) => value.colorApp.value)
     const insert = useSafeAreaInsets()
     
     const { width, height } = useWindowDimensions()
     const isPortrait = height > width
-    const user_persion: itemuser = route.params.item;
+  const conversation: Conversation = route.params.conversation;
+  console.log(conversation,'conversation');
     return (
       <View
         style={{backgroundColor: color.dark, flex: 1, paddingTop: insert.top}}>
@@ -54,7 +56,12 @@ const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, nav
               gap: 10,
             }}>
             <Image
-              source={{uri: user_persion.avatar}}
+              source={{
+                uri:
+                  conversation.avatar === null
+                    ? conversation.participants[1].avatar
+                    : conversation.avatar,
+              }}
               style={{
                 backgroundColor: color.gray,
                 width: 50,
@@ -68,7 +75,9 @@ const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, nav
               numberOfLines={1} // Số dòng tối đa hiển thị
               ellipsizeMode="tail"
               style={{color: color.white, fontSize: 18, fontWeight: 'bold'}}>
-              {user_persion.roomName ? user_persion.roomName : user_persion.account}
+              {conversation.roomName===null
+                ? conversation.participants[1].account
+                : conversation.roomName}
             </Text>
           </TouchableOpacity>
           <View
@@ -119,7 +128,7 @@ const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, nav
             height: '1%',
           }}></View>
 
-        <GifchatUser />
+        {/* <GifchatUser /> */}
       </View>
     );
 }

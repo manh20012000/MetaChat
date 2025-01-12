@@ -106,30 +106,32 @@ const delete_converStation = async (converstation: Conversation) => {
   }
 };
 //
+let isProcessing = false;
+const findAndconvertConversation = async (
+  userId: itemuser,
 
-const findAndconvertConversation = async (userId:itemuser, currentUser:any) => {
+  participantIds: string[],
+  participants: any,
+) => {
+  // Chuyển danh sách _id thành chuỗi JSON để dùng trong bộ lọc
+  const participantIdsString = JSON.stringify(participantIds);
+
   try {
-    console.log(typeof currentUser._id);
+    isProcessing = true;
 
-    const userIdString = userId._id.toString();
+    const conditions = participantIds
+      .map((id, index) => `ANY participants._id == $${index}`)
+      .join(' AND '); // Sử dụng "AND" để đảm bảo tất cả đều khớp
 
-    const matchingConversation:any = realm
+    // Thực hiện truy vấn với tham số
+    const matchingConversation: any = realm
       .objects('Conversation')
-      .filtered('ANY participants._id == $0', userIdString)[0];
-
+      .filtered(conditions, ...participantIds)[0];
     let updatedConversation = null;
-    
-    realm.write(() => {
+
+   await realm.write(() => {
       if (matchingConversation) {
-        console.log(
-          matchingConversation.participants.map((participant:any) => ({
-            _id: participant._id,
-            nickname: participant.nickname,
-            avatar: participant.avatar,
-            role: participant.role,
-          })),
-        );
-        // Lưu dữ liệu của matchingConversation trước khi xóa
+        // Logic xử lý khi tìm thấy cuộc hội thoại
         const conversationData = {
           _id: matchingConversation._id,
           roomName: matchingConversation.roomName,
@@ -142,36 +144,15 @@ const findAndconvertConversation = async (userId:itemuser, currentUser:any) => {
           messages: matchingConversation.messages.slice(),
         };
 
-        // Xóa bản ghi cũ
         realm.delete(matchingConversation);
-
-        // Tạo lại bản ghi
         updatedConversation = realm.create('Conversation', conversationData);
-        console.log(
-          `Cuộc hội thoại với userId ${userId._id} đã được chuyển lên đầu.`,
-        );
       } else {
-        console.log('Không tìm thấy cuộc hội thoại hiện có');
-
         // Tạo cuộc hội thoại mới
         const newConversation = {
           _id: new BSON.ObjectId().toString(),
-          roomName: userId.account,
-          avatar: userId.avatar,
-          participants: [
-            {
-              _id: currentUser._id.toString(),
-              nickname: currentUser.account,
-              avatar: currentUser.avatar,
-              role: 'admin',
-            },
-            {
-              _id: userId._id.toString(),
-              nickname: userId.account,
-              avatar: userId.avatar,
-              role: 'member',
-            },
-          ],
+          roomName: null,
+          avatar:null,
+          participants:participants,
           color: 'red',
           icon: '😁',
           background: 'black',
@@ -183,7 +164,7 @@ const findAndconvertConversation = async (userId:itemuser, currentUser:any) => {
         console.log(`Đã tạo cuộc hội thoại mới với userId ${userId._id}.`);
       }
     });
-
+    console.log(updatedConversation,'updatedConversation');
     return updatedConversation;
   } catch (error) {
     console.error('Lỗi khi tìm và chuyển hoặc tạo mới cuộc hội thoại:', error);

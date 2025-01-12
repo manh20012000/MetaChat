@@ -12,17 +12,30 @@ const SearchItemUser: React.FC<{ item: itemuser,navigation:any }> = ({ item,navi
 const handler_chat = async () => {
   try {
     // Tìm hoặc chuyển cuộc hội thoại với user lên đầu danh sách
-    const conversation = await findAndconvertConversation(item, currentUser);
+    const participantIds = [item._id, currentUser._id];
+    const participants = [
+      {
+        _id: currentUser._id.toString(),
+        account: currentUser.account,
+        avatar: currentUser.avatar,
+        role: 'admin',
+      },
+      {
+        _id: item._id.toString(),
+        account: item.account,
+        avatar: item.avatar,
+        role: 'member',
+      },
+    ];
+    const conversation = await findAndconvertConversation(
+      item,
+      participantIds,
+      participants,
+    );
+    console.log(conversation,'conversation111111');
 
-    if (conversation) {
-      console.log('Đã chuyển cuộc hội thoại lên đầu danh sách.');
-    } else {
-      // Nếu không tìm thấy, bạn có thể thêm logic tạo mới ở đây
-      console.log('Không tìm thấy cuộc hội thoại, cần thêm mới.');
-    }
-
-    // Chuyển đến màn hình chat cá nhân với thông tin người dùng
-    navigation.navigate('HomeChatPersion', {item});
+    // // Chuyển đến màn hình chat cá nhân với thông tin người dùng
+    navigation.navigate('HomeChatPersion', {conversation});
   } catch (error) {
     console.error('Lỗi trong handler_chat:', error);
   }
