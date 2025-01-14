@@ -17,8 +17,8 @@ const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, nav
     
     const { width, height } = useWindowDimensions()
     const isPortrait = height > width
-  const conversation: Conversation = route.params.conversation;
-  console.log(conversation,'conversation');
+    const conversation: Conversation = route.params.conversation;
+      
     return (
       <View
         style={{backgroundColor: color.dark, flex: 1, paddingTop: insert.top}}>
@@ -48,6 +48,7 @@ const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, nav
               />
             </TouchableOpacity>
           </View>
+
           <TouchableOpacity
             style={{
               flexDirection: 'row',
@@ -55,29 +56,134 @@ const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, nav
               width: '50%',
               gap: 10,
             }}>
-            <Image
-              source={{
-                uri:
-                  conversation.avatar === null
-                    ? conversation.participants[1].avatar
-                    : conversation.avatar,
-              }}
-              style={{
-                backgroundColor: color.gray,
-                width: 50,
-                height: 50,
-                resizeMode: 'contain',
-                borderRadius: 100,
-                alignItems: 'center',
-              }}
-            />
+            {conversation.avatar ? (
+              <Image
+                style={{
+                  backgroundColor: color.gray,
+                  width: 50,
+                  height: 50,
+                  resizeMode: 'contain',
+                  borderRadius: 100,
+                  alignItems: 'center',
+                }}
+                source={{uri: conversation.avatar}}
+              />
+            ) : (
+              <View
+                style={{
+                  width: 50,
+                  height: 50,
+                  marginRight: 15,
+                  position: 'relative',
+                  backgroundColor: color.gray,
+                  borderRadius: 100,
+                }}>
+                {(() => {
+                  // Lọc ra những người tham gia khác currentUser
+                  const filteredParticipants = conversation.participants.filter(
+                    participant =>
+                      participant.user._id !== conversation.participants[0].user._id,
+                  );
+
+                  // Số lượng người tham gia khác currentUser
+                  const count = filteredParticipants.length;
+                  if (count === 1) {
+                    // Chỉ hiển thị ảnh của 1 người (chiếm 100%)
+                    return (
+                      <Image
+                        style={{
+                          width: 50,
+                          height: 50,
+                          borderRadius: 25,
+                          backgroundColor: color.gray,
+                        }}
+                        source={{uri: filteredParticipants[0].user.avatar}}
+                      />
+                    );
+                  } else if (count === 2) {
+                    // Hiển thị 2 ảnh (chia 2 góc)
+                    return (
+                      <>
+                        <Image
+                          style={{
+                            width: 30,
+                            height: 30,
+                            borderRadius: 15,
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            borderWidth: 2,
+                            borderColor: 'white',
+                            backgroundColor: color.gray,
+                          }}
+                          source={{uri: filteredParticipants[0]?.user.avatar}}
+                        />
+                        <Image
+                          style={{
+                            width: 30,
+                            height: 30,
+                            borderRadius: 15,
+                            position: 'absolute',
+                            bottom: 0,
+                            right: 0,
+                            borderWidth: 2,
+                            borderColor: 'white',
+                            backgroundColor: color.gray,
+                          }}
+                          source={{uri: filteredParticipants[1]?.user.avatar}}
+                        />
+                      </>
+                    );
+                  } else {
+                    // Hiển thị tối đa 4 ảnh
+                    return filteredParticipants
+                      .slice(0, 4)
+                      .map((participant, index) => {
+                        const positions = [
+                          {top: 0, left: 0},
+                          {top: 0, right: 0},
+                          {bottom: 0, left: 0},
+                          {bottom: 0, right: 0},
+                        ];
+                        return (
+                          <Image
+                            key={participant.user._id}
+                            style={{
+                              width: 20,
+                              height: 20,
+                              borderRadius: 10,
+                              position: 'absolute',
+                              ...positions[index],
+                              borderWidth: 1,
+                              borderColor: 'white',
+                              backgroundColor: color.gray,
+                            }}
+                            source={{uri: participant.user.avatar}}
+                          />
+                        );
+                      });
+                  }
+                })()}
+              </View>
+            )}
             <Text
-              numberOfLines={1} // Số dòng tối đa hiển thị
-              ellipsizeMode="tail"
-              style={{color: color.white, fontSize: 18, fontWeight: 'bold'}}>
-              {conversation.roomName===null
-                ? conversation.participants[1].account
-                : conversation.roomName}
+              style={{
+                fontWeight: 'bold',
+                fontSize: 16,
+                color: color.white,
+              }}
+              numberOfLines={1}
+              ellipsizeMode="tail">
+              {conversation.roomName
+                ? conversation.roomName
+                : conversation.participants
+                    .filter(
+                      participant =>
+                        participant.user.name !==
+                        conversation.participants[0].user.name,
+                    ) // Lọc bỏ tên của currentUser
+                    .map(participant => participant.user.name) // Lấy tên còn lại
+                    .join(', ')}{' '}
             </Text>
           </TouchableOpacity>
           <View
@@ -128,7 +234,7 @@ const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, nav
             height: '1%',
           }}></View>
 
-        {/* <GifchatUser /> */}
+        <GifchatUser conversation={conversation}/>
       </View>
     );
 }

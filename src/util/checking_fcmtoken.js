@@ -51,7 +51,7 @@ export class HandlerNotification {
         const { fcmtoken } = this.userData;
 
         if (fcmtoken && !fcmtoken.includes(token)) {
-          console.log(typeof fcmtoken);
+        
           // console.log(Object.isFrozen(fcmToken)); // Kiểm tra xem mảng có bị đóng băng không
           // fcmToken.push(token);
           const arraysToken = [...fcmtoken, token];
@@ -87,7 +87,7 @@ export class HandlerNotification {
           access_token: this.userData.access_token,
           refresh_token: this.userData.refresh_token,
         };
-        console.log(dataUser,'guhuhuh')
+       
         await AsyncStorage.setItem('user', JSON.stringify(dataUser));
         console.log('thành côbg ')
       }

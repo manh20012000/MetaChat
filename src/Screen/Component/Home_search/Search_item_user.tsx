@@ -15,15 +15,19 @@ const handler_chat = async () => {
     const participantIds = [item._id, currentUser._id];
     const participants = [
       {
-        _id: currentUser._id.toString(),
-        account: currentUser.account,
-        avatar: currentUser.avatar,
+        user: {
+          _id: currentUser._id.toString(),
+          account: currentUser.account,
+          avatar: currentUser.avatar,
+        },
         role: 'admin',
       },
       {
-        _id: item._id.toString(),
-        account: item.account,
-        avatar: item.avatar,
+        user: {
+          _id: item._id.toString(),
+          name: item.account,
+          avatar: item.avatar,
+        },
         role: 'member',
       },
     ];
@@ -32,8 +36,6 @@ const handler_chat = async () => {
       participantIds,
       participants,
     );
-    console.log(conversation,'conversation111111');
-
     // // Chuyển đến màn hình chat cá nhân với thông tin người dùng
     navigation.navigate('HomeChatPersion', {conversation});
   } catch (error) {

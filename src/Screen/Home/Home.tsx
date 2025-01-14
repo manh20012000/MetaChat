@@ -132,7 +132,7 @@ export default function Home({navigation}: {navigation: any}) {
         const skip_convert = data_converstation.length;
         if (data_converstation) {
             setData_convertStation(data_converstation);
-            console.log(data_converstation,'data_converstation');
+           
         } else {
           await get_data(skip_convert);
         }
@@ -143,7 +143,7 @@ export default function Home({navigation}: {navigation: any}) {
     };
     getChatuser();
   }, []);
-const createdAt = new Date('2025-01-10T10:00:00Z'); // Thời gian lưu trữ
+// Thời gian lưu trữ
 const now = new Date();
     
   return (
@@ -217,7 +217,9 @@ const now = new Date();
             // Sử dụng _id làm khóa duy nhất
             renderItem={({item}: {item: Conversation}) => (
               <Pressable
-                onPress={() => navigation.navigate('HomeChatPersion', {conversation:item})}
+                onPress={() =>
+                  navigation.navigate('HomeChatPersion', {conversation: item})
+                }
                 onLongPress={handlePresentModalPress}
                 style={({pressed}) => [
                   {
@@ -259,7 +261,7 @@ const now = new Date();
                     {(() => {
                       // Lọc ra những người tham gia khác currentUser
                       const filteredParticipants = item.participants.filter(
-                        participant => participant._id !== user._id,
+                        participant => participant.user._id !== user._id,
                       );
 
                       // Số lượng người tham gia khác currentUser
@@ -275,7 +277,7 @@ const now = new Date();
                               borderRadius: 25,
                               backgroundColor: color.gray,
                             }}
-                            source={{uri: filteredParticipants[0].avatar}}
+                            source={{uri: filteredParticipants[0].user.avatar}}
                           />
                         );
                       } else if (count === 2) {
@@ -294,7 +296,9 @@ const now = new Date();
                                 borderColor: 'white',
                                 backgroundColor: color.gray,
                               }}
-                              source={{uri: filteredParticipants[0]?.avatar}}
+                              source={{
+                                uri: filteredParticipants[0]?.user.avatar,
+                              }}
                             />
                             <Image
                               style={{
@@ -308,7 +312,9 @@ const now = new Date();
                                 borderColor: 'white',
                                 backgroundColor: color.gray,
                               }}
-                              source={{uri: filteredParticipants[1]?.avatar}}
+                              source={{
+                                uri: filteredParticipants[1]?.user.avatar,
+                              }}
                             />
                           </>
                         );
@@ -325,7 +331,7 @@ const now = new Date();
                             ];
                             return (
                               <Image
-                                key={participant._id}
+                                key={participant.user._id}
                                 style={{
                                   width: 20,
                                   height: 20,
@@ -336,7 +342,7 @@ const now = new Date();
                                   borderColor: 'white',
                                   backgroundColor: color.gray,
                                 }}
-                                source={{uri: participant.avatar}}
+                                source={{uri: participant.user.avatar}}
                               />
                             );
                           });
@@ -360,9 +366,10 @@ const now = new Date();
                       : item.participants
                           .filter(
                             participant =>
-                              participant.account !== user.account,
+                              participant.user.name !== user.account,
                           ) // Lọc bỏ tên của currentUser
-                          .map(participant => participant.account) // Lấy tên còn lại
+                          .map(participant => participant.user.name) // Lấy tên
+                          .filter(name => !!name) // Loại bỏ tên rỗng
                           .join(', ')}{' '}
                     {/* Nối các tên lại thành chuỗi */}
                   </Text>
@@ -373,7 +380,7 @@ const now = new Date();
                       gap: 10,
                     }}>
                     <Text style={{fontSize: 14, color: 'gray'}}>
-                      {item.lastMessage?.textContent || 'Bắt đầu cuộc thoại'}
+                      {item.lastMessage?.text || 'Bắt đầu cuộc thoại'}
                     </Text>
                     <Text>{dayjs(item.lastMessage?.createdAt).from(now)}</Text>
                   </View>

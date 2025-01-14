@@ -1,8 +1,8 @@
 export interface IMessage {
   _id: string | number;
   text: string;
-  createdAt: Date | number;
-  senderId: {
+  createdAt: string | null;
+  user: {
     _id: string;
     name: string;
     avatar: string;

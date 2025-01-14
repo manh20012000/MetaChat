@@ -8,15 +8,18 @@ import {
   KeyboardAvoidingView,
   Platform,
   Keyboard,
-  ScrollView,Vibration ,
-  Animated,  Easing,
+  ScrollView,
+  Vibration,
+  Animated,
+  Easing,
+  Image,
 } from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
 import {Bubble, Day, GiftedChat, InputToolbar} from 'react-native-gifted-chat';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { API_ROUTE } from '../../../service/api_enpoint';
+import {API_ROUTE} from '../../../service/api_enpoint';
 import {BSON, EJSON, ObjectId} from 'bson';
 interface GifchatUserProps {
   // Add any props you need here
@@ -26,33 +29,52 @@ import {
   BottomSheetView,
   BottomSheetModalProvider,
 } from '@gorhom/bottom-sheet';
-
+import HandlerSendMessage from '../../../util/util_chat/SendMessages';
 import GetAllMedia_Bottomsheet from '../homeComponent/GetAllMedia';
 import CustomInputToolbar from './RenderInputToolbar';
-import { renderSend } from './Gited_Chat.component';
-import { postData, postFormData } from '../../../service/resfull_api';
+import {renderSend} from './Gited_Chat.component';
+import {postData, postFormData} from '../../../service/resfull_api';
 import useCheckingService from '../../../service/Checking_service';
-
+import Conversation from '../../../interface/Converstation.interface';
+import {Message_interface} from '../../../interface/Chat_interface';
+import Video from 'react-native-video';
+import MediaGrid from '../homeComponent/MediaGrid';
+import {update_Converstation} from '../../../cache_data/exportdata.ts/chat_convert_datacache';
+interface GifchatUserProps {
+  conversation: Conversation;
+}
 const GifchatUser = (props: GifchatUserProps) => {
   const {width, height} = useWindowDimensions();
   const color = useSelector(
     (value: {colorApp: {value: any}}) => value.colorApp.value,
   );
-    const {user, dispatch} = useCheckingService();
+  const conversation: Conversation = props.conversation;
+
+  const {user, dispatch} = useCheckingService();
   const isPortrait = height > width;
-  // dnah mục khai báo các state
-  const [messages, setMessages] = useState<any[]>([]);
+  
+  const [messages, setMessages] = useState<any[]>(
+    Array.from(conversation.messages),
+  );
   const [isVisible, setVisible] = useState(true);
   const [isShowSendText, setIsShowSendText] = useState(true);
   const [changeIcon, setChangIcon] = useState(true);
-  const [textContent, setTextContent] = useState('');
+  const [text, settext] = useState('');
   const [inputHeight, setInputHeight] = useState(30);
   const [keyboardOffset, setKeyboardOffset] = useState(0);
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [buttonScale] = useState(new Animated.Value(1));
   const [maginTextInput, setMaginTextInput] = useState<boolean>(false);
   const [selectedMessages, setSelectedMessages] = useState<string[]>([]); // Lưu trữ ID của tin nhắn đã chọn
-  const [participate, setParticipate] = useState<string[]>([]); // Lưu trữ ID của tin nhắn đã chọn
+  const [participate, setParticipate] = useState<any[]>(
+    conversation.participants.filter(
+      participant => participant.user._id !== user._id,
+    ),
+  ); // Lưu trữ ID của tin nhắn đã chọn
+  const [participateId, setParticipateId] = useState<string[]>(
+    conversation.participants.map(participant => participant.user._id),
+  ); // Lưu trữ ID của tin nhắn đã chọn
+
   //danh mục dành cho bootomsheet
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['40%', '90%'], []);
@@ -125,82 +147,101 @@ const GifchatUser = (props: GifchatUserProps) => {
   }, []);
 
   // phần này dành cho việc gửi tin nhắn
-  const onSend = useCallback(async (message: {text: string}) => {
-    const newMessage = {
-      _id: Math.random().toString(), // ID duy nhất cho tin nhắn
-      text: message.text, // Nội dung tin nhắn
-      createdAt: new Date(),
-      user: {
-        _id: user._id, // ID người gửi
-        name: user.Hoten,
-        avatar: user.Avatar,
-      },
-    };
-
-    setMessages(previousMessages =>
-      GiftedChat.append(previousMessages, [newMessage]),
-    );
-    try {
-      const response = await postFormData(
-        API_ROUTE.SEND_MESSAGE,
+  const onSend = useCallback(
+    async (message: Message_interface, filesOrder: any) => {
+      const dataSaveSend = {
+        user,
+        participateId,
         message,
-        useCheckingService,
-      );
+        conversation,
+        filesOrder,
+      };
+      
+      //const dataMessage = await HandlerSendMessage(dataSaveSend);
+      const newMessage = {
+        ...message,
+        user: {
+          _id: user._id, // ID người gửi
+          name: user.account,
+          avatar: user.avatar,
+        },
+      };
 
-      if (response.data.status === 200) {
+      try {
         setMessages(previousMessages =>
-          previousMessages.map(msg =>
-            msg._id === newMessage._id
-              ? {...msg, status: 'sent', viewers: response.data.viewers}
-              : msg,
-          ),
+          GiftedChat.append(previousMessages, [newMessage]),
         );
-        console.log('send message success');
-      } else {
-        throw new Error('Message sending failed');
+         await update_Converstation(message, participateId);
+        // const response = await postFormData(
+        //   API_ROUTE.SEND_MESSAGE,
+        //   dataSaveSend,
+        //   useCheckingService,
+        // );
+
+        // if (response.data.status === 200) {
+        //   setMessages(previousMessages =>
+        //     previousMessages.map(msg =>
+        //       msg._id === newMessage._id
+        //         ? {...msg, status: 'sent', viewers: response.data.viewers}
+        //         : msg,
+        //     ),
+        //   );
+        //   console.log('send message success');
+        // } else {
+        //   throw new Error('Message sending failed');
+        // }
+      } catch (error) {
+        // setMessages((previousMessages: Message_interface[]) =>
+        //   previousMessages.map((msg: Message_interface) =>
+        //     msg._id === newMessage._id ? {...msg, status: 'failed'} : msg,
+        //   ),
+        // );
+        // console.error('send message failed:', error);
       }
-    } catch (error) {
-      setMessages(previousMessages =>
-        previousMessages.map(msg =>
-          msg._id === newMessage._id ? {...msg, status: 'failed'} : msg,
-        ),
-      );
-      console.error('send message failed:', error);
-    }
-  }, []);
- 
+    },
+    [],
+  );
 
- const renderMessage = (props: any) => {
-   const {currentMessage} = props;
+  const renderMessage = (props: any) => {
+    const {currentMessage} = props;
 
-   return (
-     <View style={{marginBottom: 10,marginHorizontal:10}}>
-       <Day {...props} />
-       <Bubble
-         {...props}
-         onLongPress={(context, message) => handleLongPress(message)}
-       />
-       {currentMessage.user._id === user._id && (
-         <Text style={{fontSize: 12, color:color.white, marginTop: 5,textAlign:'right'}}>
-           {currentMessage.status === 'sending'
-             ? 'sending...'
-             : currentMessage.status === 'sent' &&
-               currentMessage.viewers.length > 0
-             ? `seen by: ${currentMessage.viewers.join(', ')}`
-             : currentMessage.status === 'failed'
-             ? 'failed'
-             : 'sent'}
-         </Text>
-       )}
-     </View>
-   );
- };
+    return (
+      <View style={{marginBottom: 10, marginHorizontal: 10}}>
+        <Day {...props} />
+        {currentMessage.messageType === 'text' && (
+          <Bubble
+            {...props}
+            onLongPress={(context, message) => handleLongPress(message)}
+          />
+        )}
+        {currentMessage.messageType === 'attachment' &&
+          MediaGrid(currentMessage.attachments)}
+        {currentMessage.user._id === user._id && (
+          <Text
+            style={{
+              fontSize: 12,
+              color: color.white,
+              marginTop: 5,
+              textAlign: 'right',
+            }}>
+            {currentMessage.status === 'sending'
+              ? 'sending...'
+              : currentMessage.status === 'sent' &&
+                currentMessage.viewers.length > 0
+              ? `seen by: ${currentMessage.viewers.join(', ')}`
+              : currentMessage.status === 'failed'
+              ? 'failed'
+              : 'sent'}
+          </Text>
+        )}
+      </View>
+    );
+  };
 
- 
   const handleLongPress = (message: any) => {
     // Rung nhẹ khi nhấn giữ
     Vibration.vibrate(50);
-      console.log('long press message')
+    console.log('long press message');
     // Kiểm tra nếu tin nhắn đã được chọn thì bỏ chọn, ngược lại thêm vào
     if (selectedMessages.includes(message._id)) {
       setSelectedMessages(selectedMessages.filter(id => id !== message._id));
@@ -211,15 +252,7 @@ const GifchatUser = (props: GifchatUserProps) => {
 
   const renderBubble = (props: any) => {
     const isSelected = selectedMessages.includes(props.currentMessage._id);
-    return (
-     
-        <Bubble
-          style={{backgroundColor:'pink' , padding: 10}}
-          {...props}
-          
-        />
-        
-    );
+    return <Bubble style={{backgroundColor: 'pink', padding: 10}} {...props} />;
   };
 
   return (
@@ -232,15 +265,19 @@ const GifchatUser = (props: GifchatUserProps) => {
           messages={messages}
           user={{
             _id: user._id,
-            name: user.Hoten,
-            avatar: user.Avatar,
+            name: user.account,
+            avatar: user.avatar,
           }}
           renderInputToolbar={props => (
-            <CustomInputToolbar {...props} onSend={onSend} />
+            <CustomInputToolbar
+              {...props}
+              onSend={onSend}
+              conversation={conversation}
+            />
           )}
           scrollToBottom
           renderSend={renderSend}
-         renderMessage={renderMessage}
+          renderMessage={renderMessage}
           renderBubble={renderBubble}
           alwaysShowSend
           renderTime={() => null}
@@ -335,54 +372,54 @@ function alert(arg0: string) {
   throw new Error('Function not implemented.');
 }
 // const [keyboardHeight, setKeyboardHeight] = useState(0);
-  // useEffect(() => {
-  //   const keyboardDidShowListener = Keyboard.addListener(
-  //     'keyboardDidShow',
-  //     e => {
-  //       setKeyboardHeight(e.endCoordinates.height); // Lấy chiều cao bàn phím
-  //     },
-  //   );
-  //   const keyboardDidHideListener = Keyboard.addListener(
-  //     'keyboardDidHide',
-  //     () => {
-  //       setKeyboardHeight(0); // Ẩn bàn phím
-  //     },
-  //   );
+// useEffect(() => {
+//   const keyboardDidShowListener = Keyboard.addListener(
+//     'keyboardDidShow',
+//     e => {
+//       setKeyboardHeight(e.endCoordinates.height); // Lấy chiều cao bàn phím
+//     },
+//   );
+//   const keyboardDidHideListener = Keyboard.addListener(
+//     'keyboardDidHide',
+//     () => {
+//       setKeyboardHeight(0); // Ẩn bàn phím
+//     },
+//   );
 
-  //   return () => {
-  //     keyboardDidShowListener.remove();
-  //     keyboardDidHideListener.remove();
-  //   };
-  // }, []);  
-  
-  // Hàm xử lý tùy chọn trong Modal
-        //  const handleOptionPress = (option: string) => {
-  //          if (option === 'Edit') {
-  //            console.log('Edit:', selectedMessage);
-  //            // Xử lý chỉnh sửa tin nhắn
-  //          } else if (option === 'Delete') {
-  //            console.log('Delete:', selectedMessage);
-  //            // Xử lý xóa tin nhắn
-  //            setMessages(prevMessages =>
-  //              prevMessages.filter(msg => msg._id !== selectedMessage._id),
-  //            );
-  //          }
-  //          setModalVisible(false); // Đóng Modal
-  //  };  // const renderDay = (props: any) => {
-  //   return (
-  //     <Day
-  //       {...props}
-  //       containerStyle={{
-  //         marginVertical: 10,
-  //         alignItems: 'center',
-  //       }}
-  //       textStyle={{
-  //         color: '#888', // Màu cho thời gian
-  //         fontSize: 12,
-  //       }}
-  //     />
-  //   );
-  // };
-  // const onLongPressMessage = (context: any, message: any) => {
-  //            console.log('long press message')
-  //        };
+//   return () => {
+//     keyboardDidShowListener.remove();
+//     keyboardDidHideListener.remove();
+//   };
+// }, []);
+
+// Hàm xử lý tùy chọn trong Modal
+//  const handleOptionPress = (option: string) => {
+//          if (option === 'Edit') {
+//            console.log('Edit:', selectedMessage);
+//            // Xử lý chỉnh sửa tin nhắn
+//          } else if (option === 'Delete') {
+//            console.log('Delete:', selectedMessage);
+//            // Xử lý xóa tin nhắn
+//            setMessages(prevMessages =>
+//              prevMessages.filter(msg => msg._id !== selectedMessage._id),
+//            );
+//          }
+//          setModalVisible(false); // Đóng Modal
+//  };  // const renderDay = (props: any) => {
+//   return (
+//     <Day
+//       {...props}
+//       containerStyle={{
+//         marginVertical: 10,
+//         alignItems: 'center',
+//       }}
+//       textStyle={{
+//         color: '#888', // Màu cho thời gian
+//         fontSize: 12,
+//       }}
+//     />
+//   );
+// };
+// const onLongPressMessage = (context: any, message: any) => {
+//            console.log('long press message')
+//        };

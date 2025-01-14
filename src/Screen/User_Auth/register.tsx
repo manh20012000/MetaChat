@@ -23,7 +23,7 @@ import {
   Google,
   Facebook,
 } from '../../assets/svg/svgfile';
-import path from '../../util/path_confige';
+// import path from '../../util/path_confige';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
