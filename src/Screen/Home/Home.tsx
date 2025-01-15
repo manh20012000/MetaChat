@@ -165,10 +165,11 @@ const now = new Date();
             <View
               style={{
                 flex: isPortrait ? 0.4 : 0.2,
-                padding: '2%',
+                paddingHorizontal: '2%',
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 alignItems: 'center',
+               
               }}>
               <Image
                 style={{
@@ -188,7 +189,7 @@ const now = new Date();
                 Chats
               </Text>
             </View>
-            <View style={{flex: isPortrait ? 0.5 : 0.8}}></View>
+            <View style={{flex: isPortrait ? 0.5 : 0.8,}}></View>
             <View
               style={{
                 flex: isPortrait ? 0.2 : 0.1,
@@ -208,7 +209,7 @@ const now = new Date();
               </TouchableOpacity>
             </View>
           </View>
-
+          <View style={{flex: 0.9,}}>                      
           <FlatList
             refreshing
             ListHeaderComponent={<HeaderHome navigation={navigation} />}
@@ -387,7 +388,8 @@ const now = new Date();
                 </View>
               </Pressable>
             )}
-          />
+            />
+          </View>
         </View>
       </View>
       <BottomSheetModal

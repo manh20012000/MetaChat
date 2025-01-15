@@ -1,6 +1,6 @@
 
 import { URL } from '@env';
-const API_URL = 'http://192.168.51.108:8080';
+const API_URL = 'http://14.225.36.70';
 console.log('hahah', URL)
 import axios from 'axios';
 import { checkAndRefreshToken } from '../util/checkingToken';

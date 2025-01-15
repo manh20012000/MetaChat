@@ -54,8 +54,9 @@ const GifchatUser = (props: GifchatUserProps) => {
   const isPortrait = height > width;
   
   const [messages, setMessages] = useState<any[]>(
-    Array.from(conversation.messages),
+    Array.from(conversation.messages)
   );
+  console.log(typeof messages)
   const [isVisible, setVisible] = useState(true);
   const [isShowSendText, setIsShowSendText] = useState(true);
   const [changeIcon, setChangIcon] = useState(true);

@@ -85,6 +85,7 @@ const HeaderHome: React.FC<{navigation: any}> = ({navigation}) => {
           alignItems: 'center',
           flex: 1,
           paddingLeft: '5%',
+        
         }}>
         <Pressable
           style={{
@@ -109,7 +110,12 @@ const HeaderHome: React.FC<{navigation: any}> = ({navigation}) => {
   };
   return (
     <View
-      style={{flex: 1, justifyContent: 'space-around', alignItems: 'center'}}>
+      style={{
+        flex: 1,
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        borderStartColor: 'pink',
+      }}>
       <Pressable
         onPress={() => {
           navigation.navigate('SearchScreen');

@@ -97,6 +97,7 @@ const ConversationSchema = {
     background: 'string?',
     lastMessage: 'LastMessage', // Phải đảm bảo `LastMessage` được đăng ký đúng cách
     messages: 'Message[]',
+    updatedAt: 'string?', // Thời gian sửa đổi gần nhất
   },
 };
 
