@@ -141,7 +141,7 @@ const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
   };
   const [eye, setEys] = useState(false);
   const anhien = () => {
-    console.log('anhien');
+
     setHienthi(!hienthi);
   };
   const SiginWithGg = async () => {

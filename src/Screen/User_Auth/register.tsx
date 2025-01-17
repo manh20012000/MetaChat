@@ -96,14 +96,14 @@ const Register: React.FC<{ navigation: any }> = ({ navigation }) => {
         `${selectedDay}/${selectedMonth}/${selectedYear}`,
       );
       formData.append('avatar', avatar);
-      console.log(values);
+      
       const response = await axios.post(`${API_URL}/api/user/register`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
       if (response.data.status === 201) {
-        console.log('Registration successful');
+
         showMessage({
           message: 'Đăng ký thành công!',
           description: 'Tài khoản của bạn đã được tạo thành công.',
@@ -113,7 +113,7 @@ const Register: React.FC<{ navigation: any }> = ({ navigation }) => {
         });
         // Handle successful registration (e.g., navigate to another screen)
       } else {
-        console.log('Registration failed');
+        
         showMessage({
           message: 'Đăng ký thất bại!',
           description: 'Có lỗi xảy ra, vui lòng thử lại.',

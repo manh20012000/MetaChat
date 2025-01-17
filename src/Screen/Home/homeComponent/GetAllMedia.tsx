@@ -35,8 +35,7 @@ const GetAllMedia_Bottomsheet = (props: any) => {
   );
 
   const fetchPhotos = async () => {
-    console.log(page,'giá trị pahe '
-    )
+
     if (Platform.OS === 'android' && !(await hasAndroidPermission())) {
       return;
     }

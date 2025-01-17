@@ -29,7 +29,7 @@ const User_profile: React.FC<{ navigation: any }> = ({ navigation }) => {
         user,
 
       );
-      console.log('hhahahh')
+      
       await AsyncStorage.removeItem('user');
       await AsyncStorage.removeItem('fcmtoken');
       await AsyncStorage.removeItem('access_token');

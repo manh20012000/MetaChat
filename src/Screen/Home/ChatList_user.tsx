@@ -18,7 +18,7 @@ const ChatScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, rou
                 <View style={{ flexDirection: 'row', alignSelf: 'center', justifyContent: 'space-around' }}>
                     <TouchableOpacity style={{ alignSelf: 'center' }}
                         onPress={() => {
-                            console.log('hahah')
+                         
                             navigation.goBack()
                         }}
                     >

@@ -20,7 +20,8 @@ import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {API_ROUTE} from '../../../service/api_enpoint';
-import {BSON, EJSON, ObjectId} from 'bson';
+import { BSON, EJSON, ObjectId } from 'bson';
+import {useSocket} from '../../../util/socket.io';
 interface GifchatUserProps {
   // Add any props you need here
 }
@@ -51,12 +52,13 @@ const GifchatUser = (props: GifchatUserProps) => {
   const conversation: Conversation = props.conversation;
 
   const {user, dispatch} = useCheckingService();
+  const socket = useSocket();
   const isPortrait = height > width;
   
   const [messages, setMessages] = useState<any[]>(
     Array.from(conversation.messages)
   );
-  console.log(typeof messages)
+
   const [isVisible, setVisible] = useState(true);
   const [isShowSendText, setIsShowSendText] = useState(true);
   const [changeIcon, setChangIcon] = useState(true);
@@ -80,7 +82,7 @@ const GifchatUser = (props: GifchatUserProps) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['40%', '90%'], []);
   const handlePresentModalPress = useCallback(() => {
-    console.log('nhấn vao image');
+   
     bottomSheetModalRef.current?.present();
   }, []);
   const handleSheetChanges = useCallback((index: number) => {
@@ -151,10 +153,22 @@ const GifchatUser = (props: GifchatUserProps) => {
   const onSend = useCallback(
     async (message: Message_interface, filesOrder: any) => {
       const dataSaveSend = {
-        user,
+        user: {
+          _id: user._id,
+          name: user.account,
+          avatar: user.avatar,
+        },
+        conversation: {
+          _id: conversation._id,
+          participants: conversation.participants,
+          roomName: conversation.roomName,
+          background: conversation.background,
+          color: conversation.color,
+          icon: conversation.icon,
+          avatar: conversation.avatar,
+        },
         participateId,
         message,
-        conversation,
         filesOrder,
       };
       
@@ -171,38 +185,62 @@ const GifchatUser = (props: GifchatUserProps) => {
       try {
         setMessages(previousMessages =>
           GiftedChat.append(previousMessages, [newMessage]),
+        ); 
+        
+        //  await update_Converstation(message, participateId);
+        
+        const response = await postFormData(
+          API_ROUTE.SEND_MESSAGE,
+          dataSaveSend,
+          {
+            dispatch,
+            user,
+          },
         );
-         await update_Converstation(message, participateId);
-        // const response = await postFormData(
-        //   API_ROUTE.SEND_MESSAGE,
-        //   dataSaveSend,
-        //   useCheckingService,
-        // );
 
-        // if (response.data.status === 200) {
-        //   setMessages(previousMessages =>
-        //     previousMessages.map(msg =>
-        //       msg._id === newMessage._id
-        //         ? {...msg, status: 'sent', viewers: response.data.viewers}
-        //         : msg,
-        //     ),
-        //   );
-        //   console.log('send message success');
-        // } else {
-        //   throw new Error('Message sending failed');
-        // }
+        if (response.data.status === 200) {
+          setMessages(previousMessages =>
+            previousMessages.map(msg =>
+              msg._id === newMessage._id
+                ? {...msg, status: 'sent', viewers: response.data.viewers}
+                : msg,
+            ),
+          );
+         
+        } else {
+          throw new Error('Message sending failed');
+        }
       } catch (error) {
-        // setMessages((previousMessages: Message_interface[]) =>
-        //   previousMessages.map((msg: Message_interface) =>
-        //     msg._id === newMessage._id ? {...msg, status: 'failed'} : msg,
-        //   ),
-        // );
-        // console.error('send message failed:', error);
+        setMessages((previousMessages: Message_interface[]) =>
+          previousMessages.map((msg: Message_interface) =>
+            msg._id === newMessage._id ? {...msg, status: 'failed'} : msg,
+          ),
+        );
+        console.error('send message failed:', error);
       }
     },
     [],
   );
-
+  useEffect(() => {
+    // if (
+    //   conversation.messages.length === 0 &&
+    //   conversation.participants.length <= 2
+    // ) {
+    //   socket?.emit('join_room', {
+    //     conversationId: conversation._id,
+    //   });
+    // }
+    // lắng nghe sự kiện nhận tin nhắn nha 
+    socket?.on('message', messages => {
+       const {message} = messages;
+        update_Converstation(message, participateId);
+       setMessages(prevMessages => [...prevMessages, message]);
+     });
+    // Cleanup khi component unmount
+    return () => {
+      socket?.off('message');
+    };
+  }, []);
   const renderMessage = (props: any) => {
     const {currentMessage} = props;
 
@@ -242,7 +280,7 @@ const GifchatUser = (props: GifchatUserProps) => {
   const handleLongPress = (message: any) => {
     // Rung nhẹ khi nhấn giữ
     Vibration.vibrate(50);
-    console.log('long press message');
+    //console.log('long press message');
     // Kiểm tra nếu tin nhắn đã được chọn thì bỏ chọn, ngược lại thêm vào
     if (selectedMessages.includes(message._id)) {
       setSelectedMessages(selectedMessages.filter(id => id !== message._id));

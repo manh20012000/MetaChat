@@ -1,12 +1,13 @@
 
 import { URL } from '@env';
-const API_URL = 'http://14.225.36.70';
+const API_URL = 'http://192.168.51.108:8080';
 console.log('hahah', URL)
 import axios from 'axios';
 import { checkAndRefreshToken } from '../util/checkingToken';
 import User_interface from '../interface/user.Interface';
 
-const postData = async (route: string, data: any ,check:any) => {
+const postData = async (route: string, data: any, check: any) => {
+
   const checking = await checkAndRefreshToken(check.dispatch,check.user);
   if (checking === null) {
     return null;
@@ -25,23 +26,40 @@ const postData = async (route: string, data: any ,check:any) => {
       throw error; // Ném lỗi ra để xử lý bên ngoài
     }
   }
-
 };
-const postFormData = async (route: string, data: any,check:any) => {
+const postFormData = async (route: string, data: any, check: any) => {
+  
   const checking = await checkAndRefreshToken(check.dispatch, check.user);
+  const formData = new FormData();
+  formData.append('message', JSON.stringify(data.message));
+  formData.append('conversation', JSON.stringify(data.conversation));
+  formData.append('user', JSON.stringify(data.user));
+  formData.append('participant_id',JSON.stringify(data.participateId));
+  formData.append('filesOrder', JSON.stringify(data.filesOrder));
+  data.message.attachments.forEach((file:any, index:any) => {
+    formData.append(`${file.type}`, {
+      uri: file.uri,
+      name: file.name || `attachment-${index}`,
+      type: file.type || 'image/jpeg', // MIME type
+    });
+  });
+  console.log(checking.access_token,'access_token')
   if (checking === null) {
     return null
   } else {
     try {
 
-      const response = await axios.post(`${API_URL}/${route}`, data, {
-        headers: {
-          'Content-Type': "multipart/form-data",
-          authorization: `Bearer ${checking.access_token}`,
-
+      const response = await axios.post(
+        `${API_URL}/${route}`,
+         formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            authorization: `Bearer ${checking.access_token}`,
+          },
+          // data: JSON.stringify(data), // Chuyển dữ liệu thành JSON
         },
-        data: JSON.stringify(data), // Chuyển dữ liệu thành JSON
-      });
+      );
       return response.data; // Trả về dữ liệu từ API
     } catch (error) {
       console.error('POST Error:', error);
@@ -51,7 +69,7 @@ const postFormData = async (route: string, data: any,check:any) => {
 }
 // Hàm GET
 const getData = async (route: string, query: any, param: any,check:any) => {
-  console.log('hahahahh')
+  
   const checking =await checkAndRefreshToken(check.dispatch, check.user);
   if (checking === null) {
     return null

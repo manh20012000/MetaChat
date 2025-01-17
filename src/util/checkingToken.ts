@@ -11,6 +11,7 @@ export const checkAndRefreshToken = async (dispatch: any, user:User_interface) =
 
   try {
     if (!user) {
+      
       // Nếu không có token, trả về false
       return false;
     }
@@ -23,7 +24,7 @@ export const checkAndRefreshToken = async (dispatch: any, user:User_interface) =
       // Token hết hạn, cần làm mới token
       try {
         const response = await axios.post(
-          `${API_URL}${API_ROUTE}`,
+          `${API_URL}${API_ROUTE.REFRESH_TOKEN}`,
           {refreshtoken: user.refresh_token},
           {
             headers: {
@@ -36,13 +37,12 @@ export const checkAndRefreshToken = async (dispatch: any, user:User_interface) =
 
         if (response.status === 200 && data) {
           // Lưu token mới vào AsyncStorage
+      
           const userDataString = JSON.stringify(data.data);
-          const accessTokenNew = data.data.accessToken;
-          const refreshTokenNew = data.data.refreshToken;
-
+          const accessTokenNew = data.data.access_token;
           await AsyncStorage.setItem('user', userDataString);
           await AsyncStorage.setItem('access_token', accessTokenNew);
-          await AsyncStorage.setItem('refresh_token', refreshTokenNew);
+          await AsyncStorage.setItem('refresh_token', user.refresh_token);
 
           // Cập nhật Redux
           dispatch(login(data.data));

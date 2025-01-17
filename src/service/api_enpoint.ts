@@ -24,6 +24,7 @@ export const API_ROUTE = {
   GET_GROUP_BY_NAME: '/chatservice/api/get_group_by_name',
   GET_GROUP_BY_ADMIN: '/chatservice/api/get_group_by_admin',
   GET_CONVERTSTATION_CHAT: '/chatservice/api/chat/get_convertstation',
-  SEND_MESSAGE: '/chatservice/api/chat/send_message',
-  REFESSHTOKEN_USER: '/api/user/refreshToken',
+  SEND_MESSAGE: 'api/chatservice/sendmessage',
+  REFESSHTOKEN_USER: '/api/user/refreshtoken',
+  REFRESH_TOKEN: '/api/user/refreshToken',
 };

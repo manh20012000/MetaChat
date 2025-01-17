@@ -19,7 +19,7 @@ const createConversation = async (Conversation: Conversation) => {
         messages: Conversation.messages,
       });
 
-      console.log('Cuộc hội thoại đã được tạo thành công.', newConversation);
+      
     });
   } catch (error) {
     console.error('Lỗi khi tạo cuộc hội thoại:', error);
@@ -28,7 +28,9 @@ const createConversation = async (Conversation: Conversation) => {
 
 const getConversations = async () => {
   try {
-    const conversations = realm.objects('Conversation');
+    const conversations = realm
+      .objects('Conversation')
+      .sorted('updatedAt', true);
     return conversations;
   } catch (error: any) {
     console.error(
@@ -64,7 +66,7 @@ const update_Converstation = async (
       matchingConversation.updatedAt = new Date().toISOString(); // Cập nhật thời gian sửa đổi
     });
 
-    console.log('Cuộc hội thoại đã được cập nhật.');
+  
   } catch (error: any) {
     console.error('Lỗi khi cập nhật cuộc hội thoại:', error.message);
     throw error;
@@ -110,6 +112,7 @@ const findAndconvertConversation = async (
           lastMessage: matchingConversation.lastMessage,
           participants: [...matchingConversation.participants],
           messages: [...matchingConversation.messages],
+          updatedAt: new Date().toISOString(),
         };
         
         realm.delete(matchingConversation);
@@ -128,10 +131,11 @@ const findAndconvertConversation = async (
           background: 'black',
           lastMessage: null,
           messages: [],
+          updatedAt: new Date().toISOString(),
         };
 
         updatedConversation = realm.create('Conversation', newConversation);
-        console.log(`Đã tạo cuộc hội thoại mới với userId ${userId._id}.`);
+      
       }
     });
     return updatedConversation;
@@ -150,7 +154,7 @@ const delete_converStation = async (converstation: Conversation) => {
       if (oldConversation) {
         // Xóa bản ghi cũ nếu tồn tại
         realm.delete(oldConversation);
-        console.log(`Đã xóa cuộc hội thoại cũ với _id: ${converstation._id}`);
+       
       }
     });
   } catch (error: any) {

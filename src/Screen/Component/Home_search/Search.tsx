@@ -74,7 +74,7 @@ const SearchScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 let data = null;
                 // setTimeout(async () => {
                 data = await getResearch(API_ROUTE.GET_USER_BY_SEARCH, keysearch);
-                console.log(data.data, 'sf')
+             
                 setUserSearch(data.data);
                 // }, 500)
             } else {
