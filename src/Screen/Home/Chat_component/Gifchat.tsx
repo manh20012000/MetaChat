@@ -54,7 +54,7 @@ const GifchatUser = (props: GifchatUserProps) => {
   const {user, dispatch} = useCheckingService();
   const socket = useSocket();
   const isPortrait = height > width;
-  
+   
   const [messages, setMessages] = useState<any[]>(
     Array.from(conversation.messages)
   );
@@ -237,7 +237,7 @@ const GifchatUser = (props: GifchatUserProps) => {
     socket?.on('message', messages => {
       console.log('messages->>>>>>>>>',messages)
        const {message} = messages;
-        update_Converstation(message, participateId);
+        // update_Converstation(message, participateId);
        setMessages(prevMessages => [...prevMessages, message]);
      });
     // Cleanup khi component unmount
