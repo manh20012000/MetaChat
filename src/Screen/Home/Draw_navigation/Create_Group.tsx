@@ -21,12 +21,21 @@ const Create_Group = () => {
     const [text,setText]=useState('')
     return (
       <KeyboardAvoidingView
-        behavior="padding"
+        behavior="height"
         style={{flex: 1, backgroundColor: color.dark}}>
-        <View style={{width: '100%', height: 100, paddingHorizontal: 10  }}>
-                <TextInput
-                    style={{width:width-20,height:50,backgroundColor:color.gray,borderRadius:10,paddingHorizontal:10}}
-                    placeholder="Tên nhóm" value={text} onChangeText={(e) => setText(e)} />
+        <View style={{width: '100%', height: 100, paddingHorizontal: 10}}>
+          <TextInput
+            style={{
+              width: width - 20,
+              height: 50,
+              backgroundColor: color.gray,
+              borderRadius: 10,
+              paddingHorizontal: 10,
+            }}
+            placeholder="Tên nhóm"
+            value={text}
+            onChangeText={e => setText(e)}
+          />
           <TouchableOpacity
             style={{
               backgroundColor: color.dark,
@@ -43,21 +52,34 @@ const Create_Group = () => {
             </Text>
           </TouchableOpacity>
         </View>
-        <View style={{width:'100%',height:1,backgroundColor:color.light}}>
-
-        </View>
+        <View
+          style={{
+            width: '100%',
+            height: 1,
+            backgroundColor: color.light,
+          }}></View>
         <FlashList
           data={listuser}
-          renderItem={(item:any) => {
+          renderItem={(item: any) => {
             return (
-                <TouchableOpacity
-                    style={{ backgroundColor: color.gray, padding: 10, borderRadius: 10, marginHorizontal: 10, marginVertical: 5 }}>
-                    <Image source={{uri:item.avatar}} style={{width:30,height:30,borderRadius:10}}/>
-                    <Text>{item.name}</Text>
-                    <MaterialIcons name="close" size={24} color={color.light} />
+              <TouchableOpacity
+                style={{
+                  backgroundColor: color.gray,
+                  padding: 10,
+                  borderRadius: 10,
+                  marginHorizontal: 10,
+                  marginVertical: 5,
+                }}>
+                <Image
+                  source={{uri: item.avatar}}
+                  style={{width: 30, height: 30, borderRadius: 10}}
+                />
+                <Text>{item.name}</Text>
+                <MaterialIcons name="close" size={24} color={color.light} />
               </TouchableOpacity>
             );
-          }}></FlashList>
+          }}
+          estimatedItemSize={50}></FlashList>
       </KeyboardAvoidingView>
     );
 }
