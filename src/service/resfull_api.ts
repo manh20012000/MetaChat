@@ -30,6 +30,7 @@ const postData = async (route: string, data: any, check: any) => {
 const postFormData = async (route: string, data: any, check: any) => {
   
   const checking = await checkAndRefreshToken(check.dispatch, check.user);
+  //  console.log('hahah',data)
   const formData = new FormData();
   formData.append('message', JSON.stringify(data.message));
   formData.append('conversation', JSON.stringify(data.conversation));
@@ -43,7 +44,7 @@ const postFormData = async (route: string, data: any, check: any) => {
       type: file.type || 'image/jpeg', // MIME type
     });
   });
-  console.log(checking.access_token,'access_token')
+
   if (checking === null) {
     return null
   } else {

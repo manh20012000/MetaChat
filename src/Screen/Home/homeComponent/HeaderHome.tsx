@@ -19,55 +19,55 @@ const HeaderHome: React.FC<{navigation: any}> = ({navigation}) => {
   const [user_data, setUser_Data] = useState([
     {
       _id: '1',
-      account: 'User 1',
+      name: 'User 1',
       avatar:
         'https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png',
     },
     {
       _id: '2',
-      account: 'User 2',
+      name: 'User 2',
       avatar:
         'https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png',
     },
     {
       _id: '3',
-      account: 'User 2',
+      name: 'User 2',
       avatar:
         'https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png',
     },
     {
       _id: '4',
-      account: 'User 2',
+      name: 'User 2',
       avatar:
         'https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png',
     },
     {
       _id: '5',
-      account: 'User 2',
+      name: 'User 2',
       avatar:
         'https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png',
     },
     {
       _id: '6',
-      account: 'User 6',
+      name: 'User 6',
       avatar:
         'https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png',
     },
     {
       _id: '7',
-      account: 'User 7',
+      name: 'User 7',
       avatar:
         'https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png',
     },
     {
       _id: '8',
-      account: 'User 8',
+      name: 'User 8',
       avatar:
         'https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png',
     },
     {
       _id: '9',
-      account: 'User 9',
+      name: 'User 9',
       avatar:
         'https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png',
     },
@@ -103,7 +103,7 @@ const HeaderHome: React.FC<{navigation: any}> = ({navigation}) => {
             }}
             source={{uri: user.avatar}}
           />
-          <Text style={{color: color.light}}>{user.account}</Text>
+          <Text style={{color: color.light}}>{user.name}</Text>
         </Pressable>
       </View>
     );
@@ -163,7 +163,7 @@ const HeaderHome: React.FC<{navigation: any}> = ({navigation}) => {
                   source={{uri: item.avatar}}
                 />
                 <Text style={{color: color.white, alignSelf: 'center'}}>
-                  {item.account}
+                  {item.name}
                 </Text>
               </TouchableOpacity>
             </View>

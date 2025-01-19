@@ -80,7 +80,7 @@ export class HandlerNotification {
    
         const dataUser = {
           _id: data.data._id,
-          account: data.data.account,
+          name: data.data.name,
           avatar: data.data.avatar,
           email: data.data.email,
           fcmtoken: data.data.fcmtoken,

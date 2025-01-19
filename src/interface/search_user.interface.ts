@@ -2,14 +2,14 @@
 
 export interface User_search {
   _id: string;
-  account: string;
+  name: string;
   avatar: string;
   roomName: string;
 }
 
 export interface itemuser {
   _id: string;
-  account: string;
+  name: string;
   avatar: string;
   roomName: string;
   statusUser: boolean; //

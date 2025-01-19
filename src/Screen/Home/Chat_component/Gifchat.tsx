@@ -155,7 +155,7 @@ const GifchatUser = (props: GifchatUserProps) => {
       const dataSaveSend = {
         user: {
           _id: user._id,
-          name: user.account,
+          name: user.name,
           avatar: user.avatar,
         },
         conversation: {
@@ -177,7 +177,7 @@ const GifchatUser = (props: GifchatUserProps) => {
         ...message,
         user: {
           _id: user._id, // ID người gửi
-          name: user.account,
+          name: user.name,
           avatar: user.avatar,
         },
       };
@@ -197,12 +197,15 @@ const GifchatUser = (props: GifchatUserProps) => {
             user,
           },
         );
-
-        if (response.data.status === 200) {
+       console.log('response',response)
+        if (response.status === 200) {
           setMessages(previousMessages =>
             previousMessages.map(msg =>
               msg._id === newMessage._id
-                ? {...msg, status: 'sent', viewers: response.data.viewers}
+                ? {
+                  ...msg, status: 'sent',
+                  // viewers: response.data.viewers
+                }
                 : msg,
             ),
           );
@@ -232,6 +235,7 @@ const GifchatUser = (props: GifchatUserProps) => {
     // }
     // lắng nghe sự kiện nhận tin nhắn nha 
     socket?.on('message', messages => {
+      console.log('messages->>>>>>>>>',messages)
        const {message} = messages;
         update_Converstation(message, participateId);
        setMessages(prevMessages => [...prevMessages, message]);
@@ -240,7 +244,7 @@ const GifchatUser = (props: GifchatUserProps) => {
     return () => {
       socket?.off('message');
     };
-  }, []);
+  }, [socket]);
   const renderMessage = (props: any) => {
     const {currentMessage} = props;
 
@@ -263,14 +267,15 @@ const GifchatUser = (props: GifchatUserProps) => {
               marginTop: 5,
               textAlign: 'right',
             }}>
-            {currentMessage.status === 'sending'
+            {/* {currentMessage.status === 'sending'
               ? 'sending...'
-              : currentMessage.status === 'sent' &&
-                currentMessage.viewers.length > 0
+              : currentMessage.status === 'sent'
+                // &&
+                // currentMessage.viewers.length > 0
               ? `seen by: ${currentMessage.viewers.join(', ')}`
               : currentMessage.status === 'failed'
               ? 'failed'
-              : 'sent'}
+              : 'sent'} */}
           </Text>
         )}
       </View>
@@ -304,7 +309,7 @@ const GifchatUser = (props: GifchatUserProps) => {
           messages={messages}
           user={{
             _id: user._id,
-            name: user.account,
+            name: user.name,
             avatar: user.avatar,
           }}
           renderInputToolbar={props => (

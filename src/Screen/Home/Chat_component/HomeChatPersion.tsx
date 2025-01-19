@@ -18,7 +18,7 @@ const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, nav
     const { width, height } = useWindowDimensions()
     const isPortrait = height > width
     const conversation: Conversation = route.params.conversation;
-      
+
     return (
       <View
         style={{backgroundColor: color.dark, flex: 1, paddingTop: insert.top}}>

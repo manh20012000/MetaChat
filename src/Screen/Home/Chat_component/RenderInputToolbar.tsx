@@ -35,7 +35,7 @@ const CustomInputToolbar = (props: any) => {
       conversation_id: conversation._id,
       user: {
         _id: user._id,
-        name: user.account,
+        name: user.name,
         avatar: user.avatar,
       },
       messageType: 'text',

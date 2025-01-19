@@ -4,10 +4,10 @@ import { realm } from '../Schema/schemaModel.tsx';
 
 const create_userSearch = async(users: User_search[]) => {
     try {
-
+             
         realm.write(() => {
             users.forEach((user) => {
-            
+                
                 realm.create('UserSearch', user);
             });
         });
@@ -20,7 +20,7 @@ const get_userSearch = async() => {
     try {
         const user = await realm.objects('UserSearch').map(user => ({
           _id: user._id,
-          account: user.account,
+          name: user.name,
           avatar: user.avatar,
           roomName: user.roomName ?? null, // Nếu `roomName` là `null` hoặc `undefined`, trả về null
         }));

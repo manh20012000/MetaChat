@@ -32,7 +32,7 @@ const SearchScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             if (data) {
                 const formattedData: User_search[] = data.map((item: any) => ({
                   _id: item._id,
-                  account: item.account,
+                  name: item.name,
                   avatar: item.avatar,
                   roomName: item.roomName ?? null, // Nếu `roomName` là `null` hoặc `undefined`, trả về null
                 }));

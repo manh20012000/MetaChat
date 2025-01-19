@@ -19,7 +19,7 @@ const handler_chat = async () => {
       {
         user: {
           _id: currentUser._id.toString(),
-          account: currentUser.account,
+          name: currentUser.name,
           avatar: currentUser.avatar,
         },
         role: 'admin',
@@ -27,7 +27,7 @@ const handler_chat = async () => {
       {
         user: {
           _id: item._id.toString(),
-          name: item.account,
+          name: item.name,
           avatar: item.avatar,
         },
         role: 'member',
@@ -41,7 +41,9 @@ const handler_chat = async () => {
     if (participantIds.length <= 2) {
       socket?.emit('invite_to_room', {
         conversationId: item._id,
-        recipientId: participants.filter(i => i.user._id !== currentUser._id),
+        recipientId: participants
+                           .filter(i => i.user._id !== currentUser._id)
+                           .map(i => i.user._id)[0],
       });
     }
     // // Chuyển đến màn hình chat cá nhân với thông tin người dùng
@@ -99,7 +101,7 @@ const handler_chat = async () => {
             fontSize: 18,
             fontWeight: 'bold',
           }}>
-          {item.roomName ? item.roomName : item.account}
+          {item.roomName ? item.roomName : item.name}
         </Text>
       </Pressable>
     );
@@ -137,3 +139,4 @@ export default SearchItemUser
 //      console.error('Lỗi trong handler_chat:', error);
 //    }
 //  };
+    

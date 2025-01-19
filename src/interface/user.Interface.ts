@@ -2,7 +2,7 @@
 interface User_interface {
     _id: string;
     access_token: string;
-    account: string;
+    name: string;
     avatar: string;
     email: string;
     fcmtoken: string[];
