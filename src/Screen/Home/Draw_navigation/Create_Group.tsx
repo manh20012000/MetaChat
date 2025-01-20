@@ -3,25 +3,41 @@ import { useEffect, useState } from 'react';
 import {View, Text,TouchableOpacity, KeyboardAvoidingView,useWindowDimensions, Image} from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { useSelector } from 'react-redux';
-
+import { useDispatch, useSelector } from 'react-redux';
+import { getListfriend } from '../../../cache_data/exportdata.ts/friend_caching';
+import { getData } from '../../../service/resfull_api';
+import {API_ROUTE} from '../../../service/api_enpoint';
 const Create_Group = () => {
     const user = useSelector((state: any) => state.auth.value);
-    const color = useSelector((state: any) => state.colorApp.value);
-    // const getlistuser=get_list_user_localdata()
+    const dispatch = useDispatch()
+  const color = useSelector((state: any) => state.colorApp.value);
+  const [skip,setskip]=useState(0)
+  // const getlistuser=get_list_user_localdata()    
+  const [listuser, setlistuser] = useState<any[]>()
+    const [text,setText]=useState('')
     useEffect(() => {
         const getListUser = async () => {
-            // const listuser = await get_list_user_localdata()
-            // setlistuser(listuser)
+          const listuser = await getListfriend()
+          if (Array.from(listuser).length > 0) {
+            setlistuser(Array.from(listuser));
+          } else {
+            const listuser = await getData(
+              API_ROUTE.GET_LIST_FRIEND_CHAT,
+              null,
+              skip,
+              {dispatch, user},
+            );
+            console.log('listuser', listuser.friend);
+            // setlistuser(listuser);
+          }
         };
         getListUser()
     },[])
     const {width,height}=useWindowDimensions()
-    const [listuser, setlistuser] = useState([])
-    const [text,setText]=useState('')
+
     return (
-      <KeyboardAvoidingView
-        behavior="height"
+      <View
+       
         style={{flex: 1, backgroundColor: color.dark}}>
         <View style={{width: '100%', height: 100, paddingHorizontal: 10}}>
           <TextInput
@@ -80,7 +96,7 @@ const Create_Group = () => {
             );
           }}
           estimatedItemSize={50}></FlashList>
-      </KeyboardAvoidingView>
+      </View>
     );
 }
 export default Create_Group;

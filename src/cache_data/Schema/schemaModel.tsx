@@ -1,6 +1,7 @@
 import Realm from "realm";
 import { UserSchema } from "./searchUser_schema";
 import { ConversationSchema,AttachmentSchema,CallDetailSchema,MessageSchema,ParticipantSchema,ReactionSchema, ReplyMessageSchema, LastMessageSchema, userSchema } from "./chat_convertstation_schema";
+import friendSchema from "./user_schema";
 const schemas = [
   UserSchema,
   ConversationSchema,
@@ -12,6 +13,7 @@ const schemas = [
   LastMessageSchema,
   ReplyMessageSchema,
   userSchema,
+  friendSchema,
 ];
 
 export const realm = new Realm({

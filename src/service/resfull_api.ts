@@ -1,6 +1,6 @@
 
 import { URL } from '@env';
-const API_URL = 'http://metachat.click/';
+const API_URL = 'http://14.225.36.70:8080';
 console.log('hahah', URL)
 import axios from 'axios';
 import { checkAndRefreshToken } from '../util/checkingToken';
@@ -75,10 +75,10 @@ const getData = async (route: string, query: any, param: any,check:any) => {
   if (checking === null) {
     return null
   } 
+
     try {
-      console.log('hahah222')
       const response = await axios.get(`${API_URL}/${route}/${param}`, {
-        params: query ?? {},
+        params: query ?? null,
         headers: {
           'Content-Type': 'application/json',
           authorization: `Bearer ${checking.access_token} `,

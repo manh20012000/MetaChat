@@ -48,7 +48,7 @@ const CustomDrawerContent = (props: any) => {
       <DrawerItem
         label="Chats"
         style={{
-          backgroundColor: selectedIndex === 0 ? color.black : color.gray,
+          backgroundColor: selectedIndex === 0 ? color.red : color.gray,
         }}
         onPress={() => props.navigation.navigate('Chats')}
         icon={() => (
@@ -59,7 +59,7 @@ const CustomDrawerContent = (props: any) => {
       <DrawerItem
         label="Create Group"
         style={{
-          backgroundColor: selectedIndex === 1 ? color.black : color.gray,
+          backgroundColor: selectedIndex === 1 ? color.red : color.gray,
         }}
         onPress={() => props.navigation.navigate('Create Group')}
         icon={() => (
@@ -70,7 +70,7 @@ const CustomDrawerContent = (props: any) => {
       <DrawerItem
         label="Friend"
         style={{
-          backgroundColor: selectedIndex === 2 ? color.black : color.gray,
+          backgroundColor: selectedIndex === 2 ? color.red : color.gray,
         }}
         onPress={() => props.navigation.navigate('Friend')}
         icon={() => (
@@ -81,7 +81,7 @@ const CustomDrawerContent = (props: any) => {
       <DrawerItem
         label="Setting Chat"
         style={{
-          backgroundColor: selectedIndex === 3 ? color.black : color.gray,
+          backgroundColor: selectedIndex === 3 ? color.red : color.gray,
         }}
         onPress={() => props.navigation.navigate('Setting_Chat')}
         icon={() => (
@@ -91,7 +91,7 @@ const CustomDrawerContent = (props: any) => {
       />
       <DrawerItem
         style={{
-          backgroundColor: selectedIndex === 4 ? color.black : color.gray,
+          backgroundColor: selectedIndex === 4 ? color.red : color.gray,
         }}
         label="Adttenment"
         onPress={() => props.navigation.navigate('Adttenment')}
@@ -102,7 +102,7 @@ const CustomDrawerContent = (props: any) => {
       />
       <DrawerItem
         style={{
-          backgroundColor: selectedIndex === 5 ? color.black : color.gray,
+          backgroundColor: selectedIndex === 5 ? color.red : color.gray,
         }}
         label="Private Conversation"
         onPress={() => props.navigation.navigate('Private_Converstation')}

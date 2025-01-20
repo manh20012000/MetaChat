@@ -27,4 +27,5 @@ export const API_ROUTE = {
   SEND_MESSAGE: 'api/chatservice/sendmessage',
   REFESSHTOKEN_USER: '/api/user/refreshtoken',
   REFRESH_TOKEN: '/api/user/refreshToken',
+  GET_LIST_FRIEND_CHAT: 'api/chatservice/friendchat',
 };
