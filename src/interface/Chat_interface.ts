@@ -4,7 +4,8 @@ export interface Message_interface {
     user: {
         _id: string;
         name: string;
-        avatar: string;
+      avatar: string;
+        
     };
    messageType: string;
    voice: string;

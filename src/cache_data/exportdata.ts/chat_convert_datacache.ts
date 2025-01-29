@@ -17,6 +17,7 @@ const createConversation = async (Conversation: Conversation) => {
         participants: Conversation.participants,
         lastMessage: Conversation.lastMessage,
         messages: Conversation.messages,
+        permission: Conversation.permission,
       });
 
       
@@ -113,6 +114,7 @@ const findAndconvertConversation = async (
           participants: [...matchingConversation.participants],
           messages: [...matchingConversation.messages],
           updatedAt: new Date().toISOString(),
+          permission: matchingConversation.permission,
         };
         
         realm.delete(matchingConversation);
@@ -132,6 +134,7 @@ const findAndconvertConversation = async (
           lastMessage: null,
           messages: [],
           updatedAt: new Date().toISOString(),
+          permission: 'lock',
         };
 
         updatedConversation = realm.create('Conversation', newConversation);
@@ -144,6 +147,17 @@ const findAndconvertConversation = async (
     throw error;
   }
 };
+const update_permission = async (conversation: Conversation) => {
+  const oldConversation = realm.objectForPrimaryKey(
+    'Conversation',
+    conversation._id,
+  );
+  if (oldConversation) {
+    realm.write(() => {
+      oldConversation.permission = conversation.permission;
+    });
+  }
+}
 const delete_converStation = async (converstation: Conversation) => {
   const oldConversation = realm.objectForPrimaryKey(
     'Conversation',

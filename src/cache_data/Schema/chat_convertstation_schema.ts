@@ -3,7 +3,6 @@ const ParticipantSchema = {
   name: 'Participant',
   properties: {
     user: 'user?',
-    role: 'string?', // Vai trò ("admin", "member")
   },
 };
 const ReplyMessageSchema = {
@@ -19,6 +18,7 @@ const userSchema = {
     _id: 'string?', // ID người gửi
     name: 'string?',
     avatar: 'string?',
+    role: 'string?',
   },
 };
 
@@ -98,6 +98,7 @@ const ConversationSchema = {
     lastMessage: 'LastMessage', // Phải đảm bảo `LastMessage` được đăng ký đúng cách
     messages: 'Message[]',
     updatedAt: 'string?', // Thời gian sửa đổi gần nhất
+    permission: 'string?',
   },
 };
 

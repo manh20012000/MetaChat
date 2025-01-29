@@ -1,15 +1,13 @@
 import React from "react";
 import { StatusBar } from "react-native";
 import { useSelector } from "react-redux";
-interface StatusbarProps {
-  bgrstatus: string;
-}
-const Statusbar: React.FC<{ bgrstatus: string, bgrcolor: string }> = ({ bgrstatus, bgrcolor }) => {
+
+const Statusbar: React.FC<{ bgrstatus: string, bgrcolor: string,translucent:boolean }> = ({ bgrstatus, bgrcolor,translucent }) => {
   const color = useSelector((state: any) => state.colorApp.value)
   return (
     <StatusBar
       animated={true}
-      translucent={true}
+      translucent={translucent} 
       barStyle={color.black === bgrcolor ? 'dark-content' : 'light-content'}
       backgroundColor={bgrstatus}
 

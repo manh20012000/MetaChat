@@ -1,7 +1,7 @@
 
-import { URL } from '@env';
-const API_URL = 'http://14.225.36.70:8080';
-console.log('hahah', URL)
+// import { URL } from '@env';
+const API_URL = 'http://192.168.188.136:8080';
+// console.log('hahah', URL)
 import axios from 'axios';
 import { checkAndRefreshToken } from '../util/checkingToken';
 import User_interface from '../interface/user.Interface';
@@ -83,7 +83,6 @@ const getData = async (route: string, query: any, param: any,check:any) => {
           'Content-Type': 'application/json',
           authorization: `Bearer ${checking.access_token} `,
         },
-
         // Tham số truyền qua query
       });
       return response.data;

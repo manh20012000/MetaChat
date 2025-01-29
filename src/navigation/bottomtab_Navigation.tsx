@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import React from 'react';
 import Notification_screen from '../Screen/Notification/Notification_screen.tsx';
-import Home_screen from '../Screen/Home/Home.tsx';
+
 import User_profile from '../Screen/User/User_profile.tsx';
 import Media_screen from '../Screen/Add_Media/Media_screen.tsx';
 import Watch from '../Screen/Video_Watch/Watch.tsx';
@@ -26,6 +26,7 @@ const Bottomtab_Navigation: React.FC<{ navigation: any }> = ({ navigation }) => 
     <Tab.Navigator
       screenOptions={({route}) => ({
         animation: 'fade',
+        tabBarHideOnKeyboard: true, // Ẩn Bottom Tab khi bàn phím hiển thị
         tabBarActiveTintColor: 'red', // Màu icon/text khi được chọn
         tabBarInactiveTintColor: 'white', // Màu icon/text khi không được chọn
         headerShown: false,

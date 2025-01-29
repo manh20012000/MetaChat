@@ -10,15 +10,16 @@ interface Conversation {
   background: string; // Background của nhóm (nếu có)
   messages: Message_interface[];
   participants: {
-    // Danh sách các thành viên
     user: {
       _id: string; // ID của thành viên
       name: string; // Tên của thành viên
       avatar: string;
+      role: string;
     }, // Ảnh đại diện
-    role: string;
+    
   }[];
   lastMessage?: Message_interface;
-  firstMessageTime?:string;
+  firstMessageTime?: string;
+  permission: string;
 }
 export default Conversation;

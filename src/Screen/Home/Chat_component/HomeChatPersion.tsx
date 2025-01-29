@@ -22,7 +22,7 @@ const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, nav
     return (
       <View
         style={{backgroundColor: color.dark, flex: 1, paddingTop: insert.top}}>
-        <Statusbar bgrstatus="transparent" bgrcolor={color.light} />
+        <Statusbar bgrstatus="transparent" bgrcolor={color.light} translucent/>
         <View
           style={{
             backgroundColor: color.dark,

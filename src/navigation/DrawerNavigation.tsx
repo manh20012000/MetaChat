@@ -126,7 +126,7 @@ const DrawerNavigation = () => {
       drawerContent={props => <CustomDrawerContent {...props} />} // Custom Drawer
       screenOptions={{
         headerStyle: {backgroundColor: color.dark},
-        drawerActiveBackgroundColor: '#003CB3',
+        // drawerActiveBackgroundColor: '#003CB3',
         headerTintColor: color.light,
         // headerTitleAlign: 'left',
         headerTitleStyle: {color: color.light},
@@ -134,7 +134,11 @@ const DrawerNavigation = () => {
         drawerActiveTintColor: color.light,
         drawerInactiveTintColor: color.light,
       }}>
-      <Drawer.Screen name="Chats" component={Home} />
+      <Drawer.Screen
+        name="Chats"
+        component={Home}
+       
+      />
       <Drawer.Screen name="Create Group" component={Create_Group} />
       <Drawer.Screen name="Friend" component={Friend} />
       <Drawer.Screen name="Setting_Chat" component={Setting_Chat} />

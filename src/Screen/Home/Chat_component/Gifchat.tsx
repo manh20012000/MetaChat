@@ -257,6 +257,12 @@ const GifchatUser = (props: GifchatUserProps) => {
             onLongPress={(context, message) => handleLongPress(message)}
           />
         )}
+        {currentMessage.messageType === 'image' && (
+          <Image
+            source={{uri: props.currentMessage.image}}
+            style={{width: 100, height: 100}}
+          />
+        )}
         {currentMessage.messageType === 'attachment' &&
           MediaGrid(currentMessage.attachments)}
         {currentMessage.user._id === user._id && (
