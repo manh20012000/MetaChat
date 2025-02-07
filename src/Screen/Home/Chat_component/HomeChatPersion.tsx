@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Image, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
 import { itemuser } from "../../../interface/search_user.interface";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,7 +14,7 @@ import Conversation from "../../../interface/Converstation.interface";
 const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, navigation }) => {
     const color = useSelector((value: any) => value.colorApp.value)
     const insert = useSafeAreaInsets()
-    
+    const [user] = useState(useSelector((state: any) => state.auth.value));
     const { width, height } = useWindowDimensions()
     const isPortrait = height > width
     const conversation: Conversation = route.params.conversation;
@@ -169,18 +169,19 @@ const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, nav
             <Text
               style={{
                 fontWeight: 'bold',
-                fontSize: 16,
+                fontSize: 25,
                 color: color.white,
               }}
               numberOfLines={1}
               ellipsizeMode="tail">
+ 
               {conversation.roomName
                 ? conversation.roomName
                 : conversation.participants
                     .filter(
                       participant =>
                         participant.user.name !==
-                        conversation.participants[0].user.name,
+                        user.name,
                     ) // Lọc bỏ tên của currentUser
                     .map(participant => participant.user.name) // Lấy tên còn lại
                     .join(', ')}{' '}

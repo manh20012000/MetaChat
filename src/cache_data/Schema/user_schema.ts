@@ -1,7 +1,7 @@
  const friendSchema = {
    name: 'friend',
    properties: {
-     _id: 'string?', // ID người gửi
+     _id: 'string?', 
      name: 'string?',
      avatar: 'string?',
    },

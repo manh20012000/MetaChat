@@ -74,6 +74,7 @@ export default function Home({navigation}: {navigation: any}) {
    
     
     if (data_converstation.data.length > 0) {
+      console.log(data_converstation.data,'lấy cuộc hôij thoại từ api')
       setData_convertStation(data_converstation.data);
     setSkiped(data_converstation.data.length);
       data_converstation.data.array.forEach(async (element: Conversation) => {
@@ -90,9 +91,10 @@ export default function Home({navigation}: {navigation: any}) {
     );
     
     if (listuser.friend.length > 0) {
-    
+      console.log('lấy danh sách bạn bè từ cuộc thoại', listuser.friend)
+      setData_friend(listuser.friend)
       listuser.friend.forEach(async (element: any) => {
-        console.log(element,'dgfhghyg')
+        
         await createListfriend(element);
       });
       setSkipfriend(listuser.friend.length);
@@ -103,12 +105,10 @@ export default function Home({navigation}: {navigation: any}) {
   
     const getChatuser = async () => {
       try {
-        let data_converstation = await getConversations();
-       
-        
+        let data_converstation = await getConversations();  
         setSkiped(data_converstation.length);
         if (data_converstation.length>0) {
-         
+  
           setData_convertStation(data_converstation);
         } else {
          
@@ -125,7 +125,7 @@ export default function Home({navigation}: {navigation: any}) {
 
         if (data_friend_chat.length > 0) {
           setData_friend(data_friend_chat)
-        console.log(data_friend_chat, 'data_friend_chat');
+  
         setSkipfriend(data_friend_chat.length);
       } else {
         await getFriend_user()
@@ -135,11 +135,16 @@ export default function Home({navigation}: {navigation: any}) {
       throw new Error();
     }
     };
-    const checkout = async () => {
-       
-       await Promise.allSettled([getChatuser(), getFriend_user_chat()])
-  
-     }
+      const checkout = async () => {
+        try {
+          setLoading(true);
+          await Promise.allSettled([getChatuser(), getFriend_user_chat()]);
+          setLoading(false);
+        } catch (err) {
+          console.log(err + 'loi promise');
+        }
+      };
+   
     checkout()
     
   }, []);
@@ -201,13 +206,13 @@ export default function Home({navigation}: {navigation: any}) {
     const updateConversations = async () => {
       let data_converstation = await getConversations();
       setData_convertStation(data_converstation);
-       let data_friend_chat = await getListfriend();
+      //  let data_friend_chat = await getListfriend();
 
-      if (data_friend_chat.length > 0) {
-        setData_friend(data_friend_chat)
-        console.log(data_friend_chat.length, 'data_friend_cha222222t');
-        setSkipfriend(data_friend_chat.length);
-      }
+      // if (data_friend_chat.length > 0) {
+      //   setData_friend(data_friend_chat)
+      //   console.log(data_friend_chat, 'data_friend_cha222222t realm');
+      //   setSkipfriend(data_friend_chat.length);
+      // }
     };
     // updateConversations();
     conversationObjects.addListener(updateConversations);
@@ -230,201 +235,201 @@ export default function Home({navigation}: {navigation: any}) {
           bgrcolor={color.light}
           translucent={true}
         />
-        <View style={{flex: 1, backgroundColor: color.dark}}>
-          <FlatList
-            refreshing
-            ListHeaderComponent={
-              <HeaderHome navigation={navigation} data_friend={data_friend} />
-            }
-            keyExtractor={(item, index) => item._id.toString()}
-            initialNumToRender={10}
-            data={data_convertstation}
-            // Sử dụng _id làm khóa duy nhất
-            renderItem={({item}: {item: Conversation}) => {
-              const statusUser = item.participants.some(participant => {
-                if (participant.user._id !== user._id) {
-                  return user_Status.includes(participant.user._id);
-                }
-              });
+        {onloading === true ? <ActivityIndicator size="large" color="#00ff00" /> :
+          (<View style={{ flex: 1, backgroundColor: color.dark }}>
+            <FlatList
+              refreshing
+              ListHeaderComponent={
+                <HeaderHome navigation={navigation} data_friend={data_friend} />
+              }
+              keyExtractor={(item, index) => item._id}
+              initialNumToRender={10}
+              data={data_convertstation}
+              // Sử dụng _id làm khóa duy nhất
+              renderItem={({ item }: { item: Conversation }) => {
+                const statusUser = item.participants.some(participant => {
+                  if (participant.user._id !== user._id) {
+                    return user_Status.includes(participant.user._id);
+                  }
+                });
 
-              return (
-               
-                <Pressable
-                  onPress={() => {
-                    if (item.participants.length <= 2) {
-                      socket?.emit('invite_to_room', {
-                        conversationId: item._id,
-                        name: item.participants
-                          .filter(i => i.user._id !== user._id)
-                          .map(i => i.user.name)[0],
-                        recipientId: item.participants
-                          .filter(i => i.user._id !== user._id)
-                          .map(i => i.user._id)[0], // Chỉ lấy id của user,
+                return (
+                  <Pressable
+                    onPress={() => {
+                      if (item.participants.length <= 2) {
+                        socket?.emit('invite_to_room', {
+                          conversationId: item._id,
+                          name: item.participants
+                            .filter(i => i.user._id !== user._id)
+                            .map(i => i.user.name)[0],
+                          recipientId: item.participants
+                            .filter(i => i.user._id !== user._id)
+                            .map(i => i.user._id)[0], // Chỉ lấy id của user,
+                        });
+                      }
+                      navigation.navigate('HomeChatPersion', {
+                        conversation: item,
                       });
-                    }
-                    navigation.navigate('HomeChatPersion', {
-                      conversation: item,
-                    });
-                  }}
-                  onLongPress={handlePresentModalPress}
-                  style={({pressed}) => [
-                    {
-                      width: '100%',
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      paddingLeft: 10,
-                      padding: 5,
-                      marginVertical: 8,
-                      backgroundColor: pressed
-                        ? 'rgb(210, 230, 255)'
-                        : color.black,
-                      shadowColor: '#000',
-                      shadowOffset: {width: 0, height: 2},
-                    },
-                  ]}>
-                  {statusUser && (
-                    <View
-                      style={{
-                        backgroundColor: 'green',
-                        width: 15,
-                        height: 15,
-                        borderRadius: 100,
-                        position: 'absolute',
-                        zIndex: 1,
-                        bottom: 5,
-                        left: '12%',
-                      }}></View>
-                  )}
-                  {/* Hiển thị avatar */}
-                  {item.avatar ? (
-                    <Image
-                      style={{
-                        width: 50,
-                        height: 50,
-                        borderRadius: 25,
-                        marginRight: 15,
-                        backgroundColor: color.gray,
-                      }}
-                      source={{uri: item.avatar}}
-                    />
-                  ) : (
-                    <View
-                      style={{
-                        width: 50,
-                        height: 50,
-                        marginRight: 15,
-                        position: 'relative',
-                        backgroundColor: color.gray,
-                        borderRadius: 100,
-                      }}>
-                      {(() => {
-                        // Lọc ra những người tham gia khác currentUser
-                        const filteredParticipants = item.participants.filter(
-                          participant => participant.user._id !== user._id,
-                        );
-
-                        // Số lượng người tham gia khác currentUser
-                        const count = filteredParticipants.length;
-
-                        if (count === 1) {
-                          // Chỉ hiển thị ảnh của 1 người (chiếm 100%)
-                          return (
-                            <Image
-                              style={{
-                                width: 50,
-                                height: 50,
-                                borderRadius: 25,
-                                backgroundColor: color.gray,
-                              }}
-                              source={{
-                                uri: filteredParticipants[0].user.avatar,
-                              }}
-                            />
+                    }}
+                    onLongPress={handlePresentModalPress}
+                    style={({ pressed }) => [
+                      {
+                        width: '100%',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        paddingLeft: 10,
+                        padding: 5,
+                        marginVertical: 8,
+                        backgroundColor: pressed
+                          ? 'rgb(210, 230, 255)'
+                          : color.black,
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 2 },
+                      },
+                    ]}>
+                    {statusUser && (
+                      <View
+                        style={{
+                          backgroundColor: 'green',
+                          width: 15,
+                          height: 15,
+                          borderRadius: 100,
+                          position: 'absolute',
+                          zIndex: 1,
+                          bottom: 5,
+                          left: '12%',
+                        }}></View>
+                    )}
+                    {/* Hiển thị avatar */}
+                    {item.avatar ? (
+                      <Image
+                        style={{
+                          width: 50,
+                          height: 50,
+                          borderRadius: 25,
+                          marginRight: 15,
+                          backgroundColor: color.gray,
+                        }}
+                        source={{ uri: item.avatar }}
+                      />
+                    ) : (
+                      <View
+                        style={{
+                          width: 50,
+                          height: 50,
+                          marginRight: 15,
+                          position: 'relative',
+                          backgroundColor: color.gray,
+                          borderRadius: 100,
+                        }}>
+                        {(() => {
+                          // Lọc ra những người tham gia khác currentUser
+                          const filteredParticipants = item.participants.filter(
+                            participant => participant.user._id !== user._id,
                           );
-                        } else if (count === 2) {
-                          // Hiển thị 2 ảnh (chia 2 góc)
-                          return (
-                            <>
+
+                          // Số lượng người tham gia khác currentUser
+                          const count = filteredParticipants.length;
+
+                          if (count === 1) {
+                            // Chỉ hiển thị ảnh của 1 người (chiếm 100%)
+                            return (
                               <Image
                                 style={{
-                                  width: 30,
-                                  height: 30,
-                                  borderRadius: 15,
-                                  position: 'absolute',
-                                  top: 0,
-                                  left: 0,
-                                  borderWidth: 2,
-                                  borderColor: 'white',
+                                  width: 50,
+                                  height: 50,
+                                  borderRadius: 25,
                                   backgroundColor: color.gray,
                                 }}
                                 source={{
-                                  uri: filteredParticipants[0]?.user.avatar,
+                                  uri: filteredParticipants[0].user.avatar,
                                 }}
                               />
-                              <Image
-                                style={{
-                                  width: 30,
-                                  height: 30,
-                                  borderRadius: 15,
-                                  position: 'absolute',
-                                  bottom: 0,
-                                  right: 0,
-                                  borderWidth: 2,
-                                  borderColor: 'white',
-                                  backgroundColor: color.gray,
-                                }}
-                                source={{
-                                  uri: filteredParticipants[1]?.user.avatar,
-                                }}
-                              />
-                            </>
-                          );
-                        } else {
-                          // Hiển thị tối đa 4 ảnh
-                          return filteredParticipants
-                            .slice(0, 4)
-                            .map((participant, index) => {
-                              const positions = [
-                                {top: 0, left: 0},
-                                {top: 0, right: 0},
-                                {bottom: 0, left: 0},
-                                {bottom: 0, right: 0},
-                              ];
-                              return (
+                            );
+                          } else if (count === 2) {
+                            // Hiển thị 2 ảnh (chia 2 góc)
+                            return (
+                              <>
                                 <Image
-                                  key={participant.user._id}
                                   style={{
-                                    width: 20,
-                                    height: 20,
-                                    borderRadius: 10,
+                                    width: 30,
+                                    height: 30,
+                                    borderRadius: 15,
                                     position: 'absolute',
-                                    ...positions[index],
-                                    borderWidth: 1,
+                                    top: 0,
+                                    left: 0,
+                                    borderWidth: 2,
                                     borderColor: 'white',
                                     backgroundColor: color.gray,
                                   }}
-                                  source={{uri: participant.user.avatar}}
+                                  source={{
+                                    uri: filteredParticipants[0]?.user.avatar,
+                                  }}
                                 />
-                              );
-                            });
-                        }
-                      })()}
-                    </View>
-                  )}
+                                <Image
+                                  style={{
+                                    width: 30,
+                                    height: 30,
+                                    borderRadius: 15,
+                                    position: 'absolute',
+                                    bottom: 0,
+                                    right: 0,
+                                    borderWidth: 2,
+                                    borderColor: 'white',
+                                    backgroundColor: color.gray,
+                                  }}
+                                  source={{
+                                    uri: filteredParticipants[1]?.user.avatar,
+                                  }}
+                                />
+                              </>
+                            );
+                          } else {
+                            // Hiển thị tối đa 4 ảnh
+                            return filteredParticipants
+                              .slice(0, 4)
+                              .map((participant, index) => {
+                                const positions = [
+                                  { top: 0, left: 0 },
+                                  { top: 0, right: 0 },
+                                  { bottom: 0, left: 0 },
+                                  { bottom: 0, right: 0 },
+                                ];
+                                return (
+                                  <Image
+                                    key={participant.user._id}
+                                    style={{
+                                      width: 20,
+                                      height: 20,
+                                      borderRadius: 10,
+                                      position: 'absolute',
+                                      ...positions[index],
+                                      borderWidth: 1,
+                                      borderColor: 'white',
+                                      backgroundColor: color.gray,
+                                    }}
+                                    source={{ uri: participant.user.avatar }}
+                                  />
+                                );
+                              });
+                          }
+                        })()}
+                      </View>
+                    )}
 
-                  {/* Nội dung tin nhắn */}
-                  <View style={{flex: 1}}>
-                    <Text
-                      style={{
-                        fontWeight: 'bold',
-                        fontSize: 16,
-                        color: color.white,
-                      }}
-                      numberOfLines={1}
-                      ellipsizeMode="tail">
-                      {item.roomName
-                        ? item.roomName
-                        : item.participants
+                    {/* Nội dung tin nhắn */}
+                    <View style={{ flex: 1 }}>
+                      <Text
+                        style={{
+                          fontWeight: 'bold',
+                          fontSize: 16,
+                          color: color.white,
+                        }}
+                        numberOfLines={1}
+                        ellipsizeMode="tail">
+                        {item.roomName
+                          ? item.roomName
+                          : item.participants
                             .filter(
                               participant =>
                                 participant.user.name !== user.name,
@@ -432,30 +437,37 @@ export default function Home({navigation}: {navigation: any}) {
                             .map(participant => participant.user.name) // Lấy tên
                             .filter(name => !!name) // Loại bỏ tên rỗng
                             .join(', ')}{' '}
-                      {/* Nối các tên lại thành chuỗi */}
-                    </Text>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        width: '90%',
-                        gap: 10,
-                      }}>
-                      <Text style={{fontSize: 14, color: 'gray'}}>
-                        {item.lastMessage?.text || 'Bắt đầu cuộc thoại'}
+                        {/* Nối các tên lại thành chuỗi */}
                       </Text>
-                      <Text>
-                        {dayjs(item.lastMessage?.createdAt).from(now)}
-                      </Text>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          width: '80%',
+                          gap: 10,
+                       
+                        }}>
+                        <Text
+                          ellipsizeMode="tail"
+                          numberOfLines={1}
+                          style={{ fontSize: 14, fontWeight: 'bold', color: color.white, width: 100 }}>
+                          {item.lastMessage?.text || 'Bắt đầu cuộc thoại'}
+                        </Text>
+                        <Text
+                          ellipsizeMode="tail"
+                        
+                          numberOfLines={1}>
+                          {dayjs(item.lastMessage?.createdAt).from(now)}
+                        </Text>
+                      </View>
                     </View>
-                  </View>
-                </Pressable>
-              );
-            }}
-            onEndReached={() => {
-              get_data();
-            }}
-          />
-        </View>
+                  </Pressable>
+                );
+              }}
+              onEndReached={() => {
+                get_data();
+              }}
+            />
+          </View>)}
       </View>
       <BottomSheetModal
         ref={bottomSheetModalRef}

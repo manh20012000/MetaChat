@@ -15,7 +15,7 @@ import {
   Image,
 } from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
-import {Bubble, Day, GiftedChat, InputToolbar} from 'react-native-gifted-chat';
+import { Bubble, Day, GiftedChat, InputToolbar, Avatar } from 'react-native-gifted-chat';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -41,6 +41,8 @@ import {Message_interface} from '../../../interface/Chat_interface';
 import Video from 'react-native-video';
 import MediaGrid from '../homeComponent/MediaGrid';
 import {update_Converstation} from '../../../cache_data/exportdata.ts/chat_convert_datacache';
+import { AnyList } from 'realm';
+import MessageItem from '../../Component/GifchatComponent/RenderMessage';
 interface GifchatUserProps {
   conversation: Conversation;
 }
@@ -59,21 +61,21 @@ const GifchatUser = (props: GifchatUserProps) => {
     Array.from(conversation.messages)
   );
 
-  const [isVisible, setVisible] = useState(true);
-  const [isShowSendText, setIsShowSendText] = useState(true);
-  const [changeIcon, setChangIcon] = useState(true);
-  const [text, settext] = useState('');
-  const [inputHeight, setInputHeight] = useState(30);
+  // const [isVisible, setVisible] = useState(true);
+  // const [isShowSendText, setIsShowSendText] = useState(true);
+  // const [changeIcon, setChangIcon] = useState(true);
+  // const [text, settext] = useState('');
+  // const [inputHeight, setInputHeight] = useState(30);
   const [keyboardOffset, setKeyboardOffset] = useState(0);
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [buttonScale] = useState(new Animated.Value(1));
   const [maginTextInput, setMaginTextInput] = useState<boolean>(false);
   const [selectedMessages, setSelectedMessages] = useState<string[]>([]); // Lưu trữ ID của tin nhắn đã chọn
-  const [participate, setParticipate] = useState<any[]>(
-    conversation.participants.filter(
-      participant => participant.user._id !== user._id,
-    ),
-  ); // Lưu trữ ID của tin nhắn đã chọn
+  // const [participate, setParticipate] = useState<any[]>(
+  //   conversation.participants.filter(
+  //     participant => participant.user._id !== user._id,
+  //   ),
+  // ); // Lưu trữ ID của tin nhắn đã chọn
   const [participateId, setParticipateId] = useState<string[]>(
     conversation.participants.map(participant => participant.user._id),
   ); // Lưu trữ ID của tin nhắn đã chọn
@@ -115,7 +117,7 @@ const GifchatUser = (props: GifchatUserProps) => {
       triggerAnimation();
     }
   }, [selectedItems]);
-  const handleSelect = (item: any) => {
+  const handleSelect = useCallback((item: any) => {
     setSelectedItems(prevSelectedItems => {
       const isSelected = prevSelectedItems.some(
         (selected: any) => selected.id === item.node.id,
@@ -129,25 +131,8 @@ const GifchatUser = (props: GifchatUserProps) => {
         return [...prevSelectedItems, item.node];
       }
     });
-  };
-  useEffect(() => {
-    const onKeyboardShow = () => setKeyboardOffset(30);
-    const onKeyboardHide = () => setKeyboardOffset(0);
-
-    const keyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
-      onKeyboardShow,
-    );
-    const keyboardDidHideListener = Keyboard.addListener(
-      'keyboardDidHide',
-      onKeyboardHide,
-    );
-
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
-  }, []);
+  },[]);
+  // 
 
   // phần này dành cho việc gửi tin nhắn
   const onSend = useCallback(
@@ -180,14 +165,13 @@ const GifchatUser = (props: GifchatUserProps) => {
           name: user.name,
           avatar: user.avatar,
         },
+        status: 'sending',
       };
 
       try {
         setMessages(previousMessages =>
           GiftedChat.append(previousMessages, [newMessage]),
         ); 
-        
-        //  await update_Converstation(message, participateId);
         
         const response = await postFormData(
           API_ROUTE.SEND_MESSAGE,
@@ -201,15 +185,9 @@ const GifchatUser = (props: GifchatUserProps) => {
         if (response.status === 200) {
           setMessages(previousMessages =>
             previousMessages.map(msg =>
-              msg._id === newMessage._id
-                ? {
-                  ...msg, status: 'sent',
-                  // viewers: response.data.viewers
-                }
-                : msg,
+              msg._id === newMessage._id ? {...msg, status: 'sent'} : msg,
             ),
           );
-         
         } else {
           throw new Error('Message sending failed');
         }
@@ -244,66 +222,74 @@ const GifchatUser = (props: GifchatUserProps) => {
     return () => {
       socket?.off('message');
     };
-  }, [socket]);
-  const renderMessage = (props: any) => {
-    const {currentMessage} = props;
+  }, []);
+  const renderMessage = useCallback((props: any) => {
+    const { currentMessage } = props;
+ 
+    return (
+    
+
+      
+      <MessageItem
+        currentMessage={currentMessage}
+        props={props}
+        user={user}
+        handleLongPress={handleLongPress}
+        MediaGrid={MediaGrid}
+        />
+
+    );
+  },[]);
+  
+  
+
+const handleLongPress = useCallback((message: any) => {
+  Vibration.vibrate(50);
+  setSelectedMessages(prevSelectedMessages =>
+    prevSelectedMessages.includes(message._id)
+      ? prevSelectedMessages.filter(id => id !== message._id)
+      : [...prevSelectedMessages, message._id],
+  );
+}, []);
+  
+
+  const renderBubble = useCallback(
+    (props: any) => {
+    
+      const isSelected = selectedMessages.includes(props.currentMessage._id);
+      return (
+        <Bubble style={{backgroundColor: 'pink', padding: 10}} {...props} />
+      );
+    },
+    [selectedMessages],
+  );
+  // const renderAvatar = useCallback((props: any) => {
+  //   console.log(props)
+  //   return (
+  //     <Avatar
+  //       {...props}
+  //       onPressAvatar={(avatarUser: any) => {
+  //         // navigate to user profile page
+  //         console.log('avatarUser', avatarUser);
+  //       }}
+  //     />
+  //   );
+  // },[])
+  const renderAvatar = useCallback((props:any) => {
+    console.log('renderAvatar props:', props);
+
+    const { currentMessage } = props;
+    if (!currentMessage || !currentMessage.user?.avatar) {
+      return null;
+    }
 
     return (
-      <View style={{marginBottom: 10, marginHorizontal: 10}}>
-        <Day {...props} />
-        {currentMessage.messageType === 'text' && (
-          <Bubble
-            {...props}
-            onLongPress={(context, message) => handleLongPress(message)}
-          />
-        )}
-        {currentMessage.messageType === 'image' && (
-          <Image
-            source={{uri: props.currentMessage.image}}
-            style={{width: 100, height: 100}}
-          />
-        )}
-        {currentMessage.messageType === 'attachment' &&
-          MediaGrid(currentMessage.attachments)}
-        {currentMessage.user._id === user._id && (
-          <Text
-            style={{
-              fontSize: 12,
-              color: color.white,
-              marginTop: 5,
-              textAlign: 'right',
-            }}>
-            {/* {currentMessage.status === 'sending'
-              ? 'sending...'
-              : currentMessage.status === 'sent'
-                // &&
-                // currentMessage.viewers.length > 0
-              ? `seen by: ${currentMessage.viewers.join(', ')}`
-              : currentMessage.status === 'failed'
-              ? 'failed'
-              : 'sent'} */}
-          </Text>
-        )}
-      </View>
+      <Image
+        source={{ uri: currentMessage.user.avatar }}
+        style={{ width: 40, height: 40, borderRadius: 20, marginLeft: 5,backgroundColor:'red' }}
+      />
     );
-  };
-
-  const handleLongPress = (message: any) => {
-    // Rung nhẹ khi nhấn giữ
-    Vibration.vibrate(50);
-    //console.log('long press message');
-    // Kiểm tra nếu tin nhắn đã được chọn thì bỏ chọn, ngược lại thêm vào
-    if (selectedMessages.includes(message._id)) {
-      setSelectedMessages(selectedMessages.filter(id => id !== message._id));
-    } else {
-      setSelectedMessages([...selectedMessages, message._id]);
-    }
-  };
-
-  const renderBubble = (props: any) => {
-    const isSelected = selectedMessages.includes(props.currentMessage._id);
-    return <Bubble style={{backgroundColor: 'pink', padding: 10}} {...props} />;
-  };
+  },[]);
 
   return (
     <>
@@ -312,6 +298,7 @@ const GifchatUser = (props: GifchatUserProps) => {
         // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={keyboardOffset}>
         <GiftedChat
+          
           messages={messages}
           user={{
             _id: user._id,
@@ -329,9 +316,13 @@ const GifchatUser = (props: GifchatUserProps) => {
           renderSend={renderSend}
           renderMessage={renderMessage}
           renderBubble={renderBubble}
+          renderAvatar={renderAvatar}
           alwaysShowSend
           renderTime={() => null}
           isLoadingEarlier={true}
+          showUserAvatar={true}
+          renderAvatarOnTop={true}
+          showAvatarForEveryMessage={true}
           keyboardShouldPersistTaps="handled"
           messagesContainerStyle={{
             marginBottom: 50,
@@ -473,3 +464,21 @@ function alert(arg0: string) {
 // const onLongPressMessage = (context: any, message: any) => {
 //            console.log('long press message')
 //        };
+// useEffect(() => {
+  //   const onKeyboardShow = () => setKeyboardOffset(30);
+  //   const onKeyboardHide = () => setKeyboardOffset(0);
+
+  //   const keyboardDidShowListener = Keyboard.addListener(
+  //     'keyboardDidShow',
+  //     onKeyboardShow,
+  //   );
+  //   const keyboardDidHideListener = Keyboard.addListener(
+  //     'keyboardDidHide',
+  //     onKeyboardHide,
+  //   );
+
+  //   return () => {
+  //     keyboardDidShowListener.remove();
+  //     keyboardDidHideListener.remove();
+  //   };
+  // }, []);

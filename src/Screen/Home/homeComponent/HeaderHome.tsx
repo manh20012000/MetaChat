@@ -22,7 +22,7 @@ const HeaderHome: React.FC<{navigation: any; data_friend: any}> = ({
   const isPortrait = height > width;
   const color = useSelector((state: any) => state.colorApp.value);
   const [user_data, setUser_Data] = useState(data_friend);
-  console.log(data_friend, 'datafiewnd');
+  // console.log(data_friend, 'datafiewnd');
       const user_Status = useSelector((state: any) => state.statusUser.value);
   useEffect(() => {
     // Fetch user data
@@ -111,6 +111,19 @@ const HeaderHome: React.FC<{navigation: any; data_friend: any}> = ({
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}>
+                {statusUser && (
+                  <View
+                    style={{
+                      backgroundColor: 'green',
+                      width: 15,
+                      height: 15,
+                      borderRadius: 100,
+                      position: 'absolute',
+                      zIndex: 1,
+                      bottom: 28,
+                      right: 1,
+                    }}></View>
+                )}
                 <TouchableOpacity
                   style={{}}
                   onPress={async () => {
@@ -152,7 +165,7 @@ const HeaderHome: React.FC<{navigation: any; data_friend: any}> = ({
                       console.error('Lỗi trong handler_chat:', error);
                     }
                   }}>
-                  {statusUser && (
+                  {/* {statusUser && (
                     <View
                       style={{
                         backgroundColor: 'green',
@@ -161,10 +174,10 @@ const HeaderHome: React.FC<{navigation: any; data_friend: any}> = ({
                         borderRadius: 100,
                         position: 'absolute',
                         zIndex: 1,
-                        bottom: 5,
-                        left: '12%',
+                        bottom: '5%',
+                        right: '12%',
                       }}></View>
-                  )}
+                  )} */}
                   <Image
                     style={{
                       width: 60,

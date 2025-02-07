@@ -37,6 +37,7 @@ export interface Message_interface {
     replyMessage: {
       _id: string;
       content: string; // Nội dung của tin nhắn reply
-    };
+  };
+   status: string;
   
 }

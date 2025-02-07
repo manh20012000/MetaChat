@@ -2,7 +2,7 @@ import { realm } from "../Schema/schemaModel";
 
 const createListfriend = async (friend: any) => {
    try {
-   console.log(friend)
+   console.log(friend,'giá trị friend')
     // Kiểm tra xem user đã tồn tại trong Realm chưa
     const existingFriend = realm
       .objects('friend')

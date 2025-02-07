@@ -37,11 +37,12 @@ const handler_chat = async () => {
         
       },
     ];
-    const conversation = await findAndconvertConversation(
+    const conversation:any = await findAndconvertConversation(
       item,
       participantIds,
       participants,
     );
+    console.log(conversation,'hdskjdksjdk')
     if (participantIds.length <= 2) {
       await createListfriend({
         _id: item._id.toString(),
@@ -51,11 +52,10 @@ const handler_chat = async () => {
       });
       
       socket?.emit('invite_to_room', {
-        
-        conversationId: item._id,
+        conversationId: conversation._id,
         recipientId: participants
-                           .filter(i => i.user._id !== currentUser._id)
-                           .map(i => i.user._id)[0],
+          .filter(i => i.user._id !== currentUser._id)
+          .map(i => i.user._id)[0],
       });
       console.log('nhay vao phan inveroom cuar search item')
     }
