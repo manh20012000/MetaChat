@@ -46,7 +46,7 @@ const CustomInputToolbar = (props: any) => {
       createdAt: newdate,
       reactions: [],
       isRead: [],
-      replyMessage: {},
+      replyTo: {},
     };
   };
 

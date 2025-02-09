@@ -34,7 +34,7 @@ export interface Message_interface {
       },
     ];
     isRead: [{_id: string; avatar: string; name: string}];
-    replyMessage: {
+    replyTo: {
       _id: string;
       content: string; // Nội dung của tin nhắn reply
   };

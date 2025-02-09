@@ -81,8 +81,8 @@ const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, nav
                 {(() => {
                   // Lọc ra những người tham gia khác currentUser
                   const filteredParticipants = conversation.participants.filter(
-                    participant =>
-                      participant.user._id !== conversation.participants[0].user._id,
+                    (participant:any) =>
+                      participant._id !== conversation.participants[0]._id,
                   );
 
                   // Số lượng người tham gia khác currentUser
@@ -97,7 +97,7 @@ const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, nav
                           borderRadius: 25,
                           backgroundColor: color.gray,
                         }}
-                        source={{uri: filteredParticipants[0].user.avatar}}
+                        source={{uri: filteredParticipants[0].avatar}}
                       />
                     );
                   } else if (count === 2) {
@@ -116,7 +116,7 @@ const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, nav
                             borderColor: 'white',
                             backgroundColor: color.gray,
                           }}
-                          source={{uri: filteredParticipants[0]?.user.avatar}}
+                          source={{uri: filteredParticipants[0]?.avatar}}
                         />
                         <Image
                           style={{
@@ -130,7 +130,7 @@ const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, nav
                             borderColor: 'white',
                             backgroundColor: color.gray,
                           }}
-                          source={{uri: filteredParticipants[1]?.user.avatar}}
+                          source={{uri: filteredParticipants[1]?.avatar}}
                         />
                       </>
                     );
@@ -147,7 +147,7 @@ const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, nav
                         ];
                         return (
                           <Image
-                            key={participant.user._id}
+                            key={participant._id}
                             style={{
                               width: 20,
                               height: 20,
@@ -158,7 +158,7 @@ const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, nav
                               borderColor: 'white',
                               backgroundColor: color.gray,
                             }}
-                            source={{uri: participant.user.avatar}}
+                            source={{uri: participant.avatar}}
                           />
                         );
                       });
@@ -180,10 +180,10 @@ const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, nav
                 : conversation.participants
                     .filter(
                       participant =>
-                        participant.user.name !==
+                        participant.name !==
                         user.name,
                     ) // Lọc bỏ tên của currentUser
-                    .map(participant => participant.user.name) // Lấy tên còn lại
+                    .map(participant => participant.name) // Lấy tên còn lại
                     .join(', ')}{' '}
             </Text>
           </TouchableOpacity>

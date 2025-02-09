@@ -158,16 +158,34 @@ export default function Home({navigation}: {navigation: any}) {
         console.log(item._id, 'Joining room');
         socket.emit('join_room', {conversationId: item._id, user: user.name});
       });
-    };
+    }
+    
+    
     const handleNewMessage = (messages: any) => {
-      const {message, conversation, participantIds} = messages;
-      const conditions = conversation.participants
-        .map((id: any, index: any) => `ANY participants.user._id == $${index}`)
-        .join(' AND ');
-   
-      const existingConversation: any = realm
-        .objects('Conversation')
-        .filtered(conditions, ...participantIds)[0];
+      console.log(
+        'message socket ở màn home'
+      )
+      const {message, conversation, } = messages;
+      const conversations = realm
+        .objects<{ participants: { _id: string }[] }>('Conversation')
+        .filtered(`participants.@size == ${conversation.participants.length}`);
+
+      let existingConversation:any = null;
+
+      for (let conv of conversations) {
+        const existingParticipantIds:any = conv.participants.map(p => p._id);
+        const serverParticipantIds:any = conversation.participants.map((p:any) => p._id);
+
+        // Kiểm tra xem danh sách participants có khớp hoàn toàn không
+        const isMatch =
+          serverParticipantIds.every((id:string) => existingParticipantIds.includes(id)) &&
+          existingParticipantIds.every((id: string) => serverParticipantIds.includes(id));
+
+        if (isMatch) {
+          existingConversation = conv;
+          break;
+        }
+      }
         
       realm.write(() => {
 
@@ -194,7 +212,7 @@ export default function Home({navigation}: {navigation: any}) {
           });
         }
       });
-    };
+    }
     // Nếu socket đã kết nối, thực hiện ngay
     if (socket.connected) {
       handleConnect();
@@ -247,9 +265,9 @@ export default function Home({navigation}: {navigation: any}) {
               data={data_convertstation}
               // Sử dụng _id làm khóa duy nhất
               renderItem={({ item }: { item: Conversation }) => {
-                const statusUser = item.participants.some(participant => {
-                  if (participant.user._id !== user._id) {
-                    return user_Status.includes(participant.user._id);
+                const statusUser = item.participants.some((participant:any) => {
+                  if (participant._id !== user._id) {
+                    return user_Status.includes(participant._id);
                   }
                 });
 
@@ -260,11 +278,11 @@ export default function Home({navigation}: {navigation: any}) {
                         socket?.emit('invite_to_room', {
                           conversationId: item._id,
                           name: item.participants
-                            .filter(i => i.user._id !== user._id)
-                            .map(i => i.user.name)[0],
+                            .filter((i:any)  => i._id !== user._id)
+                            .map((i: any) => i.name)[0],
                           recipientId: item.participants
-                            .filter(i => i.user._id !== user._id)
-                            .map(i => i.user._id)[0], // Chỉ lấy id của user,
+                            .filter((i: any) => i._id !== user._id)
+                            .map((i: any) => i._id)[0], // Chỉ lấy id của user,
                         });
                       }
                       navigation.navigate('HomeChatPersion', {
@@ -324,8 +342,8 @@ export default function Home({navigation}: {navigation: any}) {
                         }}>
                         {(() => {
                           // Lọc ra những người tham gia khác currentUser
-                          const filteredParticipants = item.participants.filter(
-                            participant => participant.user._id !== user._id,
+                          const filteredParticipants:any = item.participants.filter(
+                            (participant:any) => participant._id !== user._id,
                           );
 
                           // Số lượng người tham gia khác currentUser
@@ -342,7 +360,7 @@ export default function Home({navigation}: {navigation: any}) {
                                   backgroundColor: color.gray,
                                 }}
                                 source={{
-                                  uri: filteredParticipants[0].user.avatar,
+                                  uri: filteredParticipants[0].avatar,
                                 }}
                               />
                             );
@@ -388,7 +406,7 @@ export default function Home({navigation}: {navigation: any}) {
                             // Hiển thị tối đa 4 ảnh
                             return filteredParticipants
                               .slice(0, 4)
-                              .map((participant, index) => {
+                              .map((participant:any, index:number) => {
                                 const positions = [
                                   { top: 0, left: 0 },
                                   { top: 0, right: 0 },
@@ -431,10 +449,10 @@ export default function Home({navigation}: {navigation: any}) {
                           ? item.roomName
                           : item.participants
                             .filter(
-                              participant =>
-                                participant.user.name !== user.name,
+                              (participant:any) =>
+                                participant.name !== user.name,
                             ) // Lọc bỏ tên của currentUser
-                            .map(participant => participant.user.name) // Lấy tên
+                            .map((participant:any) => participant.name) // Lấy tên
                             .filter(name => !!name) // Loại bỏ tên rỗng
                             .join(', ')}{' '}
                         {/* Nối các tên lại thành chuỗi */}
@@ -588,3 +606,47 @@ export default function Home({navigation}: {navigation: any}) {
               </TouchableOpacity>
             </View>
           </View> */}
+
+          /* const handleConnect = useCallback(() => {
+      data_convertstation.forEach((item: any) => {
+        console.log(item._id, 'Joining room');
+        socket.emit('join_room', {conversationId: item._id, user: user.name});
+      });
+    },[]);
+    const handleNewMessage = useCallback((messages: any) => {
+      const {message, conversation, participantIds} = messages;
+      const conditions = conversation.participants
+        .map((id: any, index: any) => `ANY participants.user._id == $${index}`)
+        .join(' AND ');
+   
+      const existingConversation: any = realm
+        .objects('Conversation')
+        .filtered(conditions, ...participantIds)[0];
+        
+      realm.write(() => {
+
+        if (existingConversation) {
+          console.log('đã tônf tại ')
+          existingConversation.lastMessage = message;
+          (existingConversation.messages as Message_interface[]).unshift(
+            message,
+          )
+          existingConversation.updatedAt = message.createdAt;
+        } else {
+          
+          realm.create('Conversation', {
+            _id: conversation._id,
+            roomName: conversation.roomName,
+            avatar: conversation.avatar,
+            participants: conversation.participants,
+            color: conversation.color,
+            icon: conversation.icon,
+            background: conversation.background,
+            lastMessage: message,
+            messages: [message],
+            updatedAt: message.createdAt,
+          });
+        }
+      });
+    },[]);
+          */

@@ -2,16 +2,22 @@
 const ParticipantSchema = {
   name: 'Participant',
   properties: {
-    user: 'user?',
+    _id: 'string?',
+    name: 'string?',
+    avatar: 'string?',
+    role: 'string?',
   },
 };
-const ReplyMessageSchema = {
-  name: 'ReplyMessage',
+const ReplyToSchema = {
+  name: 'ReplyTo',
   properties: {
-    _id: 'string?', // ID của tin nhắn được reply
-    content: 'string?', // Nội dung của tin nhắn được reply
+    _id: 'string?', // ID tin nhắn gốc
+    user: 'user?', // Người gửi tin nhắn gốc
+    messageType: 'string?', // Loại tin nhắn
+    text: 'string?', // Nội dung tin nhắn gốc
   },
 };
+
 const userSchema = {
   name: 'user',
   properties: {
@@ -36,7 +42,7 @@ const LastMessageSchema = {
     createdAt: 'string?',
     reactions: 'Reaction[]',
     isRead: 'string[]',
-    replyMessage: 'ReplyMessage?',
+    replyTo: 'ReplyTo?',
   },
 };
 
@@ -53,8 +59,8 @@ const MessageSchema = {
     callDetails: 'CallDetail?', // Chi tiết cuộc gọi
     createdAt: 'string?', // Thời gian tạo
     reactions: 'Reaction[]', // Danh sách cảm xúc
-    isRead: 'string[]', // Danh sách người đã đọc
-    replyMessage: 'ReplyMessage?', // Tin nhắn được reply // Tin nhắn được trả lời
+    isRead: 'user[]', // Danh sách người đã đọc
+    replyTo: 'ReplyTo?', // ✅ Đổi từ `replyTo` thành `replyTo`
   },
   // Đánh chỉ mục cho các trường thường xuyên truy vấn
 };
@@ -109,7 +115,7 @@ export {
   ConversationSchema,
   AttachmentSchema,
   CallDetailSchema,
-  ReactionSchema,userSchema,
-  ReplyMessageSchema,
-  
+  ReactionSchema,
+  userSchema,
+  ReplyToSchema,
 };

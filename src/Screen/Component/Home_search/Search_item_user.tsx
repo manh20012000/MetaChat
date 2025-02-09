@@ -19,29 +19,25 @@ const handler_chat = async () => {
     // thực hiênnj kiểm tra cuộc thoại trong cáche xong kiểm tra trên db -> nếu ko có thì mới bắt đầu tạo mới 
     const participants = [
       {
-        user: {
           _id: currentUser._id.toString(),
           name: currentUser.name,
           avatar: currentUser.avatar, 
           role: 'admin',
-        },
-       
+
       },
       {
-        user: {
           _id: item._id.toString(),
           name: item.name,
           avatar: item.avatar,
           role: 'member',
-        },
-        
+   
       },
     ];
     const conversation:any = await findAndconvertConversation(
-      item,
-      participantIds,
+   
       participants,
     );
+    
     console.log(conversation,'hdskjdksjdk')
     if (participantIds.length <= 2) {
       await createListfriend({
@@ -54,8 +50,8 @@ const handler_chat = async () => {
       socket?.emit('invite_to_room', {
         conversationId: conversation._id,
         recipientId: participants
-          .filter(i => i.user._id !== currentUser._id)
-          .map(i => i.user._id)[0],
+          .filter(i => i !== currentUser._id)
+          .map(i => i._id)[0],
       });
       console.log('nhay vao phan inveroom cuar search item')
     }

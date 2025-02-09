@@ -77,52 +77,45 @@ const update_Converstation = async (
 
 
 //
-let isProcessing = false;
+ let isProcessing = false;
 const findAndconvertConversation = async (
-  userId: itemuser,
 
-  participantIds: string[],
-  participants: any,
+  participants: any[],
 ) => {
-  // Chuyển danh sách _id thành chuỗi JSON để dùng trong bộ lọc
-  const participantIdsString = JSON.stringify(participantIds);
-
   try {
-    isProcessing = true;
+    let isProcessing = true;
 
-    const conditions = participantIds
-      .map((id, index) => `ANY participants.user._id == $${index}`)
-      .join(' AND '); // Sử dụng "AND" để đảm bảo tất cả đều khớp
+    // Lọc các cuộc hội thoại có số lượng participants bằng nhau
+    const conversations = realm
+      .objects<{participants: {_id: string}[]}>('Conversation')
+      .filtered(`participants.@size == ${participants.length}`);
 
-    // Thực hiện truy vấn với tham số
-    const matchingConversation: any = realm
-      .objects('Conversation')
-      .filtered(conditions, ...participantIds)[0];
+    let existingConversation: any = null;
+
+    // Kiểm tra danh sách participants có khớp hoàn toàn không
+    for (let conv of conversations) {
+      const existingParticipantIds = conv.participants.map(p => p._id);
+      const serverParticipantIds = participants.map(p => p._id);
+
+      const isMatch =
+        serverParticipantIds.every(id => existingParticipantIds.includes(id)) &&
+        existingParticipantIds.every(id => serverParticipantIds.includes(id));
+
+      if (isMatch) {
+        existingConversation = conv;
+        break;
+      }
+    }
+
     let updatedConversation = null;
 
-    await realm.write(() => {
-      if (matchingConversation) {
-        // Logic xử lý khi tìm thấy cuộc hội thoại
-        const conversationData = {
-          _id: matchingConversation._id,
-          roomName: matchingConversation.roomName,
-          avatar: matchingConversation.avatar,
-          color: matchingConversation.color,
-          icon: matchingConversation.icon,
-          background: matchingConversation.background,
-          lastMessage: matchingConversation.lastMessage,
-          participants: [...matchingConversation.participants],
-          messages: [...matchingConversation.messages],
-          updatedAt: new Date().toISOString(),
-          permission: matchingConversation.permission,
-        };
-        
-        realm.delete(matchingConversation);
-        realm.create('Conversation', conversationData);
-       updatedConversation = conversationData;
-    
+    realm.write(() => {
+      if (existingConversation) {
+        // Nếu cuộc hội thoại đã tồn tại, cập nhật dữ liệu mới
+        existingConversation.updatedAt = new Date().toISOString();
+        updatedConversation = existingConversation;
       } else {
-        // Tạo cuộc hội thoại mới
+        // Nếu không tìm thấy cuộc hội thoại, tạo cuộc hội thoại mới
         const newConversation = {
           _id: new BSON.ObjectId().toString(),
           roomName: null,
@@ -138,12 +131,12 @@ const findAndconvertConversation = async (
         };
 
         updatedConversation = realm.create('Conversation', newConversation);
-      
       }
     });
+
     return updatedConversation;
   } catch (error) {
-    console.error('Lỗi khi tìm và chuyển hoặc tạo mới cuộc hội thoại:', error);
+    console.error('Lỗi khi tìm hoặc tạo mới cuộc hội thoại:', error);
     throw error;
   }
 };
@@ -240,8 +233,8 @@ export {
  // matchingConversation.messages.forEach(message => {
         //   realm.delete(message.reactions); // Xóa cảm xúc liên quan
         //   realm.delete(message.attachments); // Xóa file đính kèm
-        //   if (message.replyMessage) {
-        //     realm.delete(message.replyMessage); // Xóa tin nhắn được trả lời
+        //   if (message.replyTo) {
+        //     realm.delete(message.replyTo); // Xóa tin nhắn được trả lời
         //   }
         // });
         // Sau đó xóa tất cả tin nhắn

@@ -147,16 +147,15 @@ const HeaderHome: React.FC<{navigation: any; data_friend: any}> = ({
                         },
                       ];
                       const conversation = await findAndconvertConversation(
-                        item,
-                        participantIds,
+                     
                         participants,
                       );
                       if (participantIds.length <= 2) {
                         socket?.emit('invite_to_room', {
                           conversationId: item._id,
                           recipientId: participants
-                            .filter(i => i.user._id !== user._id)
-                            .map(i => i.user._id)[0],
+                            .filter((i:any) => i._id !== user._id)
+                            .map((i: any) => i._id)[0],
                         });
                       }
                       // // Chuyển đến màn hình chat cá nhân với thông tin người dùng

@@ -1,6 +1,6 @@
 
 // import { URL } from '@env';
-const API_URL = 'http://14.225.36.70:8080';
+const API_URL = 'http://192.168.244.21:8080';
 // console.log('hahah', URL)
 import axios from 'axios';
 import { checkAndRefreshToken } from '../util/checkingToken';
@@ -35,7 +35,7 @@ const postFormData = async (route: string, data: any, check: any) => {
   formData.append('message', JSON.stringify(data.message));
   formData.append('conversation', JSON.stringify(data.conversation));
   formData.append('user', JSON.stringify(data.user));
-  formData.append('participant_id',JSON.stringify(data.participateId));
+  // formData.append('participant_id',JSON.stringify(data.participateId));
   formData.append('filesOrder', JSON.stringify(data.filesOrder));
   data.message.attachments.forEach((file:any, index:any) => {
     formData.append(`${file.type}`, {

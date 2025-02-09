@@ -9,15 +9,15 @@ interface Conversation {
   icon: string; //
   background: string; // Background của nhóm (nếu có)
   messages: Message_interface[];
-  participants: {
-    user: {
-      _id: string; // ID của thành viên
-      name: string; // Tên của thành viên
-      avatar: string;
-      role: string;
-    }, // Ảnh đại diện
+  participants:
+  [{
+    _id: string; // ID của thành viên
+    name: string; // Tên của thành viên
+    avatar: string;
+    role: string;
+  },];
     
-  }[];
+  
   lastMessage?: Message_interface;
   firstMessageTime?: string;
   permission: string;
