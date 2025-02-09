@@ -182,13 +182,14 @@ const GifchatUser = (props: GifchatUserProps) => {
             user,
           },
         );
-       console.log('response222',response)
+    
         if (response.status === 200) {
           setMessages(previousMessages =>
             previousMessages.map(msg =>
               msg._id === newMessage._id ? {...msg, status: 'sent'} : msg,
             ),
           );
+          // socket?.emit("sendMessage",response.data);
         } else {
           throw new Error('Message sending failed');
         }
@@ -204,25 +205,22 @@ const GifchatUser = (props: GifchatUserProps) => {
     [],
   );
   useEffect(() => {
-    // if (
-    //   conversation.messages.length === 0 &&
-    //   conversation.participants.length <= 2
-    // ) {
-    //   socket?.emit('join_room', {
-    //     conversationId: conversation._id,
-    //   });
-    // }
-    // lắng nghe sự kiện nhận tin nhắn nha 
+   
     socket?.on('new_message', messages => {
-      console.log('messages->>>>>>>>>',messages)
-       const {message} = messages;
-        // update_Converstation(message, participateId);
-       setMessages(prevMessages => [...prevMessages, message]);
+      
+      const { message, send_id } = messages;
+     
+      if (send_id !== user._id) {
+       
+        setMessages((previousMessages) =>
+          GiftedChat.append(previousMessages, message)
+        );
+      }
      });
     // Cleanup khi component unmount
-    return () => {
-      socket?.off('new_message');
-    };
+    // return () => {
+    //   socket?.off('new_message');
+    // };
   }, []);
   const renderMessage = useCallback((props: any) => {
     const { currentMessage } = props;
@@ -278,7 +276,7 @@ const GifchatUser = (props: GifchatUserProps) => {
               conversation={conversation}
             />
           )}
-          scrollToBottom
+          scrollToBottom={true}
           renderSend={renderSend}
           renderMessage={renderMessage}
     
@@ -470,3 +468,29 @@ function alert(arg0: string) {
   //   );
   // }
   //   , []);
+/***useEffect(() => {
+    // if (
+    //   conversation.messages.length === 0 &&
+    //   conversation.participants.length <= 2
+    // ) {
+    //   socket?.emit('join_room', {
+    //     conversationId: conversation._id,
+    //   });
+    // }
+    // lắng nghe sự kiện nhận tin nhắn nha 
+    socket?.on('new_message', messages => {
+      
+      const { message, send_id } = messages;
+     
+      if (send_id !== user._id) {
+       
+        setMessages((previousMessages) =>
+          GiftedChat.append(previousMessages, message)
+        );
+      }
+     });
+    // Cleanup khi component unmount
+    // return () => {
+    //   socket?.off('new_message');
+    // };
+  }, []); */

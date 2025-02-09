@@ -162,10 +162,15 @@ export default function Home({navigation}: {navigation: any}) {
     
     
     const handleNewMessage = (messages: any) => {
-      console.log(
+    
+      
+      const { message, conversation, send_id } = messages;
+      if (send_id !== user._id) {
+        console.log(
         'message socket ở màn home'
       )
-      const {message, conversation, } = messages;
+      
+      }
       const conversations = realm
         .objects<{ participants: { _id: string }[] }>('Conversation')
         .filtered(`participants.@size == ${conversation.participants.length}`);
