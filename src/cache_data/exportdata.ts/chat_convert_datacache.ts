@@ -2,7 +2,9 @@ import Conversation from '../../interface/Converstation.interface';
 import {Message_interface} from '../../interface/Chat_interface';
 import {realm} from '../Schema/schemaModel';
 import {itemuser} from '../../interface/search_user.interface';
-import {BSON, EJSON, ObjectId} from 'bson';
+import { BSON, EJSON, ObjectId } from 'bson';
+import { postData } from '../../service/resfull_api';
+import { API_ROUTE } from '../../service/api_enpoint';
 const createConversation = async (Conversation: Conversation) => {
   try {
     realm.write(() => {
@@ -79,8 +81,8 @@ const update_Converstation = async (
 //
  let isProcessing = false;
 const findAndconvertConversation = async (
-
   participants: any[],
+  checking:any
 ) => {
   try {
     let isProcessing = true;
@@ -109,31 +111,44 @@ const findAndconvertConversation = async (
 
     let updatedConversation = null;
 
-    realm.write(() => {
+    realm.write(async() => {
       if (existingConversation) {
         // Nếu cuộc hội thoại đã tồn tại, cập nhật dữ liệu mới
         existingConversation.updatedAt = new Date().toISOString();
         updatedConversation = existingConversation;
       } else {
+       const response = await postData(
+         API_ROUTE.CREATE_CONVERSTATION,
+         participants,
+         checking,
+        );
+        if (response.status === 200) {
+           updatedConversation = realm.create(
+             'Conversation',
+             response.data,
+           );
+        } else {
+          throw new Error('Tạo cuộc hội thoại mới thất bại.');
+        }
+       
         // Nếu không tìm thấy cuộc hội thoại, tạo cuộc hội thoại mới
-        const newConversation = {
-          _id: new BSON.ObjectId().toString(),
-          roomName: null,
-          avatar: null,
-          participants: participants,
-          color: 'red',
-          icon: '😁',
-          background: 'black',
-          lastMessage: null,
-          messages: [],
-          updatedAt: new Date().toISOString(),
-          permission: 'lock',
-        };
-
-        updatedConversation = realm.create('Conversation', newConversation);
+        // const newConversation = {
+        //   _id: new BSON.ObjectId().toString(),
+        //   roomName: null,
+        //   avatar: null,
+        //   participants: participants,
+        //   color: 'red',
+        //   icon: '😁',
+        //   background: 'black',
+        //   lastMessage: null,
+        //   messages: [],
+        //   updatedAt: new Date().toISOString(),
+        //   permission: 'lock',
+        // };
+    
+       
       }
     });
-
     return updatedConversation;
   } catch (error) {
     console.error('Lỗi khi tìm hoặc tạo mới cuộc hội thoại:', error);

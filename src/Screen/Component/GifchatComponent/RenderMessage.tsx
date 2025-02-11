@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Image } from 'react-native';
+import { View, Text, Image,useWindowDimensions } from 'react-native';
 import { Avatar, Bubble, Day, Message } from 'react-native-gifted-chat';
 import { useSelector } from 'react-redux';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, runOnJS } from 'react-native-reanimated';
@@ -16,7 +16,13 @@ interface MessageProps {
 
 const MessageItem: React.FC<MessageProps> = ({ currentMessage,
   previousMessage, user, handleLongPress, handlerreplyTo, MediaGrid, props }) => {
+  // console.log(currentMessage, 'hahah')
+  const[currentMessageItem]=useState(currentMessage)
   const [color] = useState(useSelector((state: any) => state.colorApp.value));
+  const { width, height } = useWindowDimensions()
+  const SWIPE_THRESHOLD = width * 0.2
+  const MAX_SWIPE_DISTANCE = width * 0.2;
+
   const isMyMessage = currentMessage.user._id === user._id;
   const isFirstMessage =
     !previousMessage || currentMessage.user._id !== previousMessage.user._id;
@@ -25,16 +31,23 @@ const MessageItem: React.FC<MessageProps> = ({ currentMessage,
 
   const gesture = Gesture.Pan()
     .onUpdate((event) => {
-      translateX.value = event.translationX;
-    }).
-  onEnd((event) => {
-    if (Math.abs(event.translationX) > 100) {
-      console.log("Current Message: "); // Kiểm tra dữ liệu tin nhắn
-      runOnJS(handlerreplyTo)(currentMessage); // Gọi hàm reply khi vuốt đủ xa
-    }
-    translateX.value = withTiming(0);
-  });
-
+      if ((isMyMessage && event.translationX < 0) || (!isMyMessage && event.translationX > 0)) {
+        if (Math.abs(event.translationX) <= MAX_SWIPE_DISTANCE) {
+          translateX.value = event.translationX;
+        }
+      }
+    })
+    .onEnd((event) => {
+      
+      if (
+        (isMyMessage && event.translationX < -SWIPE_THRESHOLD) ||
+        (!isMyMessage && event.translationX > SWIPE_THRESHOLD)
+      ) {
+        console.log("Swiping detected for message:", currentMessage);
+        runOnJS(handlerreplyTo)(currentMessageItem); // Gọi handler khi vuốt
+      }
+      translateX.value = withTiming(0);
+    });
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
   }));
@@ -43,8 +56,8 @@ const MessageItem: React.FC<MessageProps> = ({ currentMessage,
   
     <View style={{ marginBottom: 2, marginHorizontal: 10 }}>
       <Day {...props} />
-      <GestureDetector gesture={gesture} {...props}>
-        <Animated.View style={animatedStyle} {...props}>
+      <GestureDetector gesture={gesture} >
+        <Animated.View style={animatedStyle} >
       {currentMessage.messageType === 'text' && (
         <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
           {isFirstMessage && currentMessage.user._id !== user._id && (
@@ -55,7 +68,7 @@ const MessageItem: React.FC<MessageProps> = ({ currentMessage,
           )}
           <Bubble
             {...props}
-            onLongPress={(context, message) => handleLongPress(message)}
+                onLongPress={(context, message) => handleLongPress(message)}
            
             wrapperStyle={{
               left: {

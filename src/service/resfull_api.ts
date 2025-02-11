@@ -1,6 +1,6 @@
 
 // import { URL } from '@env';
-const API_URL = 'http://192.168.244.21:8080';
+const API_URL = 'http://192.168.51.108:8080';
 // console.log('hahah', URL)
 import axios from 'axios';
 import { checkAndRefreshToken } from '../util/checkingToken';
@@ -95,7 +95,7 @@ const getData = async (route: string, query: any, param: any,check:any) => {
 const getResearch = async (route: string, params: any,) => {
   try {
     const response: any = await axios.get(`${API_URL}${route}`, {
-      params: { text: params } ?? {},
+      params: { text: params } ,
       headers: {
         'Content-Type': 'application/json',
       },

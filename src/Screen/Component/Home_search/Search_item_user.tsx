@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Text, Image, Pressable, View } from 'react-native'
 import { itemuser } from '../../../interface/search_user.interface';
-import { useSelector } from 'react-redux';  
+import { useDispatch, useSelector } from 'react-redux';  
 import { Add_Participate } from '../../../util/util_chat/Participate';
 import {createConversation, findAndconvertConversation, getConversations, update_Converstation } from '../../../cache_data/exportdata.ts/chat_convert_datacache';
 import Conversation from '../../../interface/Converstation.interface';
@@ -11,6 +11,7 @@ const SearchItemUser: React.FC<{ item: itemuser,navigation:any }> = ({ item,navi
   const color = useSelector((state: any) => state.colorApp.value)
   const currentUser = useSelector((state: any) => state.auth.value);
   const socket = useSocket();
+  const dispatch = useDispatch();
 const handler_chat = async () => {
   try {
    
@@ -23,6 +24,8 @@ const handler_chat = async () => {
           name: currentUser.name,
           avatar: currentUser.avatar, 
           role: 'admin',
+          action_notifi: true,
+          status_read: true,
 
       },
       {
@@ -30,15 +33,18 @@ const handler_chat = async () => {
           name: item.name,
           avatar: item.avatar,
           role: 'member',
+          action_notifi: true,
+          status_read: true,
    
       },
     ];
     const conversation:any = await findAndconvertConversation(
    
       participants,
+      { dispatch, currentUser },
     );
     
-    console.log(conversation,'hdskjdksjdk')
+   
     if (participantIds.length <= 2) {
       await createListfriend({
         _id: item._id.toString(),

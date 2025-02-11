@@ -138,7 +138,7 @@ export default function Home({navigation}: {navigation: any}) {
       const checkout = async () => {
         try {
           setLoading(true);
-          await Promise.allSettled([getChatuser(), getFriend_user_chat()]);
+          await Promise.allSettled([getChatuser(), getFriend_user_chat() ]);
           setLoading(false);
         } catch (err) {
           console.log(err + 'loi promise');
@@ -152,25 +152,15 @@ export default function Home({navigation}: {navigation: any}) {
 
   useEffect(() => {
     if (!socket) return; // Nếu socket chưa khởi tạo, thoát
-
     const handleConnect = () => {
-      data_convertstation.forEach((item: any) => {
-        console.log(item._id, 'Joining room');
-        socket.emit('join_room', {conversationId: item._id, user: user.name});
-      });
-    }
-    
-    
-    const handleNewMessage = (messages: any) => {
-    
-      
-      const { message, conversation, send_id } = messages;
-      if (send_id !== user._id) {
-        console.log(
-        'message socket ở màn home'
-      )
-      
+        data_convertstation.forEach((item: any) => {
+          console.log(item._id, 'Joining room');
+          
+          socket.emit('join_room', { conversationId: item._id, user: user.name });
+        });
       }
+    const handleNewMessage = (messages: any) => {
+      const { message, conversation, send_id } = messages;
       const conversations = realm
         .objects<{ participants: { _id: string }[] }>('Conversation')
         .filtered(`participants.@size == ${conversation.participants.length}`);
@@ -202,7 +192,6 @@ export default function Home({navigation}: {navigation: any}) {
           )
           existingConversation.updatedAt = message.createdAt;
         } else {
-          
           realm.create('Conversation', {
             _id: conversation._id,
             roomName: conversation.roomName,
@@ -220,6 +209,7 @@ export default function Home({navigation}: {navigation: any}) {
     }
     // Nếu socket đã kết nối, thực hiện ngay
     if (socket.connected) {
+      console.log('hahaha')
       handleConnect();
     } else {
       socket.on('connect', handleConnect);
@@ -229,13 +219,12 @@ export default function Home({navigation}: {navigation: any}) {
     const updateConversations = async () => {
       let data_converstation = await getConversations();
       setData_convertStation(data_converstation);
-      //  let data_friend_chat = await getListfriend();
+       let data_friend_chat = await getListfriend();
 
-      // if (data_friend_chat.length > 0) {
-      //   setData_friend(data_friend_chat)
-      //   console.log(data_friend_chat, 'data_friend_cha222222t realm');
-      //   setSkipfriend(data_friend_chat.length);
-      // }
+      if (data_friend_chat.length > 0) {
+        setData_friend(data_friend_chat)
+        setSkipfriend(data_friend_chat.length);
+      }
     };
     // updateConversations();
     conversationObjects.addListener(updateConversations);
@@ -275,7 +264,7 @@ export default function Home({navigation}: {navigation: any}) {
                     return user_Status.includes(participant._id);
                   }
                 });
-
+                //  console.log(item)
                 return (
                   <Pressable
                     onPress={() => {
@@ -350,11 +339,12 @@ export default function Home({navigation}: {navigation: any}) {
                           const filteredParticipants:any = item.participants.filter(
                             (participant:any) => participant._id !== user._id,
                           );
-
+                           
                           // Số lượng người tham gia khác currentUser
                           const count = filteredParticipants.length;
 
-                          if (count === 1) {
+                            if (count === 1) {
+                              // console.log(filteredParticipants, 'hihihi1')
                             // Chỉ hiển thị ảnh của 1 người (chiếm 100%)
                             return (
                               <Image
@@ -369,7 +359,8 @@ export default function Home({navigation}: {navigation: any}) {
                                 }}
                               />
                             );
-                          } else if (count === 2) {
+                            } else if (count === 2) {
+                              // console.log(filteredParticipants, 'hihihi2')
                             // Hiển thị 2 ảnh (chia 2 góc)
                             return (
                               <>
@@ -386,7 +377,7 @@ export default function Home({navigation}: {navigation: any}) {
                                     backgroundColor: color.gray,
                                   }}
                                   source={{
-                                    uri: filteredParticipants[0]?.user.avatar,
+                                    uri: filteredParticipants[0]?.avatar,
                                   }}
                                 />
                                 <Image
@@ -402,13 +393,13 @@ export default function Home({navigation}: {navigation: any}) {
                                     backgroundColor: color.gray,
                                   }}
                                   source={{
-                                    uri: filteredParticipants[1]?.user.avatar,
+                                    uri: filteredParticipants[1]?.avatar,
                                   }}
                                 />
                               </>
                             );
                           } else {
-                            // Hiển thị tối đa 4 ảnh
+                              // console.log(filteredParticipants, 'hihihi23')
                             return filteredParticipants
                               .slice(0, 4)
                               .map((participant:any, index:number) => {

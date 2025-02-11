@@ -15,12 +15,18 @@ import {
   Image,
 } from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
-import { Bubble, Day, GiftedChat, InputToolbar, Avatar } from 'react-native-gifted-chat';
+import {
+  Bubble,
+  Day,
+  GiftedChat,
+  InputToolbar,
+  Avatar,
+} from 'react-native-gifted-chat';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {API_ROUTE} from '../../../service/api_enpoint';
-import { BSON, EJSON, ObjectId } from 'bson';
+import {BSON, EJSON, ObjectId} from 'bson';
 import {useSocket} from '../../../util/socket.io';
 interface GifchatUserProps {
   // Add any props you need here
@@ -41,13 +47,12 @@ import {Message_interface} from '../../../interface/Chat_interface';
 import Video from 'react-native-video';
 import MediaGrid from '../homeComponent/MediaGrid';
 import {update_Converstation} from '../../../cache_data/exportdata.ts/chat_convert_datacache';
-import { AnyList } from 'realm';
+import {AnyList} from 'realm';
 import MessageItem from '../../Component/GifchatComponent/RenderMessage';
 interface GifchatUserProps {
   conversation: Conversation;
 }
 const GifchatUser = (props: GifchatUserProps) => {
-
   const {width, height} = useWindowDimensions();
   const color = useSelector(
     (value: {colorApp: {value: any}}) => value.colorApp.value,
@@ -57,9 +62,9 @@ const GifchatUser = (props: GifchatUserProps) => {
   const {user, dispatch} = useCheckingService();
   const socket = useSocket();
   const isPortrait = height > width;
-   
+
   const [messages, setMessages] = useState<any[]>(
-    Array.from(conversation.messages)
+    Array.from(conversation.messages),
   );
 
   // const [isVisible, setVisible] = useState(true);
@@ -85,7 +90,6 @@ const GifchatUser = (props: GifchatUserProps) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['40%', '90%'], []);
   const handlePresentModalPress = useCallback(() => {
-   
     bottomSheetModalRef.current?.present();
   }, []);
   const handleSheetChanges = useCallback((index: number) => {
@@ -132,8 +136,8 @@ const GifchatUser = (props: GifchatUserProps) => {
         return [...prevSelectedItems, item.node];
       }
     });
-  },[]);
-  // 
+  }, []);
+  //
 
   // phần này dành cho việc gửi tin nhắn
   const onSend = useCallback(
@@ -157,7 +161,7 @@ const GifchatUser = (props: GifchatUserProps) => {
         message,
         filesOrder,
       };
-      
+
       //const dataMessage = await HandlerSendMessage(dataSaveSend);
       const newMessage = {
         ...message,
@@ -172,8 +176,8 @@ const GifchatUser = (props: GifchatUserProps) => {
       try {
         setMessages(previousMessages =>
           GiftedChat.append(previousMessages, [newMessage]),
-        ); 
-       
+        );
+
         const response = await postFormData(
           API_ROUTE.SEND_MESSAGE,
           dataSaveSend,
@@ -182,7 +186,7 @@ const GifchatUser = (props: GifchatUserProps) => {
             user,
           },
         );
-    
+
         if (response.status === 200) {
           setMessages(previousMessages =>
             previousMessages.map(msg =>
@@ -205,25 +209,22 @@ const GifchatUser = (props: GifchatUserProps) => {
     [],
   );
   useEffect(() => {
-   
     socket?.on('new_message', messages => {
-      
-      const { message, send_id } = messages;
-     
+      const {message, send_id} = messages;
+
       if (send_id !== user._id) {
-       
-        setMessages((previousMessages) =>
-          GiftedChat.append(previousMessages, message)
+        setMessages(previousMessages =>
+          GiftedChat.append(previousMessages, message),
         );
       }
-     });
+    });
     // Cleanup khi component unmount
     // return () => {
     //   socket?.off('new_message');
     // };
   }, []);
   const renderMessage = useCallback((props: any) => {
-    const { currentMessage } = props;
+    const {currentMessage} = props;
 
     return (
       <MessageItem
@@ -237,24 +238,22 @@ const GifchatUser = (props: GifchatUserProps) => {
     );
   }, []);
 
-  const handlerreplyTo = useCallback((props: any) => { 
+  const handlerreplyTo = useCallback((props: any) => {
     Vibration.vibrate(50);
-    console.log('rely tin nhăns nha ', props)
-  },[])
-  
+   
+  }, []);
 
   const handleLongPress = useCallback((message: any) => {
-    console.log('touch ', message)
-  Vibration.vibrate(50);
-  setSelectedMessages(prevSelectedMessages =>
-    prevSelectedMessages.includes(message._id)
-      ? prevSelectedMessages.filter(id => id !== message._id)
-      : [...prevSelectedMessages, message._id],
-  );
-}, []);
-  
+    console.log('touch ', message);
+    Vibration.vibrate(50);
+    setSelectedMessages(prevSelectedMessages =>
+      prevSelectedMessages.includes(message._id)
+        ? prevSelectedMessages.filter(id => id !== message._id)
+        : [...prevSelectedMessages, message._id],
+    );
+  }, []);
 
-  // 
+  //
   return (
     <>
       <KeyboardAvoidingView
@@ -262,7 +261,6 @@ const GifchatUser = (props: GifchatUserProps) => {
         // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={keyboardOffset}>
         <GiftedChat
-          
           messages={messages}
           user={{
             _id: user._id,
@@ -279,7 +277,6 @@ const GifchatUser = (props: GifchatUserProps) => {
           scrollToBottom={true}
           renderSend={renderSend}
           renderMessage={renderMessage}
-    
           renderTime={() => null}
           isLoadingEarlier={true}
           showUserAvatar={true}
@@ -425,49 +422,49 @@ function alert(arg0: string) {
 //            console.log('long press message')
 //        };
 // useEffect(() => {
-  //   const onKeyboardShow = () => setKeyboardOffset(30);
-  //   const onKeyboardHide = () => setKeyboardOffset(0);
+//   const onKeyboardShow = () => setKeyboardOffset(30);
+//   const onKeyboardHide = () => setKeyboardOffset(0);
 
-  //   const keyboardDidShowListener = Keyboard.addListener(
-  //     'keyboardDidShow',
-  //     onKeyboardShow,
-  //   );
-  //   const keyboardDidHideListener = Keyboard.addListener(
-  //     'keyboardDidHide',
-  //     onKeyboardHide,
-  //   );
+//   const keyboardDidShowListener = Keyboard.addListener(
+//     'keyboardDidShow',
+//     onKeyboardShow,
+//   );
+//   const keyboardDidHideListener = Keyboard.addListener(
+//     'keyboardDidHide',
+//     onKeyboardHide,
+//   );
 
-  //   return () => {
-  //     keyboardDidShowListener.remove();
-  //     keyboardDidHideListener.remove();
-  //   };
-  // }, []);const renderBubble = useCallback(
-  //   (props: any) => {
-  //     console.log('hahahah')
-  //     const isSelected = selectedMessages.includes(props.currentMessage._id);
-  //     return (
-  //       <Bubble style={{backgroundColor: 'pink', padding: 10}} {...props} />
-  //     );
-  //   },
-  //   [selectedMessages],
-  // );
+//   return () => {
+//     keyboardDidShowListener.remove();
+//     keyboardDidHideListener.remove();
+//   };
+// }, []);const renderBubble = useCallback(
+//   (props: any) => {
+//     console.log('hahahah')
+//     const isSelected = selectedMessages.includes(props.currentMessage._id);
+//     return (
+//       <Bubble style={{backgroundColor: 'pink', padding: 10}} {...props} />
+//     );
+//   },
+//   [selectedMessages],
+// );
 
-  // const renderAvatar = useCallback((props:any) => {
-  //   console.log('renderAvatar props:');
+// const renderAvatar = useCallback((props:any) => {
+//   console.log('renderAvatar props:');
 
-  //   const { currentMessage } = props;
-  //   if (!currentMessage || !currentMessage.user?.avatar) {
-  //     return null;
-  //   }
+//   const { currentMessage } = props;
+//   if (!currentMessage || !currentMessage.user?.avatar) {
+//     return null;
+//   }
 
-  //   return (
-  //     <Image
-  //       source={{ uri: currentMessage.user.avatar }}
-  //       style={{ width: 20, height: 20, borderRadius: 20, marginLeft: 5,backgroundColor:'red' }}
-  //     />
-  //   );
-  // }
-  //   , []);
+//   return (
+//     <Image
+//       source={{ uri: currentMessage.user.avatar }}
+//       style={{ width: 20, height: 20, borderRadius: 20, marginLeft: 5,backgroundColor:'red' }}
+//     />
+//   );
+// }
+//   , []);
 /***useEffect(() => {
     // if (
     //   conversation.messages.length === 0 &&

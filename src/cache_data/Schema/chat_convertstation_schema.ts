@@ -4,8 +4,11 @@ const ParticipantSchema = {
   properties: {
     _id: 'string?',
     name: 'string?',
+    user_id: 'string?',
     avatar: 'string?',
     role: 'string?',
+    action_notifi: 'bool?', // Cho phép null
+    status_read: 'bool?', // Cho phép null
   },
 };
 const ReplyToSchema = {
@@ -22,9 +25,12 @@ const userSchema = {
   name: 'user',
   properties: {
     _id: 'string?', // ID người gửi
+    user_id: 'string?',
     name: 'string?',
     avatar: 'string?',
     role: 'string?',
+    action_notifi: 'bool?', // Cho phép null
+    status_read: 'bool?', // Cho phép null
   },
 };
 
@@ -105,6 +111,7 @@ const ConversationSchema = {
     messages: 'Message[]',
     updatedAt: 'string?', // Thời gian sửa đổi gần nhất
     permission: 'string?',
+    pparticipantIds:'string[]',
   },
 };
 

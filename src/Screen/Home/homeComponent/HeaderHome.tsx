@@ -8,7 +8,7 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
-import {UseDispatch, UseSelector, useSelector} from 'react-redux';
+import {useDispatch, UseDispatch, UseSelector, useSelector} from 'react-redux';
 import {Search} from '../../../assets/svg/svgfile';
 import {useSocket} from '../../../util/socket.io';
 import {findAndconvertConversation} from '../../../cache_data/exportdata.ts/chat_convert_datacache';
@@ -20,6 +20,7 @@ const HeaderHome: React.FC<{navigation: any; data_friend: any}> = ({
   const {width, height} = useWindowDimensions();
   const socket = useSocket();
   const isPortrait = height > width;
+  const dispatch = useDispatch();
   const color = useSelector((state: any) => state.colorApp.value);
   const [user_data, setUser_Data] = useState(data_friend);
   // console.log(data_friend, 'datafiewnd');
@@ -149,6 +150,7 @@ const HeaderHome: React.FC<{navigation: any; data_friend: any}> = ({
                       const conversation = await findAndconvertConversation(
                      
                         participants,
+                        {dispatch,user}
                       );
                       if (participantIds.length <= 2) {
                         socket?.emit('invite_to_room', {
