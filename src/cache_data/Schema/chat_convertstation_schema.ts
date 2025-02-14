@@ -111,7 +111,8 @@ const ConversationSchema = {
     messages: 'Message[]',
     updatedAt: 'string?', // Thời gian sửa đổi gần nhất
     permission: 'string?',
-    pparticipantIds:'string[]',
+    participantIds: 'string[]',
+    
   },
 };
 

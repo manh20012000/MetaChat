@@ -49,6 +49,7 @@ import MediaGrid from '../homeComponent/MediaGrid';
 import {update_Converstation} from '../../../cache_data/exportdata.ts/chat_convert_datacache';
 import {AnyList} from 'realm';
 import MessageItem from '../../Component/GifchatComponent/RenderMessage';
+import userMessage from '../../../interface/userMessage.interface';
 interface GifchatUserProps {
   conversation: Conversation;
 }
@@ -76,16 +77,10 @@ const GifchatUser = (props: GifchatUserProps) => {
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [buttonScale] = useState(new Animated.Value(1));
   const [maginTextInput, setMaginTextInput] = useState<boolean>(false);
-  const [selectedMessages, setSelectedMessages] = useState<string[]>([]); // Lưu trữ ID của tin nhắn đã chọn
-  // const [participate, setParticipate] = useState<any[]>(
-  //   conversation.participants.filter(
-  //     participant => participant.user._id !== user._id,
-  //   ),
-  // ); // Lưu trữ ID của tin nhắn đã chọn
-  // const [participateId, setParticipateId] = useState<string[]>(
-  //   conversation.participants.map(participant => participant.user._id),
-  // ); // Lưu trữ ID của tin nhắn đã chọn
-
+  const [selectedMessages, setSelectedMessages] = useState<string[]>([]); // Store selected message IDs
+  const [userChat] = useState<any>(
+    conversation.participants.find((participant: any) => participant.user_id === user._id)
+  ); 
   //danh mục dành cho bootomsheet
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['40%', '90%'], []);
@@ -144,9 +139,10 @@ const GifchatUser = (props: GifchatUserProps) => {
     async (message: Message_interface, filesOrder: any) => {
       const dataSaveSend = {
         user: {
-          _id: user._id,
-          name: user.name,
-          avatar: user.avatar,
+          _id: userChat._id,
+          name: userChat.name,
+          avatar: userChat.avatar,
+          user_id: userChat.user_id
         },
         conversation: {
           _id: conversation._id,
@@ -156,6 +152,7 @@ const GifchatUser = (props: GifchatUserProps) => {
           color: conversation.color,
           icon: conversation.icon,
           avatar: conversation.avatar,
+          participantIds: conversation.participantIds
         },
         // participateId,
         message,
@@ -166,9 +163,9 @@ const GifchatUser = (props: GifchatUserProps) => {
       const newMessage = {
         ...message,
         user: {
-          _id: user._id, // ID người gửi
-          name: user.name,
-          avatar: user.avatar,
+          _id: userChat._id, // ID người gửi
+          name: userChat.name,
+          avatar: userChat.avatar,
         },
         status: 'sending',
       };
@@ -212,7 +209,7 @@ const GifchatUser = (props: GifchatUserProps) => {
     socket?.on('new_message', messages => {
       const {message, send_id} = messages;
 
-      if (send_id !== user._id) {
+      if (send_id !== userChat._id) {
         setMessages(previousMessages =>
           GiftedChat.append(previousMessages, message),
         );
@@ -230,7 +227,7 @@ const GifchatUser = (props: GifchatUserProps) => {
       <MessageItem
         currentMessage={currentMessage}
         props={props}
-        user={user}
+        user={userChat}
         handleLongPress={handleLongPress}
         handlerreplyTo={handlerreplyTo}
         MediaGrid={MediaGrid}
@@ -244,7 +241,7 @@ const GifchatUser = (props: GifchatUserProps) => {
   }, []);
 
   const handleLongPress = useCallback((message: any) => {
-    console.log('touch ', message);
+
     Vibration.vibrate(50);
     setSelectedMessages(prevSelectedMessages =>
       prevSelectedMessages.includes(message._id)
@@ -263,9 +260,10 @@ const GifchatUser = (props: GifchatUserProps) => {
         <GiftedChat
           messages={messages}
           user={{
-            _id: user._id,
-            name: user.name,
-            avatar: user.avatar,
+            _id: userChat._id,
+            name: userChat.name,
+            avatar: userChat.avatar,
+            
           }}
           renderInputToolbar={props => (
             <CustomInputToolbar

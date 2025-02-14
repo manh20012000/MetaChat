@@ -1,10 +1,19 @@
-import react from 'react';
-import { Text, View, Pressable, useWindowDimensions } from 'react-native';
+import react, { useState } from 'react';
+import { Text, View, Pressable, useWindowDimensions,Modal, TouchableOpacity} from 'react-native';
 import { color } from '../../../assets/color/color';
+import Conversation from '../../../interface/Converstation.interface';
+import { delete_converStation } from '../../../cache_data/exportdata.ts/chat_convert_datacache';
+import { useDispatch, useSelector } from 'react-redux';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const BottonsheetHome = () => {
+import React from 'react';
+const BottonsheetHome = ({ bottomSheetModalRef, handlerShowmodal }: any) => {
     const { width, height } = useWindowDimensions()
     const isPortrait = height > width
+  
     return (
         <>
             <Pressable style={({ pressed }) => [
@@ -20,7 +29,7 @@ const BottonsheetHome = () => {
 
 
             ]}>
-
+                <MaterialCommunityIcons name='archive' size={30}/>
                 <Text style={{ color: color.white, fontWeight: 'bold', fontSize: 18 }}>
                     Archive
                 </Text>
@@ -56,7 +65,7 @@ const BottonsheetHome = () => {
 
 
             ]}>
-
+                <Ionicons name='create'size={30}/>
                 <Text style={{ color: color.white, fontWeight: 'bold', fontSize: 18 }}>
                     Create Group chat with
                 </Text>
@@ -128,12 +137,19 @@ const BottonsheetHome = () => {
 
 
             ]}>
-
+                <MaterialIcons name='block' size={30}/>
                 <Text style={{ color: color.white, fontWeight: 'bold', fontSize: 18 }}>
                     Block
                 </Text>
             </Pressable>
-            <Pressable style={({ pressed }) => [
+            <Pressable
+                onPress={() => {
+                   
+                    bottomSheetModalRef?.current?.dismiss();
+                    handlerShowmodal(true)
+                    // delete_converStation(props, { dispatch, user },)
+                }}
+                style={({ pressed }) => [
                 {
                     width: '100%',
                     height: 60,
@@ -142,14 +158,17 @@ const BottonsheetHome = () => {
                     flexDirection: 'row',
                     alignItems: 'center',
                 }
+                  
 
-
-            ]}>
-
-                <Text style={{ color: color.white, fontWeight: 'bold', fontSize: 18 }}>
+                ]}>
+                
+               <MaterialIcons name='delete' size={30} color={'red'}/>
+                <Text style={{ color: color.red, fontWeight: 'bold', fontSize: 18 ,}}>
                     Delete
                 </Text>
             </Pressable>
+           
+            
         </>
     )
 }

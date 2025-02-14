@@ -27,7 +27,7 @@ const Create_Group = () => {
               skip,
               {dispatch, user},
             );
-            console.log('listuser', listuser.friend);
+         
             // setlistuser(listuser);
           }
         };

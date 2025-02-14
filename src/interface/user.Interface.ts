@@ -7,5 +7,15 @@ interface User_interface {
     email: string;
     fcmtoken: string[];
     refresh_token: string;
-  }
-  export default User_interface
+}
+//   interface userMessage {
+//     _id: string;
+//     action_notifi: boolean;
+//     avatar: string;
+//     name: string;
+//     role: string;
+//     status_read: boolean;
+//     user_id: string;
+//   }
+// export type { userMessage };
+export default User_interface 

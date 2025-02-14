@@ -133,34 +133,39 @@ const HeaderHome: React.FC<{navigation: any; data_friend: any}> = ({
                       const participantIds = [item._id, user._id];
                       const participants = [
                         {
-                          user: {
-                            _id: user._id.toString(),
-                            name: user.name,
-                            avatar: user.avatar,
-                          },
+                          _id: user._id.toString(),
+                          name: user.name,
+                          avatar: user.avatar,
+                          role: 'admin',
+                          action_notifi: true,
+                          status_read: true,
+
                         },
                         {
-                          user: {
-                            _id: item._id.toString(),
-                            name: item.name,
-                            avatar: item.avatar,
-                          },
+                          _id: item._id.toString(),
+                          name: item.name,
+                          avatar: item.avatar,
+                          role: 'member',
+                          action_notifi: true,
+                          status_read: true,
+
                         },
                       ];
                       const conversation = await findAndconvertConversation(
                      
                         participants,
+                        participantIds,
+                       
                         {dispatch,user}
                       );
-                      if (participantIds.length <= 2) {
+                      if (conversation) {
+                        const recipientIds = participantIds.filter((id: string) => id !== user._id);
                         socket?.emit('invite_to_room', {
-                          conversationId: item._id,
-                          recipientId: participants
-                            .filter((i:any) => i._id !== user._id)
-                            .map((i: any) => i._id)[0],
+                          conversationId: conversation._id,
+                          recipientId: recipientIds
                         });
                       }
-                      // // Chuyển đến màn hình chat cá nhân với thông tin người dùng
+                      // Chuyển đến màn hình chat cá nhân với thông tin người dùng
                       navigation.navigate('HomeChatPersion', {conversation});
                     } catch (error) {
                       console.error('Lỗi trong handler_chat:', error);

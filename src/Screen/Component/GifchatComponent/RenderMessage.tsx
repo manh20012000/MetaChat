@@ -4,10 +4,11 @@ import { Avatar, Bubble, Day, Message } from 'react-native-gifted-chat';
 import { useSelector } from 'react-redux';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, runOnJS } from 'react-native-reanimated';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
+import userMessage from '../../../interface/userMessage.interface';
 interface MessageProps {
   currentMessage: any;
   previousMessage?: any  ,
-  user: any;
+  user: userMessage;
   handleLongPress: (message: any) => void;
   handlerreplyTo: (message: any) => void; // Thêm function để xử lý reply
   MediaGrid: (attachments: any) => React.ReactNode;
@@ -16,7 +17,6 @@ interface MessageProps {
 
 const MessageItem: React.FC<MessageProps> = ({ currentMessage,
   previousMessage, user, handleLongPress, handlerreplyTo, MediaGrid, props }) => {
-  // console.log(currentMessage, 'hahah')
   const[currentMessageItem]=useState(currentMessage)
   const [color] = useState(useSelector((state: any) => state.colorApp.value));
   const { width, height } = useWindowDimensions()
@@ -43,7 +43,7 @@ const MessageItem: React.FC<MessageProps> = ({ currentMessage,
         (isMyMessage && event.translationX < -SWIPE_THRESHOLD) ||
         (!isMyMessage && event.translationX > SWIPE_THRESHOLD)
       ) {
-        console.log("Swiping detected for message:", currentMessage);
+        
         runOnJS(handlerreplyTo)(currentMessageItem); // Gọi handler khi vuốt
       }
       translateX.value = withTiming(0);

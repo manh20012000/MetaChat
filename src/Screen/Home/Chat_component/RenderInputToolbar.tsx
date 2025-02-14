@@ -20,6 +20,7 @@ const CustomInputToolbar = (props: any) => {
   const color = useSelector(
     (value: {colorApp: {value: any}}) => value.colorApp.value,
   );
+
   const conversation: Conversation = props.conversation;
 
   const [isVisible, setVisible] = useState(true);

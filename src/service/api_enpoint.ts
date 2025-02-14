@@ -28,5 +28,6 @@ export const API_ROUTE = {
   REFESSHTOKEN_USER: '/api/user/refreshtoken',
   REFRESH_TOKEN: '/api/user/refreshToken',
   GET_LIST_FRIEND_CHAT: 'api/chatservice/friendchat',
-  CREATE_CONVERSTATION: 'api/chatservice/create_converstaion'
+  CREATE_CONVERSTATION: 'api/chatservice/create_converstaion',
+  DELETE_CONVERSTATION: 'api/chatservice/delete_converstation',
 };

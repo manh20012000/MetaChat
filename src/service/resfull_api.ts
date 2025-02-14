@@ -1,14 +1,15 @@
 
 // import { URL } from '@env';
-const API_URL = 'http://192.168.51.108:8080';
+const API_URL = 'http://192.168.51.106:8080';
 // console.log('hahah', URL)
 import axios from 'axios';
 import { checkAndRefreshToken } from '../util/checkingToken';
-import User_interface from '../interface/user.Interface';
+// import User_interface from '../interface/user.Interface';
 
 const postData = async (route: string, data: any, check: any) => {
 
-  const checking = await checkAndRefreshToken(check.dispatch,check.user);
+  const checking = await checkAndRefreshToken(check.dispatch, check.user);
+
   if (checking === null) {
     return null;
   } else {
@@ -100,7 +101,7 @@ const getResearch = async (route: string, params: any,) => {
         'Content-Type': 'application/json',
       },
     });
-    console.log(API_URL)
+ 
     return response.data;
   } catch (error) {
     console.error('GET Error:', error);
@@ -155,13 +156,13 @@ const patchData = async (route: string, data: any,check:any) => {
 }
 
 // Hàm DELETE
-const deleteData = async (route: string,check:any) => {
-  const checking = await checkAndRefreshToken(check.dispatch, check.user);
+const deleteData = async (route: string,check:any,_id:string) => {
+  const checking = await checkAndRefreshToken(check.dispatch, check.user,);
   if (checking === null) {
     return null
   } else {
     try {
-      const response = await axios.delete(`${API_URL}/${route}`, {
+      const response = await axios.delete(`${API_URL}/${route}/${_id}`, {
         headers: {
           'Content-Type': 'application/json',
           authorization: `Bearer ${checking.access_token} `,

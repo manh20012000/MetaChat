@@ -7,26 +7,25 @@ import {createConversation, findAndconvertConversation, getConversations, update
 import Conversation from '../../../interface/Converstation.interface';
 import { useSocket } from '../../../util/socket.io';
 import { createListfriend } from '../../../cache_data/exportdata.ts/friend_caching';
-const SearchItemUser: React.FC<{ item: itemuser,navigation:any }> = ({ item,navigation }) => {
+const SearchItemUser: React.FC<{ item:itemuser,navigation:any }> = ({ item,navigation }) => {
   const color = useSelector((state: any) => state.colorApp.value)
-  const currentUser = useSelector((state: any) => state.auth.value);
+  const user = useSelector((state: any) => state.auth.value);
   const socket = useSocket();
   const dispatch = useDispatch();
 const handler_chat = async () => {
   try {
    
     // Tìm hoặc chuyển cuộc hội thoại với user lên đầu danh sách
-    const participantIds = [item._id, currentUser._id];
+    const participantIds = [item._id, user._id];
     // thực hiênnj kiểm tra cuộc thoại trong cáche xong kiểm tra trên db -> nếu ko có thì mới bắt đầu tạo mới 
     const participants = [
       {
-          _id: currentUser._id.toString(),
-          name: currentUser.name,
-          avatar: currentUser.avatar, 
+          _id: user._id.toString(),
+          name: user.name,
+          avatar: user.avatar, 
           role: 'admin',
           action_notifi: true,
           status_read: true,
-
       },
       {
           _id: item._id.toString(),
@@ -38,28 +37,27 @@ const handler_chat = async () => {
    
       },
     ];
+    console.log(item)
     const conversation:any = await findAndconvertConversation(
    
       participants,
-      { dispatch, currentUser },
+      participantIds,
+      { dispatch, user },
     );
     
    
     if (participantIds.length <= 2) {
-      await createListfriend({
-        _id: item._id.toString(),
-        name: item.name,
-        avatar: item.avatar,
-        role: 'member',
-      });
+    //   await createListfriend({
+    //     _id: item._id.toString(),
+    //     name: item.name,
+    //     avatar: item.avatar,
+    //     role: 'member',
+    //   });
       
       socket?.emit('invite_to_room', {
         conversationId: conversation._id,
-        recipientId: participants
-          .filter(i => i !== currentUser._id)
-          .map(i => i._id)[0],
+        recipientIds: [item._id]
       });
-      console.log('nhay vao phan inveroom cuar search item')
     }
     // // Chuyển đến màn hình chat cá nhân với thông tin người dùng
     navigation.navigate('HomeChatPersion', {conversation});

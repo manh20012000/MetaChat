@@ -9,6 +9,7 @@ import {
   Dimensions,
   useWindowDimensions,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import HeaderHome from './homeComponent/HeaderHome';
@@ -29,19 +30,23 @@ import dayjs from 'dayjs';
 import {
   getConversations,
   createConversation,
+  delete_converStation,
 } from '../../cache_data/exportdata.ts/chat_convert_datacache';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import {realm} from '../../cache_data/Schema/schemaModel';
 import {useSocket} from '../../util/socket.io';
 import {Message_interface} from '../../interface/Chat_interface';
 import { createListfriend, getListfriend } from '../../cache_data/exportdata.ts/friend_caching';
+import userMessage from '../../interface/userMessage.interface.ts';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 dayjs.extend(relativeTime); // Kích hoạt plugin
 export default function Home({navigation}: {navigation: any}) {
   const {width, height} = useWindowDimensions();
-  const [color] = useState(useSelector((state: any) => state.colorApp.value));
-  const [user] = useState(useSelector((state: any) => state.auth.value));
+  const color= useSelector((state: any) => state.colorApp.value);
+  const user =useSelector((state: any) => state.auth.value);
   const dispatch = useDispatch();
   const user_Status = useSelector((state: any) => state.statusUser.value);
+ 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const isPortrait = height > width;
   const insets = useSafeAreaInsets();
@@ -56,15 +61,26 @@ export default function Home({navigation}: {navigation: any}) {
       ? 'portrait'
       : 'landscape',
   );
-  const [data_friend,setData_friend]=useState([])
-  const snapPoints = useMemo(() => ['60%'], []);
-  const handlePresentModalPress = useCallback(() => {
+  const [data_friend, setData_friend] = useState([])
+  const [selectConverstion,setSelectConverstation]=useState<Conversation>()
+  const snapPoints = useMemo(() => ['70%'], []);
+  const [modalVisible, setModalVisible] = useState<boolean>(false)
+  const handleDelete = useCallback(() => {
+    if (!selectConverstion) return;
+    setModalVisible(false);
+    delete_converStation(selectConverstion, { dispatch, user });
+  }, [selectConverstion]);
+  const handlerShowmodal = useCallback((status:boolean) =>{
+      setModalVisible(status)
+  },[])
+  const handlePresentModalPress = useCallback((item:Conversation) => {
+    setSelectConverstation(item)
     bottomSheetModalRef.current?.present();
   }, []);
   const handleSheetChanges = useCallback((index: number) => {
     console.log('handleSheetChanges', index);
   }, []);
-  const get_data = async () => {
+  const get_data = useCallback(async () => {
     const data_converstation = await getData(
       API_ROUTE.GET_CONVERTSTATION_CHAT,
       null,
@@ -72,16 +88,23 @@ export default function Home({navigation}: {navigation: any}) {
       {dispatch, user},
     );
    
-    
+     
     if (data_converstation.data.length > 0) {
-      console.log(data_converstation.data,'lấy cuộc hôij thoại từ api')
-      setData_convertStation(data_converstation.data);
-    setSkiped(data_converstation.data.length);
-      data_converstation.data.array.forEach(async (element: Conversation) => {
+     
+      try {
+        setSkiped(data_converstation.data.length);
+      data_converstation.data.forEach(async (element: Conversation) => {
+       
         await createConversation(element);
-      });
+      }); 
+       
+      } catch (err) {
+        console.log(err,'lỗi thêm cuộc thoại vào local');
+      } finally {
+        setData_convertStation(data_converstation.data);
+      }
     }
-  };
+  },[]);
   const getFriend_user = async () => {
      const listuser = await getData(
        API_ROUTE.GET_LIST_FRIEND_CHAT,
@@ -91,10 +114,9 @@ export default function Home({navigation}: {navigation: any}) {
     );
     
     if (listuser.friend.length > 0) {
-      console.log('lấy danh sách bạn bè từ cuộc thoại', listuser.friend)
+      
       setData_friend(listuser.friend)
       listuser.friend.forEach(async (element: any) => {
-        
         await createListfriend(element);
       });
       setSkipfriend(listuser.friend.length);
@@ -108,10 +130,9 @@ export default function Home({navigation}: {navigation: any}) {
         let data_converstation = await getConversations();  
         setSkiped(data_converstation.length);
         if (data_converstation.length>0) {
-  
           setData_convertStation(data_converstation);
         } else {
-         
+      
           await get_data();
         }
       } catch (error: any) {
@@ -122,8 +143,9 @@ export default function Home({navigation}: {navigation: any}) {
     const getFriend_user_chat = async () => {
       try {
         let data_friend_chat = await getListfriend();
-
+        
         if (data_friend_chat.length > 0) {
+          
           setData_friend(data_friend_chat)
   
         setSkipfriend(data_friend_chat.length);
@@ -154,38 +176,28 @@ export default function Home({navigation}: {navigation: any}) {
     if (!socket) return; // Nếu socket chưa khởi tạo, thoát
     const handleConnect = () => {
         data_convertstation.forEach((item: any) => {
-          console.log(item._id, 'Joining room');
-          
           socket.emit('join_room', { conversationId: item._id, user: user.name });
         });
       }
     const handleNewMessage = (messages: any) => {
+      
       const { message, conversation, send_id } = messages;
+      const conditions = conversation.participantIds
+        .map((id:any, index:any) => `participantIds CONTAINS $${index}`)
+        .join(' AND ');
+
       const conversations = realm
-        .objects<{ participants: { _id: string }[] }>('Conversation')
-        .filtered(`participants.@size == ${conversation.participants.length}`);
-
-      let existingConversation:any = null;
-
-      for (let conv of conversations) {
-        const existingParticipantIds:any = conv.participants.map(p => p._id);
-        const serverParticipantIds:any = conversation.participants.map((p:any) => p._id);
-
-        // Kiểm tra xem danh sách participants có khớp hoàn toàn không
-        const isMatch =
-          serverParticipantIds.every((id:string) => existingParticipantIds.includes(id)) &&
-          existingParticipantIds.every((id: string) => serverParticipantIds.includes(id));
-
-        if (isMatch) {
-          existingConversation = conv;
-          break;
-        }
-      }
-        
+        .objects('Conversation')
+        .filtered(
+          `participantIds.@size == ${conversation.participantIds.length} AND ${conditions}`,
+          ...conversation.participantIds,
+        );
+    
+      let existingConversation = conversations[0] || null;
       realm.write(() => {
 
         if (existingConversation) {
-          console.log('đã tônf tại ')
+         
           existingConversation.lastMessage = message;
           (existingConversation.messages as Message_interface[]).unshift(
             message,
@@ -200,6 +212,7 @@ export default function Home({navigation}: {navigation: any}) {
             color: conversation.color,
             icon: conversation.icon,
             background: conversation.background,
+            participantIds: conversation.participantIds,
             lastMessage: message,
             messages: [message],
             updatedAt: message.createdAt,
@@ -209,7 +222,6 @@ export default function Home({navigation}: {navigation: any}) {
     }
     // Nếu socket đã kết nối, thực hiện ngay
     if (socket.connected) {
-      console.log('hahaha')
       handleConnect();
     } else {
       socket.on('connect', handleConnect);
@@ -220,7 +232,6 @@ export default function Home({navigation}: {navigation: any}) {
       let data_converstation = await getConversations();
       setData_convertStation(data_converstation);
        let data_friend_chat = await getListfriend();
-
       if (data_friend_chat.length > 0) {
         setData_friend(data_friend_chat)
         setSkipfriend(data_friend_chat.length);
@@ -259,31 +270,30 @@ export default function Home({navigation}: {navigation: any}) {
               data={data_convertstation}
               // Sử dụng _id làm khóa duy nhất
               renderItem={({ item }: { item: Conversation }) => {
-                const statusUser = item.participants.some((participant:any) => {
-                  if (participant._id !== user._id) {
-                    return user_Status.includes(participant._id);
+              
+                const statusUser:boolean = item.participantIds.some((participantIds: string) => {
+                  if (participantIds !== user._id) { 
+                    return user_Status.includes(participantIds);
                   }
                 });
-                //  console.log(item)
                 return (
                   <Pressable
                     onPress={() => {
-                      if (item.participants.length <= 2) {
+                      if (item.participantIds.length <= 2) {
+                        
+                        const recipientIds = item.participantIds.filter((id: string) => id !== user._id);
+
+                        console.log("Filtered recipientIds:", recipientIds);
                         socket?.emit('invite_to_room', {
                           conversationId: item._id,
-                          name: item.participants
-                            .filter((i:any)  => i._id !== user._id)
-                            .map((i: any) => i.name)[0],
-                          recipientId: item.participants
-                            .filter((i: any) => i._id !== user._id)
-                            .map((i: any) => i._id)[0], // Chỉ lấy id của user,
-                        });
+                          recipientIds: recipientIds
+                        })
                       }
                       navigation.navigate('HomeChatPersion', {
                         conversation: item,
                       });
                     }}
-                    onLongPress={handlePresentModalPress}
+                    onLongPress={()=>handlePresentModalPress(item)}
                     style={({ pressed }) => [
                       {
                         width: '100%',
@@ -337,14 +347,13 @@ export default function Home({navigation}: {navigation: any}) {
                         {(() => {
                           // Lọc ra những người tham gia khác currentUser
                           const filteredParticipants:any = item.participants.filter(
-                            (participant:any) => participant._id !== user._id,
+                            (participant: any) => participant.user_id !== user._id,
                           );
-                           
+                         
                           // Số lượng người tham gia khác currentUser
                           const count = filteredParticipants.length;
-
                             if (count === 1) {
-                              // console.log(filteredParticipants, 'hihihi1')
+                            
                             // Chỉ hiển thị ảnh của 1 người (chiếm 100%)
                             return (
                               <Image
@@ -360,7 +369,7 @@ export default function Home({navigation}: {navigation: any}) {
                               />
                             );
                             } else if (count === 2) {
-                              // console.log(filteredParticipants, 'hihihi2')
+                            
                             // Hiển thị 2 ảnh (chia 2 góc)
                             return (
                               <>
@@ -399,7 +408,7 @@ export default function Home({navigation}: {navigation: any}) {
                               </>
                             );
                           } else {
-                              // console.log(filteredParticipants, 'hihihi23')
+                              
                             return filteredParticipants
                               .slice(0, 4)
                               .map((participant:any, index:number) => {
@@ -411,7 +420,7 @@ export default function Home({navigation}: {navigation: any}) {
                                 ];
                                 return (
                                   <Image
-                                    key={participant.user._id}
+                                    key={participant._id}
                                     style={{
                                       width: 20,
                                       height: 20,
@@ -422,7 +431,7 @@ export default function Home({navigation}: {navigation: any}) {
                                       borderColor: 'white',
                                       backgroundColor: color.gray,
                                     }}
-                                    source={{ uri: participant.user.avatar }}
+                                    source={{ uri: participant.avatar }}
                                   />
                                 );
                               });
@@ -477,22 +486,83 @@ export default function Home({navigation}: {navigation: any}) {
                   </Pressable>
                 );
               }}
-              onEndReached={() => {
-                get_data();
-              }}
+              // onEndReached={() => {
+              //   get_data();
+              // }}
             />
           </View>)}
       </View>
       <BottomSheetModal
         ref={bottomSheetModalRef}
         onChange={handleSheetChanges}
+        enableContentPanningGesture={false}
         snapPoints={snapPoints}>
-        <BottomSheetView style={{flex: 1, backgroundColor: color.gray}}>
-          <View style={{alignContent: 'center', alignItems: 'center'}}>
-            <BottonsheetHome />
+        <BottomSheetView style={{ flex: 1, backgroundColor: color.gray }}>
+          <View style={{ alignContent: 'center', alignItems: 'center' }}>
+            <BottonsheetHome
+              handlerShowmodal={handlerShowmodal}
+              bottomSheetModalRef={bottomSheetModalRef} // Truyền ref vào
+            />
           </View>
         </BottomSheetView>
       </BottomSheetModal>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}
+          activeOpacity={1}
+          onPress={() => setModalVisible(false)} // Nhấn bên ngoài modal để đóng
+        >
+          <View style={{
+            width: '80%',
+            backgroundColor: 'white',
+            padding: 20,
+            borderRadius: 10,
+            alignItems: 'center'
+          }}>
+            <Ionicons name="alert-circle-outline" size={40} color="red" />
+            <Text style={{ fontSize: 18, fontWeight: 'bold', marginTop: 10 }}>Xác nhận xóa?</Text>
+            <Text style={{ marginTop: 10, textAlign: 'center' }}>Bạn có chắc chắn muốn xóa cuộc trò chuyện này không?</Text>
+
+            <View style={{ flexDirection: 'row', marginTop: 20 }}>
+              <Pressable
+                style={{
+                  flex: 1,
+                  padding: 10,
+                  borderRadius: 5,
+                  alignItems: 'center',
+                  backgroundColor: 'gray',
+                  marginRight: 10
+                }}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={{ color: 'white' }}>Hủy</Text>
+              </Pressable>
+              <Pressable
+                style={{
+                  flex: 1,
+                  padding: 10,
+                  borderRadius: 5,
+                  alignItems: 'center',
+                  backgroundColor: 'red',
+                }}
+                onPress={handleDelete}
+              >
+                <Text style={{ color: 'white' }}>Xóa</Text>
+              </Pressable>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </BottomSheetModalProvider>
   );
 }

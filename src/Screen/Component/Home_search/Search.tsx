@@ -28,13 +28,14 @@ const SearchScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const handler_getuser_search_localdata = async () => {
         try {
             const data = await get_userSearch();
-         
+
             if (data) {
                 const formattedData: User_search[] = data.map((item: any) => ({
-                  _id: item._id,
-                  name: item.name,
-                  avatar: item.avatar,
-                  roomName: item.roomName ?? null, // Nếu `roomName` là `null` hoặc `undefined`, trả về null
+                    _id: item._id,
+                    name: item.name,
+                    user_id: item.user_id,
+                    avatar: item.avatar,
+                    roomName: item.roomName ?? null, // Nếu `roomName` là `null` hoặc `undefined`, trả về null
                 }));
 
                 setUserSearch(formattedData);
@@ -74,7 +75,7 @@ const SearchScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 let data = null;
                 // setTimeout(async () => {
                 data = await getResearch(API_ROUTE.GET_USER_BY_SEARCH, keysearch);
-             
+
                 setUserSearch(data.data);
                 // }, 500)
             } else {
@@ -135,9 +136,9 @@ const SearchScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                         data={userSearch}
                         keyExtractor={(item: any) => item._id}
                         renderItem={({ item, index }) => {
-                            const statusUser = user_Status.includes(item._id);
+                            const statusUser: boolean = user_Status.includes(item._id);
                             return (
-                            <SearchItemUser item={{ ...item,statusUser, }} navigation={navigation} /> // Ensure item structure is correct
+                                <SearchItemUser item={{ ...item, statusUser }} navigation={navigation} /> // Ensure item structure is correct
                             )
                         }}
                     />

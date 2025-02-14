@@ -152,18 +152,18 @@ const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
       });
       await GoogleSignin.hasPlayServices();
       const userInfor: any = await GoogleSignin.signIn();
-      console.log(userInfor, 'userInfor');
+    
       const gguser = userInfor.data.user;
-      console.log(gguser, 'gguser');
+      c
       // thực hiện lấy ra fcm token cho chức năng thông báo 
       const authStatus = await messaging().requestPermission();
-      console.log(authStatus, 'authStatus');
+ 
       if (
         authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
         authStatus === messaging.AuthorizationStatus.PROVISIONAL
       ) {
         const fcmtoken = await AsyncStorage.getItem('fcmtoken');
-        console.log(fcmtoken, 'fcmtoken');
+       
         if (!fcmtoken) {
           const token = await messaging().getToken();
           let avatar = gguser.photo;

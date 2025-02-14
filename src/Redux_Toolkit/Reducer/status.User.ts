@@ -8,7 +8,7 @@ export const StatusUser = createSlice({
   reducers: {
     Status: (state, action) => {
       state.value = action.payload;
-      // console.log(state.value)
+    
     },
   },
 });
