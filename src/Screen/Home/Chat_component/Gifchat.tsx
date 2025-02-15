@@ -13,6 +13,7 @@ import {
   Animated,
   Easing,
   Image,
+  FlatList,
 } from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
 import {
@@ -67,18 +68,10 @@ const GifchatUser = (props: GifchatUserProps) => {
   const [messages, setMessages] = useState<any[]>(
     Array.from(conversation.messages),
   );
-
-  // const [isVisible, setVisible] = useState(true);
-  // const [isShowSendText, setIsShowSendText] = useState(true);
-  // const [changeIcon, setChangIcon] = useState(true);
-  // const [text, settext] = useState('');
-  // const [inputHeight, setInputHeight] = useState(30);
-  const [keyboardOffset, setKeyboardOffset] = useState(0);
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [buttonScale] = useState(new Animated.Value(1));
   const [maginTextInput, setMaginTextInput] = useState<boolean>(false);
-  const [replyMessage, setReplyMessage] = useState<Message_interface>();
-  const [replyState, setReplyState]=useState<boolean>(false)
+  const [replyMessage, setReplyMessage] = useState<Message_interface | null>(null);
   const [selectedMessages, setSelectedMessages] = useState<string[]>([]); // Store selected message IDs
   const [userChat] = useState<any>(
     conversation.participants.find((participant: any) => participant.user_id === user._id)
@@ -119,6 +112,13 @@ const GifchatUser = (props: GifchatUserProps) => {
       triggerAnimation();
     }
   }, [selectedItems]);
+  const flatListRef = useRef<FlatList<any> | null>(null);
+  const scrollToMessage = (messageId:string) => {
+    const index = messages.findIndex((msg) => msg._id === messageId);
+    if (index !== -1) {
+      flatListRef.current?.scrollToIndex({ index, animated: true });
+    }
+  };
   const handleSelect = useCallback((item: any) => {
     setSelectedItems(prevSelectedItems => {
       const isSelected = prevSelectedItems.some(
@@ -144,7 +144,10 @@ const GifchatUser = (props: GifchatUserProps) => {
           _id: userChat._id,
           name: userChat.name,
           avatar: userChat.avatar,
-          user_id: userChat.user_id
+          user_id: userChat.user_id,
+          role:userChat.role,
+          action_notifi: userChat.action_notifi, // Cho phép null
+          status_read: userChat.status_readread, // Cho phép null
         },
         conversation: {
           _id: conversation._id,
@@ -233,6 +236,8 @@ const GifchatUser = (props: GifchatUserProps) => {
         handleLongPress={handleLongPress}
         handlerreplyTo={handlerreplyTo}
         MediaGrid={MediaGrid}
+        scrollToMessage={scrollToMessage} 
+        
       />
     );
   }, []);
@@ -240,11 +245,9 @@ const GifchatUser = (props: GifchatUserProps) => {
   const handlerreplyTo = useCallback((props: Message_interface) => {
     Vibration.vibrate(50);
     setReplyMessage(props)
-    if (props) {
-      setReplyState(true)
-    }
+   
   }, []);
-
+  
   const handleLongPress = useCallback((message: any) => {
 
     Vibration.vibrate(50);
@@ -275,6 +278,7 @@ const GifchatUser = (props: GifchatUserProps) => {
               <CustomInputToolbar
               {...props}
               onSend={onSend}
+              userChat={userChat}
               conversation={conversation}
               replyMessage={replyMessage}
               setReplyMessage={setReplyMessage}
@@ -289,7 +293,7 @@ const GifchatUser = (props: GifchatUserProps) => {
           showUserAvatar={true}
           keyboardShouldPersistTaps="handled"
           messagesContainerStyle={{
-            marginBottom: replyState===true?0:50,
+            marginBottom: replyMessage===null?50:0,
                 paddingVertical: 10, // Thêm margin giữa các tin nhắn
           }}
         />

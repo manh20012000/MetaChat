@@ -280,10 +280,7 @@ export default function Home({navigation}: {navigation: any}) {
                   <Pressable
                     onPress={() => {
                       if (item.participantIds.length <= 2) {
-                        
                         const recipientIds = item.participantIds.filter((id: string) => id !== user._id);
-
-                        console.log("Filtered recipientIds:", recipientIds);
                         socket?.emit('invite_to_room', {
                           conversationId: item._id,
                           recipientIds: recipientIds

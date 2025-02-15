@@ -15,14 +15,13 @@ import Conversation from '../../../interface/Converstation.interface';
 import { BSON } from 'bson';
 
 const CustomInputToolbar = (props: any) => {
-  const { onSend, user, replyMessage, setReplyMessage } = props;
+  const { onSend, userChat, replyMessage, setReplyMessage } = props;
   const { width, height } = useWindowDimensions();
   const color = useSelector(
     (value: { colorApp: { value: any } }) => value.colorApp.value,
   );
-  const conversation: Conversation = props.conversation;
 
-  const [isVisible, setVisible] = useState(true);
+  const conversation: Conversation = props.conversation;
   const [isShowSendText, setIsShowSendText] = useState(true);
   const [changeIcon, setChangeIcon] = useState(true);
   const [text, settext] = useState('');
@@ -33,11 +32,7 @@ const CustomInputToolbar = (props: any) => {
     return {
       _id: new BSON.ObjectId().toString(),
       conversation_id: conversation._id,
-      user: {
-        _id: user._id,
-        name: user.name,
-        avatar: user.avatar,
-      },
+      user: userChat,
       messageType: 'text',
       text: text,
       voice: '',
@@ -46,7 +41,12 @@ const CustomInputToolbar = (props: any) => {
       createdAt: newdate,
       reactions: [],
       isRead: [],
-      replyTo: {},
+      replyTo: replyMessage === null ? {} : {
+        _id:replyMessage._id,
+        text: replyMessage.messageType === "text" ? replyMessage.text : "reply atatment",
+        user: replyMessage.user,
+        messageType:replyMessage.messageType,
+      },
     };
   };
 
@@ -55,8 +55,10 @@ const CustomInputToolbar = (props: any) => {
       onSend(handMessage(), []); // Gửi text về hàm onSend
       settext(''); // Reset text input sau khi gửi
       setChangeIcon(true);
+      setReplyMessage(null)
     }
   };
+
   return (
     <>
       {replyMessage && (
@@ -72,13 +74,32 @@ const CustomInputToolbar = (props: any) => {
             alignSelf: 'center',
           }}
         >
-          <Text style={{ color: "white", fontWeight: "bold" }}>Replying to {replyMessage.user!==user._id?'youself':replyMessage.user.name}</Text>
-          <Text style={{ color: "white", width:width-50 }}
+          <Text style={{ color: "white", fontWeight: "bold" }}>Replying to {replyMessage.user !== userChat.user_id?'youself':replyMessage.user.name}</Text>
+          <Text style={{ color: "white", width:width-50,fontSize:18 }}
             numberOfLines={1}
-            ellipsizeMode="tail" >{replyMessage.text}</Text>
-          <TouchableOpacity onPress={() => setReplyMessage(null)} style={{ position: 'relative',borderWidth:2,borderRadius:100,backgroundColor:'pink' }}>
-            <Text  
-              style={{ color: "white", fontWeight: 'bold', fontSize: 30, bottom: 10, right: 10, position: 'absolute' }}>x</Text>
+            ellipsizeMode="tail" >{replyMessage.messageType==="text"?replyMessage.text:"reply atatment"}</Text>
+          <TouchableOpacity
+            onPress={() => setReplyMessage(null)}
+            style={{
+              borderWidth: 2,
+              borderRadius: 100,
+              height: 30,
+              width: 30,
+              position: "absolute",
+              right: 10,
+              alignSelf: 'center',
+              justifyContent: 'center',
+
+            }}>
+            <Text
+              style={{
+                color: 'white',
+                fontWeight: 'bold',
+                fontSize: 25,
+                textAlign: 'center'
+              }}>
+              x
+            </Text>
           </TouchableOpacity>
         </View>
       )}

@@ -1,30 +1,37 @@
 import React, { useRef, useState } from 'react';
 import {
   View, Text, Image, useWindowDimensions, Animated,
-  PanResponder,
+  PanResponder, TouchableOpacity
 } from 'react-native';
-import { Avatar, Bubble, Day, Message } from 'react-native-gifted-chat';
+import { Avatar, Bubble, Day } from 'react-native-gifted-chat';
 import { useSelector } from 'react-redux';
-// import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, runOnJS } from 'react-native-reanimated';
-// import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import userMessage from '../../../interface/userMessage.interface';
+
 interface MessageProps {
   currentMessage: any;
-  previousMessage?: any  ,
+  previousMessage?: any;
   user: userMessage;
   handleLongPress: (message: any) => void;
-  handlerreplyTo: (message: any) => void; // Thêm function để xử lý reply
+  handlerreplyTo: (message: any) => void;
   MediaGrid: (attachments: any) => React.ReactNode;
+  scrollToMessage: (messageId: string) => void;
   props: any;
 }
 
-const MessageItem: React.FC<MessageProps> = ({ currentMessage,
-  previousMessage, user, handleLongPress, handlerreplyTo, MediaGrid, props }) => {
-  
+const MessageItem: React.FC<MessageProps> = ({
+  currentMessage,
+  previousMessage,
+  user,
+  handleLongPress,
+  handlerreplyTo,
+  MediaGrid,
+  scrollToMessage,
+  props
+}) => {
   const [color] = useState(useSelector((state: any) => state.colorApp.value));
   const { width } = useWindowDimensions();
-  const SWIPE_THRESHOLD = width * 0.2; // Ngưỡng vuốt
-  const MAX_SWIPE_DISTANCE = width * 0.3; // Giới hạn vuốt tối đa
+  const SWIPE_THRESHOLD = width * 0.2;
+  const MAX_SWIPE_DISTANCE = width * 0.3;
 
   const isMyMessage = currentMessage.user._id === user._id;
   const isFirstMessage =
@@ -51,10 +58,9 @@ const MessageItem: React.FC<MessageProps> = ({ currentMessage,
           (isMyMessage && gestureState.dx < -SWIPE_THRESHOLD) ||
           (!isMyMessage && gestureState.dx > SWIPE_THRESHOLD)
         ) {
-          handlerreplyTo(currentMessage); // Gọi hàm reply nếu vuốt đủ xa
+          handlerreplyTo(currentMessage);
         }
 
-        // Quay lại vị trí ban đầu
         Animated.spring(translateX, {
           toValue: 0,
           useNativeDriver: true,
@@ -62,70 +68,85 @@ const MessageItem: React.FC<MessageProps> = ({ currentMessage,
       },
     })
   ).current;
-  
+
   return (
-  
-    <View style={{ marginBottom: 2, marginHorizontal: 10, }}>
+    <View style={{ marginBottom: 2, marginHorizontal: 10 }}>
       <Day {...props} />
       <Animated.View
         {...panResponder.panHandlers}
         style={{ transform: [{ translateX }] }}
       >
-      {currentMessage.messageType === 'text' && (
-        <View style={{ flexDirection: 'row', alignItems: 'flex-end',}}>
-          {isFirstMessage && currentMessage.user._id !== user._id && (
-            <Avatar
+        {currentMessage.replyTo && (
+          <View style={{ alignSelf: isMyMessage ? 'flex-end' : 'flex-start', }}>
+            
+            <Text>
+              {currentMessage.replyTo.user._id === currentMessage.user._id ? "you" : currentMessage.replyTo.user.name} reply to {currentMessage.replyTo.user._id === currentMessage.user._id ? "you" : currentMessage.replyTo.user.name}
+         </Text>
+          <TouchableOpacity
+            onPress={() => scrollToMessage(currentMessage.replyTo._id)}
+            style={{
+              backgroundColor: '#444',
+              padding: 8,
+              borderRadius: 10,
+              maxWidth: '65%',
+              alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
+            }}
+          > 
+            <Text style={{ color: '#ccc', fontSize: 12 }}>
+                {currentMessage.replyTo.messageType ==="text"?currentMessage.replyTo.text:"reply attaementattaement"}
+            </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {currentMessage.messageType === 'text' && (
+          <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
+            {isFirstMessage && currentMessage.user._id !== user._id && (
+              <Avatar {...props} />
+            )}
+            <Bubble
               {...props}
-           
+              onLongPress={(context, message) => handleLongPress(message)}
+              wrapperStyle={{
+                left: {
+                  backgroundColor: color.gray2,
+                  maxWidth: '65%',
+                  marginBottom: 0,
+                },
+                right: {
+                  backgroundColor: isMyMessage ? color.blue : color.gray2,
+                  maxWidth: '65%',
+                  marginBottom: 0,
+                },
+              }}
+              textStyle={{
+                left: { color: 'white' },
+                right: { color: 'white' },
+              }}
             />
-          )}
-          <Bubble
-            {...props}
-                onLongPress={(context, message) => handleLongPress(message)}
-           
-            wrapperStyle={{
-              left: {
-                backgroundColor: color.gray2, // Màu nền của tin nhắn người nhận
-                maxWidth: '65%', // Giới hạn chiều rộng tin nhắn
-                marginBottom: 0,
-                 padding:59
-              },
-              right: {
-                backgroundColor: isMyMessage ? color.blue : color.gray2, // Màu nền của tin nhắn người gửi
-                maxWidth: '65%', // Giới hạn chiều rộng tin nhắn
-                marginBottom:0
-              },
-            }}
-            textStyle={{
-              left: {
-                color: 'white', // Màu chữ của tin nhắn người nhận
-              },
-              right: {
-                color: 'white', // Màu chữ của tin nhắn người gửi
-              },
-            }}
+          </View>
+        )}
+
+        {currentMessage.messageType === 'image' && (
+          <Image
+            source={{ uri: currentMessage.image }}
+            style={{ width: 100, height: 100 }}
           />
+        )}
 
-
-        </View>
-      )}
-      {currentMessage.messageType === 'image' && (
-        <Image
-          source={{ uri: currentMessage.image }}
-          style={{ width: 100, height: 100 }}
-        />
-      )}
-          {currentMessage.messageType === 'attachment' && MediaGrid(currentMessage.attachments)}
+        {currentMessage.messageType === 'attachment' &&
+          MediaGrid(currentMessage.attachments)}
       </Animated.View>
+
       {currentMessage.status && (
         <Text
           style={{
             fontSize: 12,
             color: 'white',
             marginTop: 5,
-            textAlign: 'right',
-           
-          }}>
+            textAlign: isMyMessage ? 'right' : 'left',
+          }}
+        >
           {currentMessage.status === 'sending'
             ? 'Sending...'
             : currentMessage.status === 'sent'
@@ -135,8 +156,7 @@ const MessageItem: React.FC<MessageProps> = ({ currentMessage,
                 : ''}
         </Text>
       )}
-      </View>
-
+    </View>
   );
 };
 
