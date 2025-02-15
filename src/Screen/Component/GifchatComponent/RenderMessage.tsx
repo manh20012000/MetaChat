@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
-import { View, Text, Image,useWindowDimensions } from 'react-native';
+import React, { useRef, useState } from 'react';
+import {
+  View, Text, Image, useWindowDimensions, Animated,
+  PanResponder,
+} from 'react-native';
 import { Avatar, Bubble, Day, Message } from 'react-native-gifted-chat';
 import { useSelector } from 'react-redux';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, runOnJS } from 'react-native-reanimated';
-import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
+// import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, runOnJS } from 'react-native-reanimated';
+// import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import userMessage from '../../../interface/userMessage.interface';
 interface MessageProps {
   currentMessage: any;
@@ -17,49 +20,59 @@ interface MessageProps {
 
 const MessageItem: React.FC<MessageProps> = ({ currentMessage,
   previousMessage, user, handleLongPress, handlerreplyTo, MediaGrid, props }) => {
-  const[currentMessageItem]=useState(currentMessage)
+  
   const [color] = useState(useSelector((state: any) => state.colorApp.value));
-  const { width, height } = useWindowDimensions()
-  const SWIPE_THRESHOLD = width * 0.2
-  const MAX_SWIPE_DISTANCE = width * 0.2;
+  const { width } = useWindowDimensions();
+  const SWIPE_THRESHOLD = width * 0.2; // Ngưỡng vuốt
+  const MAX_SWIPE_DISTANCE = width * 0.3; // Giới hạn vuốt tối đa
 
   const isMyMessage = currentMessage.user._id === user._id;
   const isFirstMessage =
     !previousMessage || currentMessage.user._id !== previousMessage.user._id;
-  
-  const translateX = useSharedValue(0);
 
-  const gesture = Gesture.Pan()
-    .onUpdate((event) => {
-      if ((isMyMessage && event.translationX < 0) || (!isMyMessage && event.translationX > 0)) {
-        if (Math.abs(event.translationX) <= MAX_SWIPE_DISTANCE) {
-          translateX.value = event.translationX;
+  const translateX = useRef(new Animated.Value(0)).current;
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderMove: (event, gestureState) => {
+        if (
+          (isMyMessage && gestureState.dx < 0) ||
+          (!isMyMessage && gestureState.dx > 0)
+        ) {
+          if (Math.abs(gestureState.dx) <= MAX_SWIPE_DISTANCE) {
+            translateX.setValue(gestureState.dx);
+          }
         }
-      }
+      },
+      onPanResponderRelease: (event, gestureState) => {
+        if (
+          (isMyMessage && gestureState.dx < -SWIPE_THRESHOLD) ||
+          (!isMyMessage && gestureState.dx > SWIPE_THRESHOLD)
+        ) {
+          handlerreplyTo(currentMessage); // Gọi hàm reply nếu vuốt đủ xa
+        }
+
+        // Quay lại vị trí ban đầu
+        Animated.spring(translateX, {
+          toValue: 0,
+          useNativeDriver: true,
+        }).start();
+      },
     })
-    .onEnd((event) => {
-      
-      if (
-        (isMyMessage && event.translationX < -SWIPE_THRESHOLD) ||
-        (!isMyMessage && event.translationX > SWIPE_THRESHOLD)
-      ) {
-        
-        runOnJS(handlerreplyTo)(currentMessageItem); // Gọi handler khi vuốt
-      }
-      translateX.value = withTiming(0);
-    });
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value }],
-  }));
+  ).current;
   
   return (
   
-    <View style={{ marginBottom: 2, marginHorizontal: 10 }}>
+    <View style={{ marginBottom: 2, marginHorizontal: 10, }}>
       <Day {...props} />
-      <GestureDetector gesture={gesture} >
-        <Animated.View style={animatedStyle} >
+      <Animated.View
+        {...panResponder.panHandlers}
+        style={{ transform: [{ translateX }] }}
+      >
       {currentMessage.messageType === 'text' && (
-        <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'flex-end',}}>
           {isFirstMessage && currentMessage.user._id !== user._id && (
             <Avatar
               {...props}
@@ -75,6 +88,7 @@ const MessageItem: React.FC<MessageProps> = ({ currentMessage,
                 backgroundColor: color.gray2, // Màu nền của tin nhắn người nhận
                 maxWidth: '65%', // Giới hạn chiều rộng tin nhắn
                 marginBottom: 0,
+                 padding:59
               },
               right: {
                 backgroundColor: isMyMessage ? color.blue : color.gray2, // Màu nền của tin nhắn người gửi
@@ -102,8 +116,7 @@ const MessageItem: React.FC<MessageProps> = ({ currentMessage,
         />
       )}
           {currentMessage.messageType === 'attachment' && MediaGrid(currentMessage.attachments)}
-        </Animated.View>
-      </GestureDetector>
+      </Animated.View>
       {currentMessage.status && (
         <Text
           style={{

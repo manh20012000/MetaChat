@@ -38,7 +38,7 @@ import {
 } from '@gorhom/bottom-sheet';
 import HandlerSendMessage from '../../../util/util_chat/SendMessages';
 import GetAllMedia_Bottomsheet from '../homeComponent/GetAllMedia';
-import CustomInputToolbar from './RenderInputToolbar';
+import CustomInputToolbar from '../../Component/GifchatComponent/RenderInputToolbar';
 import {renderSend} from './Gited_Chat.component';
 import {postData, postFormData} from '../../../service/resfull_api';
 import useCheckingService from '../../../service/Checking_service';
@@ -77,6 +77,8 @@ const GifchatUser = (props: GifchatUserProps) => {
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [buttonScale] = useState(new Animated.Value(1));
   const [maginTextInput, setMaginTextInput] = useState<boolean>(false);
+  const [replyMessage, setReplyMessage] = useState<Message_interface>();
+  const [replyState, setReplyState]=useState<boolean>(false)
   const [selectedMessages, setSelectedMessages] = useState<string[]>([]); // Store selected message IDs
   const [userChat] = useState<any>(
     conversation.participants.find((participant: any) => participant.user_id === user._id)
@@ -235,9 +237,12 @@ const GifchatUser = (props: GifchatUserProps) => {
     );
   }, []);
 
-  const handlerreplyTo = useCallback((props: any) => {
+  const handlerreplyTo = useCallback((props: Message_interface) => {
     Vibration.vibrate(50);
-   
+    setReplyMessage(props)
+    if (props) {
+      setReplyState(true)
+    }
   }, []);
 
   const handleLongPress = useCallback((message: any) => {
@@ -253,10 +258,11 @@ const GifchatUser = (props: GifchatUserProps) => {
   //
   return (
     <>
-      <KeyboardAvoidingView
-        style={{flex: 1}}
+      <View
+        style={{flex: 1,marginBottom:0}}
         // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={keyboardOffset}>
+        // keyboardVerticalOffset={keyboardOffset}
+      >
         <GiftedChat
           messages={messages}
           user={{
@@ -266,11 +272,14 @@ const GifchatUser = (props: GifchatUserProps) => {
             
           }}
           renderInputToolbar={props => (
-            <CustomInputToolbar
+              <CustomInputToolbar
               {...props}
               onSend={onSend}
               conversation={conversation}
+              replyMessage={replyMessage}
+              setReplyMessage={setReplyMessage}
             />
+            
           )}
           scrollToBottom={true}
           renderSend={renderSend}
@@ -280,11 +289,12 @@ const GifchatUser = (props: GifchatUserProps) => {
           showUserAvatar={true}
           keyboardShouldPersistTaps="handled"
           messagesContainerStyle={{
-            marginBottom: 50,
-            paddingVertical: 10, // Thêm margin giữa các tin nhắn
+            marginBottom: replyState===true?0:50,
+                paddingVertical: 10, // Thêm margin giữa các tin nhắn
           }}
         />
-      </KeyboardAvoidingView>
+       
+      </View>
       <BottomSheetModalProvider>
         <BottomSheetModal
           ref={bottomSheetModalRef}
