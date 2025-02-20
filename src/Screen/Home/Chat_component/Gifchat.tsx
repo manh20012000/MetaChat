@@ -14,6 +14,8 @@ import {
   Easing,
   Image,
   FlatList,
+  TouchableWithoutFeedback,
+  Pressable,
 } from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
 import {
@@ -46,11 +48,14 @@ import useCheckingService from '../../../service/Checking_service';
 import Conversation from '../../../interface/Converstation.interface';
 import {Message_interface} from '../../../interface/Chat_interface';
 import Video from 'react-native-video';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import MediaGrid from '../homeComponent/MediaGrid';
 import {update_Converstation} from '../../../cache_data/exportdata.ts/chat_convert_datacache';
 import {AnyList} from 'realm';
 import MessageItem from '../../Component/GifchatComponent/RenderMessage';
 import userMessage from '../../../interface/userMessage.interface';
+import RenderIconReact from '../../Component/GifchatComponent/RenderIconReact';
+import RenderOptionMessage from '../../Component/GifchatComponent/RenderOptionMessage';
 interface GifchatUserProps {
   conversation: Conversation;
 }
@@ -71,14 +76,21 @@ const GifchatUser = (props: GifchatUserProps) => {
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [buttonScale] = useState(new Animated.Value(1));
   const [maginTextInput, setMaginTextInput] = useState<boolean>(false);
-  const [replyMessage, setReplyMessage] = useState<Message_interface | null>(null);
-  const [selectedMessages, setSelectedMessages] = useState<string[]>([]); // Store selected message IDs
+  const [replyMessage, setReplyMessage] = useState<Message_interface | null>(
+    null,
+  );
+  const [selectedMessages, setSelectedMessages] =
+    useState<Message_interface | null>(null);
+  //  Store selected message IDs
   const [userChat] = useState<any>(
-    conversation.participants.find((participant: any) => participant.user_id === user._id)
-  ); 
+    conversation.participants.find(
+      (participant: any) => participant.user_id === user._id,
+    ),
+  );
   //danh mục dành cho bootomsheet
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['40%', '90%'], []);
+
   const handlePresentModalPress = useCallback(() => {
     bottomSheetModalRef.current?.present();
   }, []);
@@ -113,10 +125,10 @@ const GifchatUser = (props: GifchatUserProps) => {
     }
   }, [selectedItems]);
   const flatListRef = useRef<FlatList<any> | null>(null);
-  const scrollToMessage = (messageId:string) => {
-    const index = messages.findIndex((msg) => msg._id === messageId);
+  const scrollToMessage = (messageId: string) => {
+    const index = messages.findIndex(msg => msg._id === messageId);
     if (index !== -1) {
-      flatListRef.current?.scrollToIndex({ index, animated: true });
+      flatListRef.current?.scrollToIndex({index, animated: true});
     }
   };
   const handleSelect = useCallback((item: any) => {
@@ -145,7 +157,7 @@ const GifchatUser = (props: GifchatUserProps) => {
           name: userChat.name,
           avatar: userChat.avatar,
           user_id: userChat.user_id,
-          role:userChat.role,
+          role: userChat.role,
           action_notifi: userChat.action_notifi, // Cho phép null
           status_read: userChat.status_readread, // Cho phép null
         },
@@ -157,7 +169,7 @@ const GifchatUser = (props: GifchatUserProps) => {
           color: conversation.color,
           icon: conversation.icon,
           avatar: conversation.avatar,
-          participantIds: conversation.participantIds
+          participantIds: conversation.participantIds,
         },
         // participateId,
         message,
@@ -210,7 +222,28 @@ const GifchatUser = (props: GifchatUserProps) => {
     },
     [],
   );
+  const handlerReaction = useCallback((message: Message_interface) => {}, []);
   useEffect(() => {
+    socket?.on('updateMessage', ({updatedMessage, send_id}) => {
+      if (send_id !== userChat._id) {
+        setMessages(previousMessages => {
+          const messageIndex = previousMessages.findIndex(
+            message => message._id === updatedMessage._id,
+          );
+
+          if (messageIndex !== -1) {
+            // Nếu tin nhắn đã tồn tại, cập nhật nó
+            const updatedMessages = [...previousMessages];
+            updatedMessages[messageIndex] = updatedMessage;
+            return updatedMessages;
+          } else {
+            // Nếu tin nhắn chưa tồn tại, thêm mới vào danh sách
+            return GiftedChat.append(previousMessages, updatedMessage);
+          }
+        });
+      }
+    });
+
     socket?.on('new_message', messages => {
       const {message, send_id} = messages;
 
@@ -225,80 +258,99 @@ const GifchatUser = (props: GifchatUserProps) => {
     //   socket?.off('new_message');
     // };
   }, []);
-  const renderMessage = useCallback((props: any) => {
-    const {currentMessage} = props;
-
-    return (
-      <MessageItem
-        currentMessage={currentMessage}
-        props={props}
-        user={userChat}
-        handleLongPress={handleLongPress}
-        handlerreplyTo={handlerreplyTo}
-        MediaGrid={MediaGrid}
-        scrollToMessage={scrollToMessage} 
-        
-      />
-    );
-  }, []);
 
   const handlerreplyTo = useCallback((props: Message_interface) => {
     Vibration.vibrate(50);
-    setReplyMessage(props)
-   
-  }, []);
-  
-  const handleLongPress = useCallback((message: any) => {
-
-    Vibration.vibrate(50);
-    setSelectedMessages(prevSelectedMessages =>
-      prevSelectedMessages.includes(message._id)
-        ? prevSelectedMessages.filter(id => id !== message._id)
-        : [...prevSelectedMessages, message._id],
-    );
+    setReplyMessage(props);
   }, []);
 
-  //
-  return (
-    <>
-      <View
-        style={{flex: 1,marginBottom:0}}
-        // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        // keyboardVerticalOffset={keyboardOffset}
-      >
-        <GiftedChat
-          messages={messages}
-          user={{
-            _id: userChat._id,
-            name: userChat.name,
-            avatar: userChat.avatar,
-            
-          }}
-          renderInputToolbar={props => (
-              <CustomInputToolbar
-              {...props}
-              onSend={onSend}
-              userChat={userChat}
-              conversation={conversation}
-              replyMessage={replyMessage}
-              setReplyMessage={setReplyMessage}
-            />
-            
-          )}
-          scrollToBottom={true}
-          renderSend={renderSend}
-          renderMessage={renderMessage}
-          renderTime={() => null}
-          isLoadingEarlier={true}
-          showUserAvatar={true}
-          keyboardShouldPersistTaps="handled"
-          messagesContainerStyle={{
-            marginBottom: replyMessage===null?50:0,
-                paddingVertical: 10, // Thêm margin giữa các tin nhắn
-          }}
+  const renderMessage = useCallback(
+    (props: any) => {
+      const {currentMessage} = props;
+      return (
+        <MessageItem
+          currentMessage={currentMessage}
+          props={props}
+          userChat={userChat}
+          handleLongPress={handleLongPress}
+          handlerreplyTo={handlerreplyTo}
+          MediaGrid={MediaGrid}
+          scrollToMessage={scrollToMessage}
+          selectedMessages_id={selectedMessages?._id}
         />
-       
-      </View>
+      );
+    },
+    [selectedMessages?._id],
+  );
+
+  const handleLongPress = useCallback((message: any) => {
+    Vibration.vibrate(50);
+    setSelectedMessages(message);
+    // setSelectedMessages(prevSelectedMessages =>
+    //   prevSelectedMessages.includes(message._id)
+    //     ? prevSelectedMessages.filter(id => id !== message._id)
+    //     : [...prevSelectedMessages, message._id],
+    // );
+  }, []);
+
+  const handlerdeleteMessage = useCallback(async (message: any) => {
+  
+    setMessages((prevMessages:any) =>
+     prevMessages.filter((id:any) => id._id !== message._id)
+    );
+    setSelectedMessages(null); // Hủy chọn tin nhắn
+  },[]);
+ 
+  return (
+    <> 
+      <Pressable
+        onPress={() => {
+          console.log('hahah')
+          Keyboard.dismiss(); // Ẩn bàn phím nếu đang mở
+          setSelectedMessages(null); // Hủy chọn tin nhắn
+        }}
+        style={{flex: 1}}
+        accessible={true}>
+        <View style={{flex: 1, marginBottom: 0, backgroundColor: color.black}}>
+          {/* <RenderIconReact
+            userChat={userChat}
+            conversation={conversation}
+            selectedMessages={selectedMessages}
+          
+          
+          /> */}
+          <GiftedChat
+            
+            messages={messages}
+            user={{
+              _id: userChat._id,
+              name: userChat.name,
+              avatar: userChat.avatar,
+            }}
+            renderInputToolbar={props => (
+              <CustomInputToolbar
+                {...props}
+                onSend={onSend}
+                userChat={userChat}
+                conversation={conversation}
+                replyMessage={replyMessage}
+                setReplyMessage={setReplyMessage}
+              />
+            )}
+            scrollToBottom={true}
+            renderSend={renderSend}
+            renderMessage={renderMessage}
+            renderTime={() => null}
+            isLoadingEarlier={true}
+            showUserAvatar={true}
+            keyboardShouldPersistTaps="always"
+            messagesContainerStyle={{
+              marginBottom: replyMessage === null ? 50 : 0,
+              paddingVertical: 10, // Thêm margin giữa các tin nhắn
+            }}
+          />
+        </View>
+      </Pressable>
       <BottomSheetModalProvider>
         <BottomSheetModal
           ref={bottomSheetModalRef}
@@ -310,7 +362,15 @@ const GifchatUser = (props: GifchatUserProps) => {
           </BottomSheetView>
         </BottomSheetModal>
       </BottomSheetModalProvider>
-      <View
+      {selectedMessages && (
+        <RenderOptionMessage
+          userChat={userChat}
+          conversation={conversation}
+          selectedMessages={selectedMessages}
+          handlerdeleteMessage={handlerdeleteMessage}
+        />
+      )}
+      {/* <View
         style={{
           position: 'absolute',
           backgroundColor: 'rgba(0,0,0,0.1)',
@@ -371,7 +431,7 @@ const GifchatUser = (props: GifchatUserProps) => {
             </TouchableOpacity>
           </Animated.View>
         ) : null}
-      </View>
+      </View> */}
     </>
   );
 };
@@ -381,125 +441,3 @@ export default GifchatUser;
 function alert(arg0: string) {
   throw new Error('Function not implemented.');
 }
-// const [keyboardHeight, setKeyboardHeight] = useState(0);
-// useEffect(() => {
-//   const keyboardDidShowListener = Keyboard.addListener(
-//     'keyboardDidShow',
-//     e => {
-//       setKeyboardHeight(e.endCoordinates.height); // Lấy chiều cao bàn phím
-//     },
-//   );
-//   const keyboardDidHideListener = Keyboard.addListener(
-//     'keyboardDidHide',
-//     () => {
-//       setKeyboardHeight(0); // Ẩn bàn phím
-//     },
-//   );
-
-//   return () => {
-//     keyboardDidShowListener.remove();
-//     keyboardDidHideListener.remove();
-//   };
-// }, []);
-
-// Hàm xử lý tùy chọn trong Modal
-//  const handleOptionPress = (option: string) => {
-//          if (option === 'Edit') {
-//            console.log('Edit:', selectedMessage);
-//            // Xử lý chỉnh sửa tin nhắn
-//          } else if (option === 'Delete') {
-//            console.log('Delete:', selectedMessage);
-//            // Xử lý xóa tin nhắn
-//            setMessages(prevMessages =>
-//              prevMessages.filter(msg => msg._id !== selectedMessage._id),
-//            );
-//          }
-//          setModalVisible(false); // Đóng Modal
-//  };  // const renderDay = (props: any) => {
-//   return (
-//     <Day
-//       {...props}
-//       containerStyle={{
-//         marginVertical: 10,
-//         alignItems: 'center',
-//       }}
-//       textStyle={{
-//         color: '#888', // Màu cho thời gian
-//         fontSize: 12,
-//       }}
-//     />
-//   );
-// };
-// const onLongPressMessage = (context: any, message: any) => {
-//            console.log('long press message')
-//        };
-// useEffect(() => {
-//   const onKeyboardShow = () => setKeyboardOffset(30);
-//   const onKeyboardHide = () => setKeyboardOffset(0);
-
-//   const keyboardDidShowListener = Keyboard.addListener(
-//     'keyboardDidShow',
-//     onKeyboardShow,
-//   );
-//   const keyboardDidHideListener = Keyboard.addListener(
-//     'keyboardDidHide',
-//     onKeyboardHide,
-//   );
-
-//   return () => {
-//     keyboardDidShowListener.remove();
-//     keyboardDidHideListener.remove();
-//   };
-// }, []);const renderBubble = useCallback(
-//   (props: any) => {
-//     console.log('hahahah')
-//     const isSelected = selectedMessages.includes(props.currentMessage._id);
-//     return (
-//       <Bubble style={{backgroundColor: 'pink', padding: 10}} {...props} />
-//     );
-//   },
-//   [selectedMessages],
-// );
-
-// const renderAvatar = useCallback((props:any) => {
-//   console.log('renderAvatar props:');
-
-//   const { currentMessage } = props;
-//   if (!currentMessage || !currentMessage.user?.avatar) {
-//     return null;
-//   }
-
-//   return (
-//     <Image
-//       source={{ uri: currentMessage.user.avatar }}
-//       style={{ width: 20, height: 20, borderRadius: 20, marginLeft: 5,backgroundColor:'red' }}
-//     />
-//   );
-// }
-//   , []);
-/***useEffect(() => {
-    // if (
-    //   conversation.messages.length === 0 &&
-    //   conversation.participants.length <= 2
-    // ) {
-    //   socket?.emit('join_room', {
-    //     conversationId: conversation._id,
-    //   });
-    // }
-    // lắng nghe sự kiện nhận tin nhắn nha 
-    socket?.on('new_message', messages => {
-      
-      const { message, send_id } = messages;
-     
-      if (send_id !== user._id) {
-       
-        setMessages((previousMessages) =>
-          GiftedChat.append(previousMessages, message)
-        );
-      }
-     });
-    // Cleanup khi component unmount
-    // return () => {
-    //   socket?.off('new_message');
-    // };
-  }, []); */

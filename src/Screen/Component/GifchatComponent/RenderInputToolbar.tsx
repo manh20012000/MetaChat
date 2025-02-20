@@ -37,11 +37,11 @@ const CustomInputToolbar = (props: any) => {
       text: text,
       voice: '',
       attachments: [],
-      callDetails: {},
+      callDetails:null,
       createdAt: newdate,
       reactions: [],
       isRead: [],
-      replyTo: replyMessage === null ? {} : {
+      replyTo: replyMessage === null ? null : {
         _id:replyMessage._id,
         text: replyMessage.messageType === "text" ? replyMessage.text : "reply atatment",
         user: replyMessage.user,

@@ -20,9 +20,9 @@ interface Conversation {
       user_id: string;
     },
   ];
-
+  isDeleted:string,
+  createdAt: Date;
   participantIds: string[];
-  lastMessage?: Message_interface;
   firstMessageTime?: string;
   permission: string;
 }

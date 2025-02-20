@@ -6,6 +6,7 @@ import { Add_Participate } from '../../../util/util_chat/Participate';
 import {createConversation, findAndconvertConversation, getConversations, update_Converstation } from '../../../cache_data/exportdata.ts/chat_convert_datacache';
 import Conversation from '../../../interface/Converstation.interface';
 import { useSocket } from '../../../util/socket.io';
+import { ObjectId } from "bson";
 import { createListfriend } from '../../../cache_data/exportdata.ts/friend_caching';
 const SearchItemUser: React.FC<{ item:itemuser,navigation:any }> = ({ item,navigation }) => {
   const color = useSelector((state: any) => state.colorApp.value)
@@ -20,7 +21,8 @@ const handler_chat = async () => {
     // thực hiênnj kiểm tra cuộc thoại trong cáche xong kiểm tra trên db -> nếu ko có thì mới bắt đầu tạo mới 
     const participants = [
       {
-          _id: user._id.toString(),
+        _id: new ObjectId(),
+        use_id: user._id.toString(),
           name: user.name,
           avatar: user.avatar, 
           role: 'admin',
@@ -28,7 +30,8 @@ const handler_chat = async () => {
           status_read: true,
       },
       {
-          _id: item._id.toString(),
+        _id: new ObjectId(),
+          use_id: item._id.toString(),
           name: item.name,
           avatar: item.avatar,
           role: 'member',

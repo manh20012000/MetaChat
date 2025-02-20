@@ -30,9 +30,9 @@ const createConversation = async (Conversation: Conversation) => {
         background: Conversation.background,
         participants: Conversation.participants,
         participantIds: Conversation.participantIds,
-        lastMessage: Conversation.lastMessage,
         messages: Conversation.messages,
         permission: Conversation.permission,
+        
       });
     });
 

@@ -20,6 +20,13 @@ const ReplyToSchema = {
     text: 'string?', // Nội dung tin nhắn gốc
   },
 };
+const IsReadSchema = {
+  name: 'IsRead',
+  properties: {
+    user: 'user?', // Người gửi tin nhắn gốc
+    status:'bool?'
+  },
+};
 
 const userSchema = {
   name: 'user',
@@ -47,8 +54,9 @@ const LastMessageSchema = {
     callDetails: 'CallDetail?',
     createdAt: 'string?',
     reactions: 'Reaction[]',
-    isRead: 'string[]',
+    isRead: 'IsRead[]',
     replyTo: 'ReplyTo?',
+    statusSendding: 'bool?',
   },
 };
 
@@ -67,6 +75,9 @@ const MessageSchema = {
     reactions: 'Reaction[]', // Danh sách cảm xúc
     isRead: 'user[]', // Danh sách người đã đọc
     replyTo: 'ReplyTo?', // ✅ Đổi từ `replyTo` thành `replyTo`
+    statusSendding: 'bool?',
+    reciver: 'string[]',
+    recall: "bool?",
   },
   // Đánh chỉ mục cho các trường thường xuyên truy vấn
 };
@@ -86,11 +97,20 @@ const CallDetailSchema = {
     createdAt: 'string?', // Thời gian tạo
   },
 };
+const ReactionDetailSchema = {
+  name: 'ReactionDetail', // ✅ Định nghĩa schema mới
+  properties: {
+    id: 'int', // Sửa từ 'number' thành 'int'
+    name: 'string',
+    title: 'string',
+  },
+};
+
 const ReactionSchema = {
   name: 'Reaction',
   properties: {
-     user: 'user?',
-    type: 'string?', // Loại cảm xúc (e.g., "heart", "thumbs_up")
+    user: 'user?', // ✅ Giữ nguyên
+    reaction: 'ReactionDetail', // ✅ Liên kết đến schema `ReactionDetail`
   },
 };
 
@@ -107,12 +127,11 @@ const ConversationSchema = {
     color: 'string?',
     icon: 'string?',
     background: 'string?',
-    lastMessage: 'LastMessage', // Phải đảm bảo `LastMessage` được đăng ký đúng cách
     messages: 'Message[]',
     updatedAt: 'string?', // Thời gian sửa đổi gần nhất
     permission: 'string?',
     participantIds: 'string[]',
-    
+    isDeleted:'string?'
   },
 };
 
@@ -126,4 +145,5 @@ export {
   ReactionSchema,
   userSchema,
   ReplyToSchema,
+  IsReadSchema,ReactionDetailSchema
 };

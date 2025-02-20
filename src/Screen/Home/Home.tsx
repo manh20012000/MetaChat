@@ -36,17 +36,20 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import {realm} from '../../cache_data/Schema/schemaModel';
 import {useSocket} from '../../util/socket.io';
 import {Message_interface} from '../../interface/Chat_interface';
-import { createListfriend, getListfriend } from '../../cache_data/exportdata.ts/friend_caching';
+import {
+  createListfriend,
+  getListfriend,
+} from '../../cache_data/exportdata.ts/friend_caching';
 import userMessage from '../../interface/userMessage.interface.ts';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 dayjs.extend(relativeTime); // Kích hoạt plugin
 export default function Home({navigation}: {navigation: any}) {
   const {width, height} = useWindowDimensions();
-  const color= useSelector((state: any) => state.colorApp.value);
-  const user =useSelector((state: any) => state.auth.value);
+  const color = useSelector((state: any) => state.colorApp.value);
+  const user = useSelector((state: any) => state.auth.value);
   const dispatch = useDispatch();
   const user_Status = useSelector((state: any) => state.statusUser.value);
- 
+
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const isPortrait = height > width;
   const insets = useSafeAreaInsets();
@@ -54,27 +57,27 @@ export default function Home({navigation}: {navigation: any}) {
 
   const [data_convertstation, setData_convertStation] = useState<any>([]);
   const [skip, setSkiped] = useState(0);
-  const [skipfriend, setSkipfriend] = useState(0)
-  const [onloading,setLoading]=useState<boolean>(false)
+  const [skipfriend, setSkipfriend] = useState(0);
+  const [onloading, setLoading] = useState<boolean>(false);
   const [orientation, setOrientation] = useState(
     Dimensions.get('window').height > Dimensions.get('window').width
       ? 'portrait'
       : 'landscape',
   );
-  const [data_friend, setData_friend] = useState([])
-  const [selectConverstion,setSelectConverstation]=useState<Conversation>()
+  const [data_friend, setData_friend] = useState([]);
+  const [selectConverstion, setSelectConverstation] = useState<Conversation>();
   const snapPoints = useMemo(() => ['70%'], []);
-  const [modalVisible, setModalVisible] = useState<boolean>(false)
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
   const handleDelete = useCallback(() => {
     if (!selectConverstion) return;
     setModalVisible(false);
-    delete_converStation(selectConverstion, { dispatch, user });
+    delete_converStation(selectConverstion, {dispatch, user});
   }, [selectConverstion]);
-  const handlerShowmodal = useCallback((status:boolean) =>{
-      setModalVisible(status)
-  },[])
-  const handlePresentModalPress = useCallback((item:Conversation) => {
-    setSelectConverstation(item)
+  const handlerShowmodal = useCallback((status: boolean) => {
+    setModalVisible(status);
+  }, []);
+  const handlePresentModalPress = useCallback((item: Conversation) => {
+    setSelectConverstation(item);
     bottomSheetModalRef.current?.present();
   }, []);
   const handleSheetChanges = useCallback((index: number) => {
@@ -87,35 +90,30 @@ export default function Home({navigation}: {navigation: any}) {
       skip,
       {dispatch, user},
     );
-   
-     
+
     if (data_converstation.data.length > 0) {
-     
       try {
         setSkiped(data_converstation.data.length);
-      data_converstation.data.forEach(async (element: Conversation) => {
-       
-        await createConversation(element);
-      }); 
-       
+        data_converstation.data.forEach(async (element: Conversation) => {
+          await createConversation(element);
+        });
       } catch (err) {
-        console.log(err,'lỗi thêm cuộc thoại vào local');
+        console.log(err, 'lỗi thêm cuộc thoại vào local');
       } finally {
         setData_convertStation(data_converstation.data);
       }
     }
-  },[]);
+  }, []);
   const getFriend_user = async () => {
-     const listuser = await getData(
-       API_ROUTE.GET_LIST_FRIEND_CHAT,
-       null,
-       skipfriend,
-       {dispatch, user},
+    const listuser = await getData(
+      API_ROUTE.GET_LIST_FRIEND_CHAT,
+      null,
+      skipfriend,
+      {dispatch, user},
     );
-    
+
     if (listuser.friend.length > 0) {
-      
-      setData_friend(listuser.friend)
+      setData_friend(listuser.friend);
       listuser.friend.forEach(async (element: any) => {
         await createListfriend(element);
       });
@@ -124,15 +122,14 @@ export default function Home({navigation}: {navigation: any}) {
   };
   const now = new Date();
   useEffect(() => {
-  
     const getChatuser = async () => {
       try {
-        let data_converstation = await getConversations();  
+        let data_converstation = await getConversations();
+     
         setSkiped(data_converstation.length);
-        if (data_converstation.length>0) {
+        if (data_converstation.length > 0) {
           setData_convertStation(data_converstation);
         } else {
-      
           await get_data();
         }
       } catch (error: any) {
@@ -142,48 +139,43 @@ export default function Home({navigation}: {navigation: any}) {
     };
     const getFriend_user_chat = async () => {
       try {
-        let data_friend_chat = await getListfriend();
-        
-        if (data_friend_chat.length > 0) {
-          
-          setData_friend(data_friend_chat)
-  
-        setSkipfriend(data_friend_chat.length);
-      } else {
-        await getFriend_user()
+        // let data_friend_chat = await getListfriend();
+        // if (data_friend_chat.length > 0) {
+        //   setData_friend(data_friend_chat);
+        //   setSkipfriend(data_friend_chat.length);
+        // } else {
+        //   await getFriend_user();
+        // }
+      } catch (error: any) {
+        console.log(error, 'error convert api GET_LIST_FRIEND_CHAT ');
+        throw new Error();
       }
-    } catch (error: any) {
-      console.log(error, 'error convert api GET_LIST_FRIEND_CHAT ');
-      throw new Error();
-    }
     };
-      const checkout = async () => {
-        try {
-          setLoading(true);
-          await Promise.allSettled([getChatuser(), getFriend_user_chat() ]);
-          setLoading(false);
-        } catch (err) {
-          console.log(err + 'loi promise');
-        }
-      };
-   
-    checkout()
-    
+    const checkout = async () => {
+      try {
+        setLoading(true);
+        await Promise.allSettled([getChatuser(), getFriend_user_chat()]);
+        setLoading(false);
+      } catch (err) {
+        console.log(err + 'loi promise');
+      }
+    };
+    checkout();
   }, []);
   // Thời gian lưu trữ
 
   useEffect(() => {
     if (!socket) return; // Nếu socket chưa khởi tạo, thoát
     const handleConnect = () => {
-        data_convertstation.forEach((item: any) => {
-          socket.emit('join_room', { conversationId: item._id, user: user.name });
-        });
-      }
+      data_convertstation.forEach((item: any) => {
+        socket.emit('join_room', {conversationId: item._id, user: user.name});
+      });
+    };
     const handleNewMessage = (messages: any) => {
-      
       const { message, conversation, send_id } = messages;
+      console.log(user.name)
       const conditions = conversation.participantIds
-        .map((id:any, index:any) => `participantIds CONTAINS $${index}`)
+        .map((id: any, index: any) => `participantIds CONTAINS $${index}`)
         .join(' AND ');
 
       const conversations = realm
@@ -192,16 +184,14 @@ export default function Home({navigation}: {navigation: any}) {
           `participantIds.@size == ${conversation.participantIds.length} AND ${conditions}`,
           ...conversation.participantIds,
         );
-    
+
       let existingConversation = conversations[0] || null;
       realm.write(() => {
-
         if (existingConversation) {
-         
           existingConversation.lastMessage = message;
           (existingConversation.messages as Message_interface[]).unshift(
             message,
-          )
+          );
           existingConversation.updatedAt = message.createdAt;
         } else {
           realm.create('Conversation', {
@@ -219,28 +209,63 @@ export default function Home({navigation}: {navigation: any}) {
           });
         }
       });
-    }
+    };
+    const handlerUpdateMessage = async ({
+      converstation_id,
+      updatedMessage,
+    }: {
+      converstation_id: string;
+      updatedMessage: Message_interface;
+    }) => {
+      if (!realm) return; // Kiểm tra realm có tồn tại không
+      realm.write(async () => {
+        // 🔹 Tìm cuộc hội thoại trong Realm
+        const conversation: Conversation = (await realm
+          .objects<Conversation>('Conversation')
+          .filtered(
+            '_id == $0',
+            converstation_id,
+          )[0]) as unknown as Conversation;
+        if (conversation) {
+          // 🔹 Đảm bảo messages là một mảng Realm hợp lệ
+          if (!conversation.messages) {
+            conversation.messages = [];
+          }
+          let messageIndex = await conversation.messages.findIndex(
+            msg => msg._id === updatedMessage._id,
+          );
+          if (messageIndex !== -1) {
+            // ✅ Cập nhật tin nhắn trong danh sách messages
+            conversation.messages[messageIndex] = updatedMessage;
+          } else {
+            // ✅ Nếu chưa có tin nhắn thì thêm vào
+            conversation.messages = [...conversation.messages, updatedMessage];
+          }
+        }
+      });
+    };
     // Nếu socket đã kết nối, thực hiện ngay
     if (socket.connected) {
       handleConnect();
     } else {
       socket.on('connect', handleConnect);
     }
+    socket.on('updateMessage', handlerUpdateMessage);
     socket.on('new_message', handleNewMessage);
     const conversationObjects = realm.objects('Conversation');
     const updateConversations = async () => {
       let data_converstation = await getConversations();
       setData_convertStation(data_converstation);
-       let data_friend_chat = await getListfriend();
+      let data_friend_chat = await getListfriend();
       if (data_friend_chat.length > 0) {
-        setData_friend(data_friend_chat)
+        setData_friend(data_friend_chat);
         setSkipfriend(data_friend_chat.length);
       }
     };
-    // updateConversations();
     conversationObjects.addListener(updateConversations);
     return () => {
       socket.off('new_message', handleNewMessage);
+      socket.off('updateMessage', handlerUpdateMessage);
       socket.off('connect', handleConnect);
       conversationObjects.removeListener(updateConversations);
     };
@@ -258,8 +283,10 @@ export default function Home({navigation}: {navigation: any}) {
           bgrcolor={color.light}
           translucent={true}
         />
-        {onloading === true ? <ActivityIndicator size="large" color="#00ff00" /> :
-          (<View style={{ flex: 1, backgroundColor: color.dark }}>
+        {onloading === true ? (
+          <ActivityIndicator size="large" color="#00ff00" />
+        ) : (
+          <View style={{flex: 1, backgroundColor: color.dark}}>
             <FlatList
               refreshing
               ListHeaderComponent={
@@ -269,29 +296,32 @@ export default function Home({navigation}: {navigation: any}) {
               initialNumToRender={10}
               data={data_convertstation}
               // Sử dụng _id làm khóa duy nhất
-              renderItem={({ item }: { item: Conversation }) => {
-              
-                const statusUser:boolean = item.participantIds.some((participantIds: string) => {
-                  if (participantIds !== user._id) { 
-                    return user_Status.includes(participantIds);
-                  }
-                });
+              renderItem={({item}: {item: Conversation}) => {
+                const statusUser: boolean = item.participantIds.some(
+                  (participantIds: string) => {
+                    if (participantIds !== user._id) {
+                      return user_Status.includes(participantIds);
+                    }
+                  },
+                );
                 return (
                   <Pressable
                     onPress={() => {
                       if (item.participantIds.length <= 2) {
-                        const recipientIds = item.participantIds.filter((id: string) => id !== user._id);
+                        const recipientIds = item.participantIds.filter(
+                          (id: string) => id !== user._id,
+                        );
                         socket?.emit('invite_to_room', {
                           conversationId: item._id,
-                          recipientIds: recipientIds
-                        })
+                          recipientIds: recipientIds,
+                        });
                       }
                       navigation.navigate('HomeChatPersion', {
                         conversation: item,
                       });
                     }}
-                    onLongPress={()=>handlePresentModalPress(item)}
-                    style={({ pressed }) => [
+                    onLongPress={() => handlePresentModalPress(item)}
+                    style={({pressed}) => [
                       {
                         width: '100%',
                         flexDirection: 'row',
@@ -303,7 +333,7 @@ export default function Home({navigation}: {navigation: any}) {
                           ? 'rgb(210, 230, 255)'
                           : color.black,
                         shadowColor: '#000',
-                        shadowOffset: { width: 0, height: 2 },
+                        shadowOffset: {width: 0, height: 2},
                       },
                     ]}>
                     {statusUser && (
@@ -329,7 +359,7 @@ export default function Home({navigation}: {navigation: any}) {
                           marginRight: 15,
                           backgroundColor: color.gray,
                         }}
-                        source={{ uri: item.avatar }}
+                        source={{uri: item.avatar}}
                       />
                     ) : (
                       <View
@@ -343,14 +373,15 @@ export default function Home({navigation}: {navigation: any}) {
                         }}>
                         {(() => {
                           // Lọc ra những người tham gia khác currentUser
-                          const filteredParticipants:any = item.participants.filter(
-                            (participant: any) => participant.user_id !== user._id,
-                          );
-                         
+                          const filteredParticipants: any =
+                            item.participants.filter(
+                              (participant: any) =>
+                                participant.user_id !== user._id,
+                            );
+
                           // Số lượng người tham gia khác currentUser
                           const count = filteredParticipants.length;
-                            if (count === 1) {
-                            
+                          if (count === 1) {
                             // Chỉ hiển thị ảnh của 1 người (chiếm 100%)
                             return (
                               <Image
@@ -365,8 +396,7 @@ export default function Home({navigation}: {navigation: any}) {
                                 }}
                               />
                             );
-                            } else if (count === 2) {
-                            
+                          } else if (count === 2) {
                             // Hiển thị 2 ảnh (chia 2 góc)
                             return (
                               <>
@@ -405,15 +435,14 @@ export default function Home({navigation}: {navigation: any}) {
                               </>
                             );
                           } else {
-                              
                             return filteredParticipants
                               .slice(0, 4)
-                              .map((participant:any, index:number) => {
+                              .map((participant: any, index: number) => {
                                 const positions = [
-                                  { top: 0, left: 0 },
-                                  { top: 0, right: 0 },
-                                  { bottom: 0, left: 0 },
-                                  { bottom: 0, right: 0 },
+                                  {top: 0, left: 0},
+                                  {top: 0, right: 0},
+                                  {bottom: 0, left: 0},
+                                  {bottom: 0, right: 0},
                                 ];
                                 return (
                                   <Image
@@ -428,7 +457,7 @@ export default function Home({navigation}: {navigation: any}) {
                                       borderColor: 'white',
                                       backgroundColor: color.gray,
                                     }}
-                                    source={{ uri: participant.avatar }}
+                                    source={{uri: participant.avatar}}
                                   />
                                 );
                               });
@@ -438,7 +467,7 @@ export default function Home({navigation}: {navigation: any}) {
                     )}
 
                     {/* Nội dung tin nhắn */}
-                    <View style={{ flex: 1 }}>
+                    <View style={{flex: 1}}>
                       <Text
                         style={{
                           fontWeight: 'bold',
@@ -450,13 +479,13 @@ export default function Home({navigation}: {navigation: any}) {
                         {item.roomName
                           ? item.roomName
                           : item.participants
-                            .filter(
-                              (participant:any) =>
-                                participant.name !== user.name,
-                            ) // Lọc bỏ tên của currentUser
-                            .map((participant:any) => participant.name) // Lấy tên
-                            .filter(name => !!name) // Loại bỏ tên rỗng
-                            .join(', ')}{' '}
+                              .filter(
+                                (participant: any) =>
+                                  participant.name !== user.name,
+                              ) // Lọc bỏ tên của currentUser
+                              .map((participant: any) => participant.name) // Lấy tên
+                              .filter(name => !!name) // Loại bỏ tên rỗng
+                              .join(', ')}{' '}
                         {/* Nối các tên lại thành chuỗi */}
                       </Text>
                       <View
@@ -464,18 +493,19 @@ export default function Home({navigation}: {navigation: any}) {
                           flexDirection: 'row',
                           width: '80%',
                           gap: 10,
-                       
                         }}>
                         <Text
                           ellipsizeMode="tail"
                           numberOfLines={1}
-                          style={{ fontSize: 14, fontWeight: 'bold', color: color.white, width: 100 }}>
+                          style={{
+                            fontSize: 14,
+                            fontWeight: 'bold',
+                            color: color.white,
+                            width: 100,
+                          }}>
                           {item.lastMessage?.text || 'Bắt đầu cuộc thoại'}
                         </Text>
-                        <Text
-                          ellipsizeMode="tail"
-                        
-                          numberOfLines={1}>
+                        <Text ellipsizeMode="tail" numberOfLines={1}>
                           {dayjs(item.lastMessage?.createdAt).from(now)}
                         </Text>
                       </View>
@@ -487,15 +517,16 @@ export default function Home({navigation}: {navigation: any}) {
               //   get_data();
               // }}
             />
-          </View>)}
+          </View>
+        )}
       </View>
       <BottomSheetModal
         ref={bottomSheetModalRef}
         onChange={handleSheetChanges}
         enableContentPanningGesture={false}
         snapPoints={snapPoints}>
-        <BottomSheetView style={{ flex: 1, backgroundColor: color.gray }}>
-          <View style={{ alignContent: 'center', alignItems: 'center' }}>
+        <BottomSheetView style={{flex: 1, backgroundColor: color.gray}}>
+          <View style={{alignContent: 'center', alignItems: 'center'}}>
             <BottonsheetHome
               handlerShowmodal={handlerShowmodal}
               bottomSheetModalRef={bottomSheetModalRef} // Truyền ref vào
@@ -507,30 +538,34 @@ export default function Home({navigation}: {navigation: any}) {
         animationType="fade"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
+        onRequestClose={() => setModalVisible(false)}>
         <TouchableOpacity
           style={{
             flex: 1,
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
             justifyContent: 'center',
-            alignItems: 'center'
+            alignItems: 'center',
           }}
           activeOpacity={1}
           onPress={() => setModalVisible(false)} // Nhấn bên ngoài modal để đóng
         >
-          <View style={{
-            width: '80%',
-            backgroundColor: 'white',
-            padding: 20,
-            borderRadius: 10,
-            alignItems: 'center'
-          }}>
+          <View
+            style={{
+              width: '80%',
+              backgroundColor: 'white',
+              padding: 20,
+              borderRadius: 10,
+              alignItems: 'center',
+            }}>
             <Ionicons name="alert-circle-outline" size={40} color="red" />
-            <Text style={{ fontSize: 18, fontWeight: 'bold', marginTop: 10 }}>Xác nhận xóa?</Text>
-            <Text style={{ marginTop: 10, textAlign: 'center' }}>Bạn có chắc chắn muốn xóa cuộc trò chuyện này không?</Text>
+            <Text style={{fontSize: 18, fontWeight: 'bold', marginTop: 10}}>
+              Xác nhận xóa?
+            </Text>
+            <Text style={{marginTop: 10, textAlign: 'center'}}>
+              Bạn có chắc chắn muốn xóa cuộc trò chuyện này không?
+            </Text>
 
-            <View style={{ flexDirection: 'row', marginTop: 20 }}>
+            <View style={{flexDirection: 'row', marginTop: 20}}>
               <Pressable
                 style={{
                   flex: 1,
@@ -538,11 +573,10 @@ export default function Home({navigation}: {navigation: any}) {
                   borderRadius: 5,
                   alignItems: 'center',
                   backgroundColor: 'gray',
-                  marginRight: 10
+                  marginRight: 10,
                 }}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={{ color: 'white' }}>Hủy</Text>
+                onPress={() => setModalVisible(false)}>
+                <Text style={{color: 'white'}}>Hủy</Text>
               </Pressable>
               <Pressable
                 style={{
@@ -552,9 +586,8 @@ export default function Home({navigation}: {navigation: any}) {
                   alignItems: 'center',
                   backgroundColor: 'red',
                 }}
-                onPress={handleDelete}
-              >
-                <Text style={{ color: 'white' }}>Xóa</Text>
+                onPress={handleDelete}>
+                <Text style={{color: 'white'}}>Xóa</Text>
               </Pressable>
             </View>
           </View>
@@ -617,7 +650,8 @@ export default function Home({navigation}: {navigation: any}) {
 //         { _id: "user2", avatar: "https://example.com/avatar2.png", name: "Bob" }
 //     ]
 // };
- {/* <View
+{
+  /* <View
             style={{
               flex: isPortrait ? 0.1 : 0.4,
               backgroundColor: color.dark,
@@ -668,9 +702,10 @@ export default function Home({navigation}: {navigation: any}) {
                 <Pen width={30} color={'pink'} stroke={'#ffffff'} />
               </TouchableOpacity>
             </View>
-          </View> */}
+          </View> */
+}
 
-          /* const handleConnect = useCallback(() => {
+/* const handleConnect = useCallback(() => {
       data_convertstation.forEach((item: any) => {
         console.log(item._id, 'Joining room');
         socket.emit('join_room', {conversationId: item._id, user: user.name});

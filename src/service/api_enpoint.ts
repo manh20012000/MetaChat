@@ -30,4 +30,6 @@ export const API_ROUTE = {
   GET_LIST_FRIEND_CHAT: 'api/chatservice/friendchat',
   CREATE_CONVERSTATION: 'api/chatservice/create_converstaion',
   DELETE_CONVERSTATION: 'api/chatservice/delete_converstation',
+  UPDATE_MESSAGE: 'api/chatservice/update_message',
+  DELATE_MESSAGE: 'api/ chatservice/delete_message'
 };
