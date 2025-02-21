@@ -1,6 +1,6 @@
 
 
-export interface User_search {
+export type User_search=  {
   _id: string;
   name: string;
   avatar: string;
@@ -9,7 +9,7 @@ export interface User_search {
  
 }
 
-export interface itemuser {
+export type itemuser=  {
   _id: string;
   user_id: string;
   name: string;

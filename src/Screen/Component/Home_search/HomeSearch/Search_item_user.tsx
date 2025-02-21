@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Text, Image, Pressable, View } from 'react-native'
-import { itemuser } from '../../../interface/search_user.interface';
+import { itemuser } from '../../../../type/search_type';
 import { useDispatch, useSelector } from 'react-redux';  
-import { Add_Participate } from '../../../util/util_chat/Participate';
-import {createConversation, findAndconvertConversation, getConversations, update_Converstation } from '../../../cache_data/exportdata.ts/chat_convert_datacache';
-import Conversation from '../../../interface/Converstation.interface';
-import { useSocket } from '../../../util/socket.io';
+import { Add_Participate } from '../../../../util/util_chat/Participate';
+import { createConversation, findAndconvertConversation, getConversations, update_Converstation } from '../../../../cache_data/exportdata.ts/converstation_cache';
+import Conversation from '../../../../type/Converstation_type';
+import { useSocket } from '../../../../util/socket.io';
 import { ObjectId } from "bson";
-import { createListfriend } from '../../../cache_data/exportdata.ts/friend_caching';
+import { createListfriend } from '../../../../cache_data/exportdata.ts/friend_cache';
 const SearchItemUser: React.FC<{ item:itemuser,navigation:any }> = ({ item,navigation }) => {
   const color = useSelector((state: any) => state.colorApp.value)
   const user = useSelector((state: any) => state.auth.value);
@@ -21,8 +21,8 @@ const handler_chat = async () => {
     // thực hiênnj kiểm tra cuộc thoại trong cáche xong kiểm tra trên db -> nếu ko có thì mới bắt đầu tạo mới 
     const participants = [
       {
-        _id: new ObjectId(),
-        use_id: user._id.toString(),
+        _id: new ObjectId().toString(),
+        user_id: user._id.toString(),
           name: user.name,
           avatar: user.avatar, 
           role: 'admin',
@@ -30,8 +30,8 @@ const handler_chat = async () => {
           status_read: true,
       },
       {
-        _id: new ObjectId(),
-          use_id: item._id.toString(),
+        _id: new ObjectId().toString(),
+        user_id: item._id.toString(),
           name: item.name,
           avatar: item.avatar,
           role: 'member',
@@ -40,7 +40,7 @@ const handler_chat = async () => {
    
       },
     ];
-    console.log(item)
+
     const conversation:any = await findAndconvertConversation(
    
       participants,
@@ -59,9 +59,10 @@ const handler_chat = async () => {
       
       socket?.emit('invite_to_room', {
         conversationId: conversation._id,
-        recipientIds: [item._id]
+        recipientIds: participantIds
       });
     }
+    // console.log(conversation)
     // // Chuyển đến màn hình chat cá nhân với thông tin người dùng
     navigation.navigate('HomeChatPersion', {conversation});
   } catch (error) {

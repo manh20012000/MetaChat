@@ -1,4 +1,4 @@
-export interface IMessage {
+export type IMessage ={
   _id: string | number;
   text: string;
   createdAt: string | null;
@@ -13,13 +13,13 @@ export interface IMessage {
   pending?: boolean;
   quickReplies?: QuickReplies;
 }
-interface Reply {
+type Reply ={
   title: string;
   value: string;
   messageId?: number | string;
 }
 
-interface QuickReplies {
+type QuickReplies = {
   type: 'radio' | 'checkbox';
   values: Reply[];
   keepIt?: boolean;

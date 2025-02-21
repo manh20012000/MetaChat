@@ -12,9 +12,9 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Avatar, Bubble, Day } from 'react-native-gifted-chat';
 import { useDispatch, useSelector } from 'react-redux';
-import userMessage from '../../../interface/userMessage.interface';
+import userMessage from '../../../type/useMessage_type';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Message_interface } from '../../../interface/Chat_interface';
+import { Message_type } from '../../../type/Chat_type';
 import { API_ROUTE } from '../../../service/api_enpoint';
 import { putData } from '../../../service/resfull_api';
 import useCheckingService from '../../../service/Checking_service';

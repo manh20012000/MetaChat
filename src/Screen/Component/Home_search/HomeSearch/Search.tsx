@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, useWindowDimensions, TouchableOpacity, ActivityIndicator, Platform, FlatList, Pressable } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import Statusbar from "../StatusBar";
+import Statusbar from "./StatusBar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { TextInput } from "react-native-gesture-handler";
-import { Backsvg, Send, WhiteBack } from "../../../assets/svg/svgfile";
+import { Backsvg, Send, WhiteBack } from "../../../../assets/svg/svgfile";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
-import { postData, getResearch } from "../../../service/resfull_api";
-import User_interface from "../../../interface/user.Interface";
-import { API_ROUTE } from "../../../service/api_enpoint";
-import { clearUserSearch, create_userSearch, get_userSearch } from "../../../cache_data/exportdata.ts/userSearch_data";
-import { User_search } from "../../../interface/search_user.interface";
-import Skeleton from "../Skeleton";
-import { itemuser } from "../../../interface/search_user.interface";
+import { postData, getResearch } from "../../../../service/resfull_api";
+import User_type from "../../../../type/user_type";
+import { API_ROUTE } from "../../../../service/api_enpoint";
+import { clearUserSearch, create_userSearch, get_userSearch } from "../../../../cache_data/exportdata.ts/useSearch_cache";
+import { User_search } from "../../../../type/search_type";
+import Skeleton from "./Skeleton";
+import { itemuser } from "../../../../type/search_type";
 import SearchItemUser from "./Search_item_user";
 const SearchScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const color = useSelector((state: any) => state.colorApp.value)
@@ -23,7 +23,7 @@ const SearchScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const [keywordSearch, setSearchKey_word] = useState('')
     const [userSearch, setUserSearch] = useState<User_search[]>([])
     const [animatedload, setAnimatedload] = useState(false)
-    const user: User_interface = useSelector(((state: any) => state.colorApp.value))
+    const user: User_type = useSelector(((state: any) => state.colorApp.value))
 
     const handler_getuser_search_localdata = async () => {
         try {

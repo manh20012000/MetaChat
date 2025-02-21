@@ -1,4 +1,4 @@
-export interface Message_interface {
+export type Message_type = {
   _id: string;
   conversation_id: string;
   user: {

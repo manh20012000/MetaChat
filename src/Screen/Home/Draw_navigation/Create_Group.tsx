@@ -4,7 +4,7 @@ import {View, Text,TouchableOpacity, KeyboardAvoidingView,useWindowDimensions, I
 import { TextInput } from 'react-native-gesture-handler';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useDispatch, useSelector } from 'react-redux';
-import { getListfriend } from '../../../cache_data/exportdata.ts/friend_caching';
+import { getListfriend } from '../../../cache_data/exportdata.ts/friend_cache';
 import { getData } from '../../../service/resfull_api';
 import {API_ROUTE} from '../../../service/api_enpoint';
 const Create_Group = () => {

@@ -1,6 +1,6 @@
 
-import { User_search } from '../../interface/search_user.interface.ts';
-import { realm } from '../Schema/schemaModel.tsx';
+import { User_search } from '../../type/search_type.ts';
+import { realm } from '../Schema/schema_realm_model.tsx';
 
 const create_userSearch = async(users: User_search[]) => {
     try {

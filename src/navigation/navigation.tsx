@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import { login } from '../Redux_Toolkit/Reducer/auth.slice.ts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
-import SearchScreen from '../Screen/Component/Home_search/Search.tsx';
+import SearchScreen from '../Screen/Component/Home_search/HomeSearch/Search.tsx';
 import HomeChatPersion from '../Screen/Home/Chat_component/HomeChatPersion.tsx';
 import Create_Group from '../Screen/Home/Draw_navigation/Create_Group.tsx';
 import Friend from '../Screen/Home/Draw_navigation/Friend.tsx';

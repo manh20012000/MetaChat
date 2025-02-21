@@ -1,10 +1,10 @@
 
 // import { URL } from '@env';
-const API_URL = 'http://192.168.51.102:8080';
+const API_URL = 'http://192.168.51.109:8080';
 // console.log('hahah', URL)
 import axios from 'axios';
 import { checkAndRefreshToken } from '../util/checkingToken';
-// import User_interface from '../interface/user.Interface';
+// import User_type from '../interface/user.Interface';
 
 const postData = async (route: string, data: any, check: any) => {
 

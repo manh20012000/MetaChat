@@ -1,4 +1,4 @@
-import { realm } from "../Schema/schemaModel";
+import { realm } from "../Schema/schema_realm_model";
 
 const createListfriend = async (friend: any) => {
    try {

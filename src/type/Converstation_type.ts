@@ -1,6 +1,6 @@
-import { Message_interface } from "./Chat_interface";
+import { Message_type } from "./Chat_type";
 
-interface Conversation {
+type Conversation= {
   _id: string; // ID của cuộc trò chuyện
   roomName: string | null; // Tên của nhóm hoặc tên động được tạo từ các thành viên
   avatar: string | null; // Ảnh đại diện nhóm hoặc danh sách ảnh đại diện
@@ -8,7 +8,7 @@ interface Conversation {
   color: string; // Màu sắc của nhóm (nếu có)
   icon: string; //
   background: string; // Background của nhóm (nếu có)
-  messages: Message_interface[];
+  messages: Message_type[];
   participants: [
     {
       _id: string;

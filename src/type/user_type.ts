@@ -1,5 +1,5 @@
 
-interface User_interface {
+type User_type = {
     _id: string;
     access_token: string;
     name: string;
@@ -18,4 +18,4 @@ interface User_interface {
 //     user_id: string;
 //   }
 // export type { userMessage };
-export default User_interface 
+export default User_type; 

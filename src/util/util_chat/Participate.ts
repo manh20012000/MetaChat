@@ -1,4 +1,4 @@
-import {itemuser} from '../../interface/search_user.interface';
+import {itemuser} from '../../type/search_type';
 
 let participate: itemuser[] = [];
 

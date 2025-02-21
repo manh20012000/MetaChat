@@ -41,21 +41,21 @@ import {
 } from '@gorhom/bottom-sheet';
 import HandlerSendMessage from '../../../util/util_chat/SendMessages';
 import GetAllMedia_Bottomsheet from '../homeComponent/GetAllMedia';
-import CustomInputToolbar from '../../Component/GifchatComponent/RenderInputToolbar';
+import CustomInputToolbar from '../../Component/Gifchat/RenderInputToolbar';
 import {renderSend} from './Gited_Chat.component';
 import {postData, postFormData} from '../../../service/resfull_api';
 import useCheckingService from '../../../service/Checking_service';
-import Conversation from '../../../interface/Converstation.interface';
-import {Message_interface} from '../../../interface/Chat_interface';
+import Conversation from '../../../type/Converstation_type';
+import {Message_type} from '../../../type/Chat_type';
 import Video from 'react-native-video';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MediaGrid from '../homeComponent/MediaGrid';
-import {update_Converstation} from '../../../cache_data/exportdata.ts/chat_convert_datacache';
+import {update_Converstation} from '../../../cache_data/exportdata.ts/converstation_cache';
 import {AnyList} from 'realm';
-import MessageItem from '../../Component/GifchatComponent/RenderMessage';
-import userMessage from '../../../interface/userMessage.interface';
-import RenderIconReact from '../../Component/GifchatComponent/RenderIconReact';
-import RenderOptionMessage from '../../Component/GifchatComponent/RenderOptionMessage';
+import MessageItem from '../../Component/Gifchat/RenderMessage';
+import userMessage from '../../../type/useMessage_type';
+import RenderIconReact from '../../Component/Gifchat/RenderIconReact';
+import RenderOptionMessage from '../../Component/Gifchat/RenderOptionMessage';
 interface GifchatUserProps {
   conversation: Conversation;
 }
@@ -76,17 +76,18 @@ const GifchatUser = (props: GifchatUserProps) => {
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [buttonScale] = useState(new Animated.Value(1));
   const [maginTextInput, setMaginTextInput] = useState<boolean>(false);
-  const [replyMessage, setReplyMessage] = useState<Message_interface | null>(
+  const [replyMessage, setReplyMessage] = useState<Message_type | null>(
     null,
   );
   const [selectedMessages, setSelectedMessages] =
-    useState<Message_interface | null>(null);
+    useState<Message_type | null>(null);
   //  Store selected message IDs
   const [userChat] = useState<any>(
     conversation.participants.find(
       (participant: any) => participant.user_id === user._id,
     ),
   );
+
   //danh mục dành cho bootomsheet
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['40%', '90%'], []);
@@ -150,7 +151,7 @@ const GifchatUser = (props: GifchatUserProps) => {
 
   // phần này dành cho việc gửi tin nhắn
   const onSend = useCallback(
-    async (message: Message_interface, filesOrder: any) => {
+    async (message: Message_type, filesOrder: any) => {
       const dataSaveSend = {
         user: {
           _id: userChat._id,
@@ -212,8 +213,8 @@ const GifchatUser = (props: GifchatUserProps) => {
           throw new Error('Message sending failed');
         }
       } catch (error) {
-        setMessages((previousMessages: Message_interface[]) =>
-          previousMessages.map((msg: Message_interface) =>
+        setMessages((previousMessages: Message_type[]) =>
+          previousMessages.map((msg: Message_type) =>
             msg._id === newMessage._id ? {...msg, status: 'failed'} : msg,
           ),
         );
@@ -222,7 +223,7 @@ const GifchatUser = (props: GifchatUserProps) => {
     },
     [],
   );
-  const handlerReaction = useCallback((message: Message_interface) => {}, []);
+  const handlerReaction = useCallback((message: Message_type) => {}, []);
   useEffect(() => {
     socket?.on('updateMessage', ({updatedMessage, send_id}) => {
       if (send_id !== userChat._id) {
@@ -259,7 +260,7 @@ const GifchatUser = (props: GifchatUserProps) => {
     // };
   }, []);
 
-  const handlerreplyTo = useCallback((props: Message_interface) => {
+  const handlerreplyTo = useCallback((props: Message_type) => {
     Vibration.vibrate(50);
     setReplyMessage(props);
   }, []);

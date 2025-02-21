@@ -47,7 +47,7 @@ GoogleSignin.configure({
 //   webClientId: '',
 // } as any);
 import FlashMessage, { showMessage } from 'react-native-flash-message';
-import Statusbar from '../Component/StatusBar.tsx';
+import Statusbar from '../Component/Home_search/HomeSearch/StatusBar.tsx';
 const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
   const color = useSelector((state: any) => state.colorApp.value);
   const insets = useSafeAreaInsets();

@@ -11,7 +11,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { InputToolbar } from 'react-native-gifted-chat';
 import { useSelector } from 'react-redux';
 import { Send } from '../../../assets/svg/svgfile';
-import Conversation from '../../../interface/Converstation.interface';
+import Conversation from '../../../type/Converstation_type';
 import { BSON } from 'bson';
 
 const CustomInputToolbar = (props: any) => {
@@ -40,6 +40,7 @@ const CustomInputToolbar = (props: any) => {
       callDetails:null,
       createdAt: newdate,
       reactions: [],
+      reciver: conversation.participantIds,
       isRead: [],
       replyTo: replyMessage === null ? null : {
         _id:replyMessage._id,

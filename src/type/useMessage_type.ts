@@ -1,4 +1,4 @@
-interface userMessage {
+type userMessage = {
   _id: string;
   action_notifi: boolean;
   avatar: string;

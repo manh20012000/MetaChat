@@ -3,7 +3,7 @@ import { Animated, Text, TouchableOpacity, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import handlerMessage from '../../../util/util_chat/messageReaction';
-import userMessage from '../../../interface/userMessage.interface';
+import userMessage from '../../../type/useMessage_type';
 import { putData } from '../../../service/resfull_api';
 import { API_ROUTE } from '../../../service/api_enpoint';
 import useCheckingService from '../../../service/Checking_service';

@@ -20,10 +20,10 @@ import {
   BottomSheetView,
   BottomSheetModalProvider,
 } from '@gorhom/bottom-sheet';
-import Statusbar from '../Component/StatusBar';
+import Statusbar from '../Component/Home_search/HomeSearch/StatusBar.tsx';
 import {Pen} from '../../assets/svg/svgfile';
 import BottonsheetHome from './homeComponent/BottomsheetHome';
-import Conversation from '../../interface/Converstation.interface';
+import Conversation from '../../type/Converstation_type.ts';
 import {getData} from '../../service/resfull_api';
 import {API_ROUTE} from '../../service/api_enpoint';
 import dayjs from 'dayjs';
@@ -31,16 +31,16 @@ import {
   getConversations,
   createConversation,
   delete_converStation,
-} from '../../cache_data/exportdata.ts/chat_convert_datacache';
+} from '../../cache_data/exportdata.ts/converstation_cache.ts';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import {realm} from '../../cache_data/Schema/schemaModel';
+import {realm} from '../../cache_data/Schema/schema_realm_model.tsx';
 import {useSocket} from '../../util/socket.io';
-import {Message_interface} from '../../interface/Chat_interface';
+import {Message_type} from '../../type/Chat_type.ts';
 import {
   createListfriend,
   getListfriend,
-} from '../../cache_data/exportdata.ts/friend_caching';
-import userMessage from '../../interface/userMessage.interface.ts';
+} from '../../cache_data/exportdata.ts/friend_cache.ts';
+import userMessage from '../../type/useMessage_type.ts';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 dayjs.extend(relativeTime); // Kích hoạt plugin
 export default function Home({navigation}: {navigation: any}) {
@@ -173,7 +173,7 @@ export default function Home({navigation}: {navigation: any}) {
     };
     const handleNewMessage = (messages: any) => {
       const { message, conversation, send_id } = messages;
-      console.log(user.name)
+      console.log(user.name, send_id)
       const conditions = conversation.participantIds
         .map((id: any, index: any) => `participantIds CONTAINS $${index}`)
         .join(' AND ');
@@ -189,7 +189,7 @@ export default function Home({navigation}: {navigation: any}) {
       realm.write(() => {
         if (existingConversation) {
           existingConversation.lastMessage = message;
-          (existingConversation.messages as Message_interface[]).unshift(
+          (existingConversation.messages as Message_type[]).unshift(
             message,
           );
           existingConversation.updatedAt = message.createdAt;
@@ -215,7 +215,7 @@ export default function Home({navigation}: {navigation: any}) {
       updatedMessage,
     }: {
       converstation_id: string;
-      updatedMessage: Message_interface;
+      updatedMessage: Message_type;
     }) => {
       if (!realm) return; // Kiểm tra realm có tồn tại không
       realm.write(async () => {
@@ -296,7 +296,7 @@ export default function Home({navigation}: {navigation: any}) {
               initialNumToRender={10}
               data={data_convertstation}
               // Sử dụng _id làm khóa duy nhất
-              renderItem={({item}: {item: Conversation}) => {
+                renderItem={({ item }: { item: Conversation }) => {
                 const statusUser: boolean = item.participantIds.some(
                   (participantIds: string) => {
                     if (participantIds !== user._id) {
@@ -380,7 +380,8 @@ export default function Home({navigation}: {navigation: any}) {
                             );
 
                           // Số lượng người tham gia khác currentUser
-                          const count = filteredParticipants.length;
+                            const count = filteredParticipants.length;
+                           
                           if (count === 1) {
                             // Chỉ hiển thị ảnh của 1 người (chiếm 100%)
                             return (
@@ -503,10 +504,10 @@ export default function Home({navigation}: {navigation: any}) {
                             color: color.white,
                             width: 100,
                           }}>
-                          {item.lastMessage?.text || 'Bắt đầu cuộc thoại'}
+                          {item.messages[item.messages.length-1]?.text || 'Bắt đầu cuộc thoại'}
                         </Text>
                         <Text ellipsizeMode="tail" numberOfLines={1}>
-                          {dayjs(item.lastMessage?.createdAt).from(now)}
+                          {dayjs(item.messages[item.messages.length - 1]?.createdAt).from(now)}
                         </Text>
                       </View>
                     </View>
@@ -726,7 +727,7 @@ export default function Home({navigation}: {navigation: any}) {
         if (existingConversation) {
           console.log('đã tônf tại ')
           existingConversation.lastMessage = message;
-          (existingConversation.messages as Message_interface[]).unshift(
+          (existingConversation.messages as Message_type[]).unshift(
             message,
           )
           existingConversation.updatedAt = message.createdAt;
