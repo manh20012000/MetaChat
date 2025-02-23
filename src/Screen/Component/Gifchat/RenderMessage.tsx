@@ -24,7 +24,7 @@ interface MessageProps {
   props: any;
   selectedMessages_id: any;
   setSelectedMessages: React.Dispatch<React.SetStateAction<any>>;
-  
+  setReactionPosition: React.Dispatch<React.SetStateAction<any>>;
 }
 
 const MessageItem: React.FC<MessageProps> = ({
@@ -38,6 +38,7 @@ const MessageItem: React.FC<MessageProps> = ({
   props,
   selectedMessages_id,
   setSelectedMessages,
+  setReactionPosition
 }) => {
   const { user } = useCheckingService();
   const [color] = useState(useSelector((state: any) => state.colorApp.value));
@@ -51,7 +52,7 @@ const MessageItem: React.FC<MessageProps> = ({
   
   const translateX = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const [reactionPosition, setReactionPosition] = useState({ x: 0, y: 0 });
+
 
   const panResponder = useRef(
     PanResponder.create({
@@ -76,9 +77,9 @@ const MessageItem: React.FC<MessageProps> = ({
     }),
   ).current;
 
-  const handleLongPressMessage = () => {
-    console.log('hdhdhd')
-    handleLongPress(currentMessage);
+  const handleLongPressMessage = ({ x, y }: { x: number; y: number }, message: any) => {
+    setReactionPosition({ x, y }); // Lưu vị trí nhấn giữ
+    handleLongPress(message); // Gọi hàm xử lý nhấn giữ
     setShowReactions(true);
   };
 
@@ -105,7 +106,12 @@ const MessageItem: React.FC<MessageProps> = ({
   };
 
   return (
-    <Pressable onPress={() => console.log('hahahahdffsd')}>
+    <Pressable onPress={() => {
+      console.log('hahahahdffsd')
+      setSelectedMessages(null)
+    }}
+    
+    >
       <View style={{ marginBottom: 2, marginHorizontal: 10, position: 'relative' }}>
         <Day {...props} />
         <Animated.View {...panResponder.panHandlers} style={{ transform: [{ translateX }] }}>

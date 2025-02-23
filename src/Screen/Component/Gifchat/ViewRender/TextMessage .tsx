@@ -32,12 +32,10 @@ export const TextMessage: React.FC<TextMessageProps> = ({
         if (messageRef.current) {
            
             messageRef.current.measureInWindow((x, y, width, height) => {
-                console.log(`🟢 Vị trí View: X=${x}, Y=${y}, Width=${width}, Height=${height}`);
+                
                 handleLongPressMessage({ x, y }, currentMessage);
             });
-        } else {
-            console.log("🔴 messageRef.current is null");
-        }
+        } 
     };
 
     return (

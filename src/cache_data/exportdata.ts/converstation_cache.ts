@@ -1,5 +1,5 @@
 import Conversation from '../../type/Home/Converstation_type';
-import {Message_type} from '../../type/Chat_type';
+import { Message_type } from '../../type/Home/Chat_type';
 import {realm} from '../Schema/schema_realm_model';
 import {itemuser} from '../../type/Home/search_type';
 import { BSON, EJSON, ObjectId } from 'bson';
@@ -201,8 +201,23 @@ const delete_converStation = async (
     throw error;
   }
 };
+const updateMessage = (participantIds:[string],message:Message_type) => {
+  const conditions = participantIds
+    .map((id, index) => `participantIds CONTAINS $${index}`)
+    .join(' AND ');
+
+  const conversations = realm
+    .objects('Conversation')
+    .filtered(
+      `participantIds.@size == ${participantIds.length} AND ${conditions}`,
+      ...participantIds,
+    );
+
+  let existingConversation = conversations[0] || null; // Lấy cuộc hội thoại đầu tiên nếu có
+};
 
 export {
+  updateMessage,
   createConversation,
   delete_converStation,
   update_Converstation,

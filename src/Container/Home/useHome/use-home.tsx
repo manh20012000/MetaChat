@@ -171,7 +171,6 @@ export const useHomeLogic = (navigation: any) => {
             let existingConversation = conversations[0] || null;
             realm.write(() => {
                 if (existingConversation) {
-                    existingConversation.lastMessage = message;
                     (existingConversation.messages as Message_type[]).unshift(message);
                     existingConversation.updatedAt = message.createdAt;
                 } else {

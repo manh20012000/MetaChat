@@ -19,7 +19,8 @@ export const GiftedChatView = ({ conversation }: { conversation: Conversation })
     messages,
     selectedItems,
     buttonScale,
-    maginTextInput, setReplyMessage,
+    maginTextInput,
+    setReplyMessage,
     replyMessage,
     selectedMessages,
     bottomSheetModalRef,
@@ -34,6 +35,8 @@ export const GiftedChatView = ({ conversation }: { conversation: Conversation })
     handlerreplyTo,
     handleLongPress,
     handlerdeleteMessage,
+    setReactionPosition,
+    reactionPosition
   } = useGiftedChatLogic(conversation);
 
   return (
@@ -77,6 +80,7 @@ export const GiftedChatView = ({ conversation }: { conversation: Conversation })
                 scrollToMessage={scrollToMessage}
                 selectedMessages_id={selectedMessages?._id}
                 setSelectedMessages={setSelectedMessages}
+                setReactionPosition={setReactionPosition}
          
                 
               />
@@ -105,10 +109,12 @@ export const GiftedChatView = ({ conversation }: { conversation: Conversation })
       </BottomSheetModalProvider>
       {selectedMessages && (
         <>
-        
             <ReactionIcons
-              isMyMessage={true}
-              userChat={userChat}
+            isMyMessage={true}
+            userChat={userChat}
+            handlerReactIcon={handlerReaction}
+            reactionPosition={reactionPosition}
+            selectedMessages={selectedMessages}
             />
           <RenderOptionMessage
             userChat={userChat}

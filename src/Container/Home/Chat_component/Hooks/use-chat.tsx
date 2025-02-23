@@ -12,6 +12,7 @@ import { Message_type } from '../../../../type/Home/Chat_type';
 import {update_Converstation} from '../../../../cache_data/exportdata.ts/converstation_cache';
 import {Vibration} from 'react-native';
 import {converstationsend} from '../../../../util/util_chat/converstationSend';
+import { updateMessageReaction } from '../../../../service/MesssageService';
 
 export const useGiftedChatLogic = (conversation: Conversation) => {
   const {width, height} = useWindowDimensions();
@@ -32,7 +33,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   const [selectedMessages, setSelectedMessages] = useState<Message_type | null>(
     null,
   );
-
+  const [reactionPosition, setReactionPosition] = useState({ x: 0, y: 0 });
   const [userChat] = useState<any>(
     conversation.participants.find(
       (participant: any) => participant.user_id === user._id,
@@ -151,7 +152,12 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     }
   }, []);
 
-  const handlerReaction = useCallback((message: Message_type) => {}, []);
+  const handlerReaction = useCallback(
+    async (message: Message_type) => {
+      await updateMessageReaction(message, userChat,);
+    },
+    [],
+  );
 
   useEffect(() => {
     socket?.on('updateMessage', ({updatedMessage, send_id}) => {
@@ -222,5 +228,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     handleLongPress,
     handlerdeleteMessage,
     setReplyMessage,
+    setReactionPosition,
+    reactionPosition
   };
 };

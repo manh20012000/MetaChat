@@ -60,7 +60,7 @@ export type Message_type = {
   statusSendding: boolean;
 };
 
-export interface reactions {
+export type reactions ={
     user: {
       _id: string;
       name: string;
