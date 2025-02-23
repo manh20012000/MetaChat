@@ -1,7 +1,7 @@
 import react, { useState } from 'react';
 import { Text, View, Pressable, useWindowDimensions,Modal, TouchableOpacity} from 'react-native';
 import { color } from '../../../assets/color/color';
-import Conversation from '../../../type/Converstation_type';
+import Conversation from '../../../type/Home/Converstation_type';
 import { delete_converStation } from '../../../cache_data/exportdata.ts/converstation_cache';
 import { useDispatch, useSelector } from 'react-redux';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';

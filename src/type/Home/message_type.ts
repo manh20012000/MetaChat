@@ -6,6 +6,7 @@ export type IMessage ={
     _id: string;
     name: string;
     avatar: string;
+    user_id: string;
   };
   voice: string;
   conversationId: string; // ID cuộc hội thoại

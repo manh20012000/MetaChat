@@ -1,0 +1,226 @@
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useSelector} from 'react-redux';
+import {Animated, FlatList, useWindowDimensions, Easing} from 'react-native';
+import {GiftedChat} from 'react-native-gifted-chat';
+import {API_ROUTE} from '../../../../service/api_enpoint';
+import {useSocket} from '../../../../util/socket.io';
+import {BottomSheetModal} from '@gorhom/bottom-sheet';
+import {postFormData} from '../../../../service/resfull_api';
+import useCheckingService from '../../../../service/Checking_service';
+import Conversation from '../../../../type/Home/Converstation_type';
+import { Message_type } from '../../../../type/Home/Chat_type';
+import {update_Converstation} from '../../../../cache_data/exportdata.ts/converstation_cache';
+import {Vibration} from 'react-native';
+import {converstationsend} from '../../../../util/util_chat/converstationSend';
+
+export const useGiftedChatLogic = (conversation: Conversation) => {
+  const {width, height} = useWindowDimensions();
+  const color = useSelector(
+    (value: {colorApp: {value: any}}) => value.colorApp.value,
+  );
+  const {user, dispatch} = useCheckingService();
+  const socket = useSocket();
+  const isPortrait = height > width;
+
+  const [messages, setMessages] = useState<any[]>(
+    Array.from(conversation.messages),
+  );
+  const [selectedItems, setSelectedItems] = useState<any[]>([]);
+  const [buttonScale] = useState(new Animated.Value(1));
+  const [maginTextInput, setMaginTextInput] = useState<boolean>(false);
+  const [replyMessage, setReplyMessage] = useState<Message_type | null>(null);
+  const [selectedMessages, setSelectedMessages] = useState<Message_type | null>(
+    null,
+  );
+
+  const [userChat] = useState<any>(
+    conversation.participants.find(
+      (participant: any) => participant.user_id === user._id,
+    ),
+  );
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const snapPoints = useMemo(() => ['40%', '90%'], []);
+
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
+
+  const handleSheetChanges = useCallback((index: number) => {
+    if (index === -1) {
+      setMaginTextInput(false);
+      setSelectedItems([]);
+    }
+  }, []);
+
+  const triggerAnimation = () => {
+    Animated.sequence([
+      Animated.timing(buttonScale, {
+        toValue: 1.2,
+        duration: 150,
+        easing: Easing.ease,
+        useNativeDriver: true,
+      }),
+      Animated.timing(buttonScale, {
+        toValue: 1,
+        duration: 150,
+        easing: Easing.ease,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  useEffect(() => {
+    if (selectedItems.length > 0) {
+      triggerAnimation();
+    }
+  }, [selectedItems]);
+
+  const flatListRef = useRef<FlatList<any> | null>(null);
+
+  const scrollToMessage = (messageId: string) => {
+    const index = messages.findIndex(msg => msg._id === messageId);
+    if (index !== -1) {
+      flatListRef.current?.scrollToIndex({index, animated: true});
+    }
+  };
+
+  const handleSelect = useCallback((item: any) => {
+    setSelectedItems(prevSelectedItems => {
+      const isSelected = prevSelectedItems.some(
+        (selected: any) => selected.id === item.node.id,
+      );
+
+      if (isSelected) {
+        return prevSelectedItems.filter(
+          (selected: any) => selected.id !== item.node.id,
+        );
+      } else {
+        return [...prevSelectedItems, item.node];
+      }
+    });
+  }, []);
+
+  const onSend = useCallback(async (message: Message_type, filesOrder: any) => {
+    const dataSaveSend = await converstationsend(
+      message,
+      filesOrder,
+      userChat,
+      conversation,
+    );
+    const newMessage = {
+      ...message,
+      user: {
+        _id: userChat._id,
+        name: userChat.name,
+        avatar: userChat.avatar,
+        use_id: user._id,
+      },
+      status: 'sending',
+    };
+
+    try {
+      setMessages(previousMessages =>
+        GiftedChat.append(previousMessages, [newMessage]),
+      );
+
+      const response = await postFormData(
+        API_ROUTE.SEND_MESSAGE,
+        dataSaveSend,
+        {
+          dispatch,
+          user,
+        },
+      );
+
+      if (response.status === 200) {
+        setMessages(previousMessages =>
+          previousMessages.map(msg =>
+            msg._id === newMessage._id ? {...msg, status: 'sent'} : msg,
+          ),
+        );
+      } else {
+        throw new Error('Message sending failed');
+      }
+    } catch (error) {
+      setMessages((previousMessages: Message_type[]) =>
+        previousMessages.map((msg: Message_type) =>
+          msg._id === newMessage._id ? {...msg, status: 'failed'} : msg,
+        ),
+      );
+      console.error('send message failed:', error);
+    }
+  }, []);
+
+  const handlerReaction = useCallback((message: Message_type) => {}, []);
+
+  useEffect(() => {
+    socket?.on('updateMessage', ({updatedMessage, send_id}) => {
+      if (send_id !== userChat._id) {
+        setMessages(previousMessages => {
+          const messageIndex = previousMessages.findIndex(
+            message => message._id === updatedMessage._id,
+          );
+
+          if (messageIndex !== -1) {
+            const updatedMessages = [...previousMessages];
+            updatedMessages[messageIndex] = updatedMessage;
+            return updatedMessages;
+          } else {
+            return GiftedChat.append(previousMessages, updatedMessage);
+          }
+        });
+      }
+    });
+
+    socket?.on('new_message', messages => {
+      const {message, send_id} = messages;
+
+      if (send_id !== userChat._id) {
+        setMessages(previousMessages =>
+          GiftedChat.append(previousMessages, message),
+        );
+      }
+    });
+  }, []);
+
+  const handlerreplyTo = useCallback((props: Message_type) => {
+    Vibration.vibrate(50);
+    setReplyMessage(props);
+  }, []);
+
+  const handleLongPress = useCallback((message: any) => {
+    Vibration.vibrate(50);
+    setSelectedMessages(message);
+  }, []);
+
+  const handlerdeleteMessage = useCallback(async (message: any) => {
+    setMessages((prevMessages: any) =>
+      prevMessages.filter((id: any) => id._id !== message._id),
+    );
+    setSelectedMessages(null);
+  }, []);
+
+  return {
+    color,
+    userChat,
+    messages,
+    selectedItems,
+    buttonScale,
+    maginTextInput,
+    replyMessage,
+    selectedMessages,
+    bottomSheetModalRef,
+    snapPoints,
+    setSelectedMessages,
+    handlePresentModalPress,
+    handleSheetChanges,
+    scrollToMessage,
+    handleSelect,
+    onSend,
+    handlerReaction,
+    handlerreplyTo,
+    handleLongPress,
+    handlerdeleteMessage,
+    setReplyMessage,
+  };
+};

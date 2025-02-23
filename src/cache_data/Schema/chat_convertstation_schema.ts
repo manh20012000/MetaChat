@@ -131,7 +131,7 @@ const ConversationSchema = {
     updatedAt: 'string?', // Thời gian sửa đổi gần nhất
     permission: 'string?',
     participantIds: 'string[]',
-    isDeleted:'string?'
+    isDeleted:'string[]'
   },
 };
 

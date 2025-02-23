@@ -11,7 +11,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { InputToolbar } from 'react-native-gifted-chat';
 import { useSelector } from 'react-redux';
 import { Send } from '../../../assets/svg/svgfile';
-import Conversation from '../../../type/Converstation_type';
+import Conversation from '../../../type/Home/Converstation_type';
 import { BSON } from 'bson';
 
 const CustomInputToolbar = (props: any) => {

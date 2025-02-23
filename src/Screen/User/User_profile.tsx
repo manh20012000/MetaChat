@@ -19,7 +19,7 @@ import { logout } from '../../Redux_Toolkit/Reducer/auth.slice';
 import { HandlerNotification } from '../../util/checking_fcmtoken';
 import { CommonActions } from '@react-navigation/native';
 
-import Statusbar from '../Component/Home_search/HomeSearch/StatusBar';
+import Statusbar from '../../Constants/StatusBar';
 
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';

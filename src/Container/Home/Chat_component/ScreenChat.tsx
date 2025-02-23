@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { Image, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
-import { itemuser } from "../../../type/search_type";
+import { itemuser } from "../../../type/Home/search_type";
 import { useDispatch, useSelector } from "react-redux";
-import Statusbar from "../../Component/Home_search/HomeSearch/StatusBar";
+import Statusbar from "../../../Constants/StatusBar";
 import { BackChat, Backsvg, Call, Infor, VideoCall } from "../../../assets/svg/svgfile";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import GifchatUser from "./Gifchat";
+import { GiftedChatView } from "./GiftedChat";
 import BackIcon from "../../../assets/svg/SvgIcon";
 import Icon from "../../../assets/svg/Customsvg";
 import { TextInput } from "react-native-gesture-handler";
 import { GiftedChat, InputToolbar } from "react-native-gifted-chat";
-import Conversation from "../../../type/Converstation_type";
+import Conversation from "../../../type/Home/Converstation_type";
 const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, navigation }) => {
     const color = useSelector((value: any) => value.colorApp.value)
     const insert = useSafeAreaInsets()
@@ -235,7 +235,7 @@ const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, nav
             height: '1%',
           }}></View>
 
-        <GifchatUser conversation={conversation}/>
+        <GiftedChatView conversation={conversation}/>
       </View>
     );
 }

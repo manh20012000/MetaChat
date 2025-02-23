@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, useWindowDimensions, TouchableOpacity, ActivityIndicator, Platform, FlatList, Pressable } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import Statusbar from "./StatusBar";
+import Statusbar from "../../../../Constants/StatusBar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { TextInput } from "react-native-gesture-handler";
 import { Backsvg, Send, WhiteBack } from "../../../../assets/svg/svgfile";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { postData, getResearch } from "../../../../service/resfull_api";
-import User_type from "../../../../type/user_type";
+import User_type from "../../../../type/Home/user_type";
 import { API_ROUTE } from "../../../../service/api_enpoint";
 import { clearUserSearch, create_userSearch, get_userSearch } from "../../../../cache_data/exportdata.ts/useSearch_cache";
-import { User_search } from "../../../../type/search_type";
-import Skeleton from "./Skeleton";
-import { itemuser } from "../../../../type/search_type";
+import { User_search } from "../../../../type/Home/search_type";
+import Skeleton from "../../../../Constants/Skeleton";
+import { itemuser } from "../../../../type/Home/search_type";
 import SearchItemUser from "./Search_item_user";
 const SearchScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const color = useSelector((state: any) => state.colorApp.value)

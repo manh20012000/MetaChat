@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { login } from '../Redux_Toolkit/Reducer/auth.slice';
 import { API_URL } from '../service/resfull_api';
 import { useDispatch } from 'react-redux';
-import User_type from '../type/user_type';
+import User_type from '../type/Home/user_type';
 import { API_ROUTE } from '../service/api_enpoint';
 export const checkAndRefreshToken = async (dispatch: any, user:User_type) => {
   // Lấy token từ AsyncStorage

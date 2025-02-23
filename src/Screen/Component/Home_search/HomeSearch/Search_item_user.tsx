@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Text, Image, Pressable, View } from 'react-native'
-import { itemuser } from '../../../../type/search_type';
+import { itemuser } from '../../../../type/Home/search_type';
 import { useDispatch, useSelector } from 'react-redux';  
 import { Add_Participate } from '../../../../util/util_chat/Participate';
 import { createConversation, findAndconvertConversation, getConversations, update_Converstation } from '../../../../cache_data/exportdata.ts/converstation_cache';
-import Conversation from '../../../../type/Converstation_type';
+import Conversation from '../../../../type/Home/Converstation_type';
 import { useSocket } from '../../../../util/socket.io';
 import { ObjectId } from "bson";
 import { createListfriend } from '../../../../cache_data/exportdata.ts/friend_cache';

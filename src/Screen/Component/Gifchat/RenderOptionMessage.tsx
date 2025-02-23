@@ -4,7 +4,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import handlerMessage from '../../../util/util_chat/messageReaction';
-import userMessage from '../../../type/useMessage_type';
+import userMessage from '../../../type/Home/useMessage_type';
 import { deleteData, putData } from '../../../service/resfull_api';
 import { API_ROUTE } from '../../../service/api_enpoint';
 import useCheckingService from '../../../service/Checking_service';
@@ -59,20 +59,24 @@ const RenderOptionMessage: React.FC<MessageProps> = ({
             }}>
 
             <TouchableOpacity
+                style={{alignItems: 'center',justifyContent:'center',}}
                 onPress={handlerdelete}
             >
                 <MaterialIcons name='delete' size={28} color="red" />
                 <Text style={{ color: color.white, fontWeight: '700' }}>Delete</Text>
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity
+                style={{ alignItems: 'center', justifyContent: 'center', }}
+            >
                 <Ionicons name='copy' size={25} color="red" />
                 <Text style={{ color: color.white, fontWeight: '700' }}>Sao chép</Text>
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity
+                style={{ alignItems: 'center', justifyContent: 'center', }}>
                 <AntDesign name='pushpin' size={25} color="red" />
                 <Text style={{ color: color.white, fontWeight: '700' }}>Gim</Text>
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', }}>
                 <MaterialIcons color="red" name="reply" size={30} />
                 <Text style={{ color: color.white, fontWeight: '700' }}>Reply</Text>
             </TouchableOpacity>

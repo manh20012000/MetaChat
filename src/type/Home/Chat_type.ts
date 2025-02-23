@@ -5,6 +5,7 @@ export type Message_type = {
     _id: string;
     name: string;
     avatar: string;
+    user_id: string;
   };
   messageType: string;
   voice: string;
@@ -48,11 +49,16 @@ export type Message_type = {
   ];
   replyTo: {
     _id: string;
-    content: string; // Nội dung của tin nhắn reply
+    text: string; // Nội dung của tin nhắn reply
+    messageType: string;
+    user:{_id: string,
+      name: string,
+      avatar: string,
+      user_id: string,}
   };
   other: string;
   statusSendding: boolean;
-}
+};
 
 export interface reactions {
     user: {

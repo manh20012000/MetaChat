@@ -1,7 +1,7 @@
-import Conversation from '../../type/Converstation_type';
+import Conversation from '../../type/Home/Converstation_type';
 import {Message_type} from '../../type/Chat_type';
 import {realm} from '../Schema/schema_realm_model';
-import {itemuser} from '../../type/search_type';
+import {itemuser} from '../../type/Home/search_type';
 import { BSON, EJSON, ObjectId } from 'bson';
 
 import { deleteData, postData } from '../../service/resfull_api';
