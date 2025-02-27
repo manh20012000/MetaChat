@@ -37,12 +37,12 @@ export const checkAndRefreshToken = async (dispatch: any, user:User_type) => {
 
         if (response.status === 200 && data) {
           // Lưu token mới vào AsyncStorage
-      
-          const userDataString = JSON.stringify(data.data);
-          const accessTokenNew = data.data.access_token;
-          await AsyncStorage.setItem('user', userDataString);
-          await AsyncStorage.setItem('access_token', accessTokenNew);
-          await AsyncStorage.setItem('refresh_token', user.refresh_token);
+          console.log('cập nhật lại data', data.data.access_token
+          )
+          const userDataString = data.data;
+          await AsyncStorage.setItem('user', JSON.stringify(userDataString));
+          await AsyncStorage.setItem('access_token', JSON.stringify(data.data.access_token));
+          await AsyncStorage.setItem('refresh_token', JSON.stringify(data.data.refresh_token));
 
           // Cập nhật Redux
           dispatch(login(data.data));

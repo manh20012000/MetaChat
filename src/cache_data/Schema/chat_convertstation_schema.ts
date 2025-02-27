@@ -97,20 +97,12 @@ const CallDetailSchema = {
     createdAt: 'string?', // Thời gian tạo
   },
 };
-const ReactionDetailSchema = {
-  name: 'ReactionDetail', // ✅ Định nghĩa schema mới
-  properties: {
-    id: 'int', // Sửa từ 'number' thành 'int'
-    name: 'string',
-    title: 'string',
-  },
-};
 
 const ReactionSchema = {
   name: 'Reaction',
   properties: {
     user: 'user?', // ✅ Giữ nguyên
-    reaction: 'ReactionDetail', // ✅ Liên kết đến schema `ReactionDetail`
+    reaction: 'int?', 
   },
 };
 
@@ -145,5 +137,5 @@ export {
   ReactionSchema,
   userSchema,
   ReplyToSchema,
-  IsReadSchema,ReactionDetailSchema
+  IsReadSchema,
 };

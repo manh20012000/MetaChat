@@ -2,7 +2,7 @@ import React from 'react';
 import { Pressable, View, Animated, Keyboard } from 'react-native';
 import { GiftedChat } from 'react-native-gifted-chat';
 import { BottomSheetModalProvider, BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
-import { useGiftedChatLogic } from './Hooks/use-chat';
+import { useGiftedChatLogic } from './Hooks/use-Giftedchat';
 import CustomInputToolbar from '../../../Screen/Component/Gifchat/RenderInputToolbar';
 import { renderSend } from './GiftedchatComponent';
 import MessageItem from '../../../Screen/Component/Gifchat/RenderMessage';

@@ -22,7 +22,7 @@ const handler_chat = async () => {
     const participants = [
       {
         _id: new ObjectId().toString(),
-        user_id: user._id.toString(),
+          user_id: user._id.toString(),
           name: user.name,
           avatar: user.avatar, 
           role: 'admin',
@@ -31,7 +31,7 @@ const handler_chat = async () => {
       },
       {
         _id: new ObjectId().toString(),
-        user_id: item._id.toString(),
+          user_id: item._id.toString(),
           name: item.name,
           avatar: item.avatar,
           role: 'member',

@@ -1,6 +1,6 @@
 import Realm from "realm";
 import { UserSchema } from "./schema_search_user";
-import { ConversationSchema, AttachmentSchema, CallDetailSchema, MessageSchema, ParticipantSchema, ReactionSchema, ReplyToSchema, LastMessageSchema, userSchema, IsReadSchema, ReactionDetailSchema } from "./chat_convertstation_schema";
+import { ConversationSchema, AttachmentSchema, CallDetailSchema, MessageSchema, ParticipantSchema, ReactionSchema, ReplyToSchema, LastMessageSchema, userSchema, IsReadSchema,  } from "./chat_convertstation_schema";
 import friendSchema from "./schema_user";
 const schemas = [
   UserSchema,
@@ -14,7 +14,7 @@ const schemas = [
   ReplyToSchema,
   userSchema,
   friendSchema,
-  IsReadSchema, ReactionDetailSchema
+  IsReadSchema,
 ];
 export const realm = new Realm({
     schema: schemas,

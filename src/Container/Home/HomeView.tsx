@@ -64,7 +64,7 @@ export const HomeView = ({navigation}: {navigation: any}) => {
               initialNumToRender={10}
               data={data_convertstation}
                 renderItem={({ item }: { item: Conversation }) => {
-                  
+               
                 const statusUser: boolean = item.participantIds.some(
                   (participantIds: string) => {
                     if (participantIds !== user._id) {
@@ -84,6 +84,7 @@ export const HomeView = ({navigation}: {navigation: any}) => {
                           recipientIds: recipientIds,
                         });
                       }
+                      
                       navigation.navigate('HomeChatPersion', {
                         conversation: item,
                       });
@@ -144,24 +145,30 @@ export const HomeView = ({navigation}: {navigation: any}) => {
                               (participant: any) =>
                                 participant.user_id !== user._id,
                             );
+
                           const count = filteredParticipants.length;
+
                           if (count === 1) {
+                           
                             return (
-                              <Image
-                                style={{
-                                  width: 50,
-                                  height: 50,
-                                  borderRadius: 25,
-                                  backgroundColor: color.gray,
-                                }}
-                                source={{
-                                  uri: filteredParticipants[0].avatar,
-                                }}
-                              />
+                              <>
+                                <Image
+                                  style={{
+                                    width: 50,
+                                    height: 50,
+                                    borderRadius: 25,
+                                    backgroundColor: color.gray,
+                                  }}
+                                  source={{
+                                    uri: filteredParticipants[0].avatar,
+                                  }}
+                                />
+                              </>
                             );
                           } else if (count === 2) {
                             return (
                               <>
+                               
                                 <Image
                                   style={{
                                     width: 30,
@@ -262,14 +269,16 @@ export const HomeView = ({navigation}: {navigation: any}) => {
                             color: color.white,
                             width: 100,
                           }}>
-                          {item.messages[0].user.user_id === user._id?"You ":item.messages[0].user.name}:{" "}
-                          {item.messages[0]?.text ||
-                            'Bắt đầu cuộc thoại'}
+                          {
+                            item.messages && item.messages.length > 0
+                              ? item.messages[0]?.user?.user_id === user._id
+                                ? 'You: ' + (item.messages[0]?.text || 'Bắt đầu cuộc thoại')
+                                : item.messages[0]?.user?.name + ': ' + (item.messages[0]?.text || 'Bắt đầu cuộc thoại')
+                              : 'Bắt đầu cuộc thoại'
+                          }
                         </Text>
                         <Text ellipsizeMode="tail" numberOfLines={1}>
-                          {dayjs(
-                            item.messages[0]?.createdAt,
-                          ).from(new Date())}
+                          {dayjs(item.messages[0]?.createdAt).from(new Date())}
                         </Text>
                       </View>
                     </View>

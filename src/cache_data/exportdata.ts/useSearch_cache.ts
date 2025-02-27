@@ -3,17 +3,14 @@ import { User_search } from '../../type/Home/search_type.ts';
 import { realm } from '../Schema/schema_realm_model.tsx';
 
 const create_userSearch = async(users: User_search[]) => {
-    try {
-             
+    try {    
         realm.write(() => {
             users.forEach((user) => {
-                
                 realm.create('UserSearch', user);
             });
         });
     } catch (error) {
         console.error('Error adding user:', error);
-
     };
 }
 const get_userSearch = async() => {

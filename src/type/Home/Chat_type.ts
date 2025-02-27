@@ -30,17 +30,7 @@ export type Message_type = {
       avatar: string;
       user_id: string;
     };
-    reaction: {
-      id: {
-        type: Number;
-      };
-      name: {
-        type: String;
-      };
-      title: {
-        type: String;
-      };
-    };
+    reaction:number,
   }[];
   reciver: string[];
   recall: boolean;

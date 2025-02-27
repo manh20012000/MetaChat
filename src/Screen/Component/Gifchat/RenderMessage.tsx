@@ -10,7 +10,7 @@ import { ReplyMessage } from './ViewRender/ReplyMessage';
 import { ReactionIcons } from './ViewRender/ReactionIcons';
 import { TextMessage } from './ViewRender/TextMessage ';
 import { MessageStatus } from './ViewRender/MessageStatus';
-
+import { messageIcon } from '../../../type/react-type';
 
 
 interface MessageProps {
@@ -112,7 +112,7 @@ const MessageItem: React.FC<MessageProps> = ({
     }}
     
     >
-      <View style={{ marginBottom: 2, marginHorizontal: 10, position: 'relative' }}>
+      <View style={{ marginBottom: 2, marginHorizontal: 10, position: 'relative', }}>
         <Day {...props} />
         <Animated.View {...panResponder.panHandlers} style={{ transform: [{ translateX }] }}>
           {currentMessage.replyTo !== null && (

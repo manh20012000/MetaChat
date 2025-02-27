@@ -1,12 +1,14 @@
 import React, { useRef } from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { Bubble, Avatar } from 'react-native-gifted-chat';
 import userMessage from '../../../../type/Home/useMessage_type';
-
+import { messageIcon } from '../../../../type/react-type';
+import { Message_type } from '../../../../type/Home/Chat_type';
+import { TouchableOpacity } from 'react-native';
 interface TextMessageProps {
     isFirstMessage: boolean;
     isMyMessage: boolean;
-    currentMessage: any;
+    currentMessage: Message_type;
     props: any;
     handleLongPressMessage: (position: { x: number, y: number }, message: any) => void;
     color: any;
@@ -30,9 +32,7 @@ export const TextMessage: React.FC<TextMessageProps> = ({
 
     const getPosition = () => {
         if (messageRef.current) {
-           
             messageRef.current.measureInWindow((x, y, width, height) => {
-                
                 handleLongPressMessage({ x, y }, currentMessage);
             });
         } 
@@ -71,6 +71,22 @@ export const TextMessage: React.FC<TextMessageProps> = ({
                     right: { color: 'white' },
                 }}
             />
+            {currentMessage.reactions.length > 0 && (
+                <View style={{
+                    flexDirection: 'row', backgroundColor: 'pink', position: 'absolute', top: 0, left: 0,
+                    alignSelf: isMyMessage?"flex-end":'flex-start'
+                }}>
+                    {currentMessage.reactions.slice(-2).map((iconId: any) => {
+                    const reaction = messageIcon.find(item => item._id === iconId._id);
+                    return reaction ? (
+                        <TouchableOpacity key={reaction._id}>
+                            <Text>{reaction.icon}</Text>
+                        </TouchableOpacity>
+                    ) : null;
+                })}
+                </View>
+            )}
+
         </Pressable>
     );
 };

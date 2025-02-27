@@ -1,32 +1,45 @@
-import { postFormData,putData } from './resfull_api';
-import { API_ROUTE } from './api_enpoint';
-import { Message_type } from '../type/Home/Chat_type';
+import {postFormData, putData} from './resfull_api';
+import {API_ROUTE} from './api_enpoint';
+import {Message_type} from '../type/Home/Chat_type';
 import Conversation from '../type/Home/Converstation_type';
-import { GiftedChat } from 'react-native-gifted-chat';
+import {GiftedChat} from 'react-native-gifted-chat';
 import useCheckingService from './Checking_service';
+import {updateMessage} from '../cache_data/exportdata.ts/converstation_cache';
+import userMessage from '../type/Home/useMessage_type';
 
 export const updateMessageReaction = async (
-    message: Message_type,
-    userChat: any,
+  message: Message_type,
+  conversation: Conversation,
+  userChat: userMessage,
+    Checking:any
 ) => {
-    const { user, dispatch } = useCheckingService();
+  
     try {
-        const response = await putData(
-            API_ROUTE.UPDATE_MESSAGE,
-            {
-                conversation_id: message.conversation_id,
-                user: userChat,
-                message: message,
-            },
-            { dispatch, user },
-        );
+        console.log('dhsjdsjdhjs')
+        const { user, dispatch } = Checking;
+      
+      
+    const response = await putData(
+      API_ROUTE.UPDATE_MESSAGE,
+      {
+        conversation: conversation,
+        send_id: userChat.user_id,
+        message: message,
+      },
+      {dispatch, user},
+      message._id,
+    );
 
-        if (response.status === 200) {
-            console.log('Cập nhật phản ứng thành công');
-        } else {
-            throw new Error('Cập nhật phản ứng thất bại');
-        }
-    } catch (error) {
-        console.error('Cập nhật phản ứng thất bại:', error);
+    if (response.status === 200) {
+      console.log('Cập nhật phản ứng thành công');
+      const failedMessage: Message_type = { ...message, statusSendding: true };
+      await updateMessage(failedMessage, conversation);
+    } else {
+      throw new Error('Cập nhật phản ứng thất bại');
     }
+  } catch (error) {
+    console.log('câp nhât thất baik');
+    const failedMessage: Message_type = {...message, statusSendding: false};
+    await updateMessage(failedMessage, conversation);
+  }
 };

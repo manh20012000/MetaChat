@@ -8,11 +8,14 @@ import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import {postFormData} from '../../../../service/resfull_api';
 import useCheckingService from '../../../../service/Checking_service';
 import Conversation from '../../../../type/Home/Converstation_type';
-import { Message_type } from '../../../../type/Home/Chat_type';
-import {update_Converstation} from '../../../../cache_data/exportdata.ts/converstation_cache';
+import {Message_type} from '../../../../type/Home/Chat_type';
+import {
+  Converstation_Message,
+  update_Converstation,
+} from '../../../../cache_data/exportdata.ts/converstation_cache';
 import {Vibration} from 'react-native';
 import {converstationsend} from '../../../../util/util_chat/converstationSend';
-import { updateMessageReaction } from '../../../../service/MesssageService';
+import {updateMessageReaction} from '../../../../service/MesssageService';
 
 export const useGiftedChatLogic = (conversation: Conversation) => {
   const {width, height} = useWindowDimensions();
@@ -33,7 +36,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   const [selectedMessages, setSelectedMessages] = useState<Message_type | null>(
     null,
   );
-  const [reactionPosition, setReactionPosition] = useState({ x: 0, y: 0 });
+  const [reactionPosition, setReactionPosition] = useState({x: 0, y: 0});
   const [userChat] = useState<any>(
     conversation.participants.find(
       (participant: any) => participant.user_id === user._id,
@@ -143,6 +146,8 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
         throw new Error('Message sending failed');
       }
     } catch (error) {
+      const failedMessage: Message_type = {...message, statusSendding: false};
+      await Converstation_Message(failedMessage, conversation, userChat);
       setMessages((previousMessages: Message_type[]) =>
         previousMessages.map((msg: Message_type) =>
           msg._id === newMessage._id ? {...msg, status: 'failed'} : msg,
@@ -152,35 +157,44 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     }
   }, []);
 
-  const handlerReaction = useCallback(
-    async (message: Message_type) => {
-      await updateMessageReaction(message, userChat,);
-    },
-    [],
-  );
+  const handlerReaction = useCallback(async (message: Message_type) => {
+    setSelectedMessages(null);
+    setMessages(previousMessages => {
+      for (let i = previousMessages.length - 1; i >= 0; i--) {
+        if (previousMessages[i]._id === message._id) {
+          const updatedMessages = [...previousMessages];
+          updatedMessages[i] = { ...message };
+          return updatedMessages;
+        }
+      }
+      return GiftedChat.append(previousMessages, [message]);
+    });
+    await updateMessageReaction(message, conversation, userChat, {
+      user,
+      dispatch,
+    });
+  }, []);
 
   useEffect(() => {
-    socket?.on('updateMessage', ({updatedMessage, send_id}) => {
-      if (send_id !== userChat._id) {
+    socket?.on('update_message', ({ message, send_id }) => {
+      console.log(message);
+      if (send_id !== userChat.user_id) {
         setMessages(previousMessages => {
-          const messageIndex = previousMessages.findIndex(
-            message => message._id === updatedMessage._id,
-          );
-
-          if (messageIndex !== -1) {
-            const updatedMessages = [...previousMessages];
-            updatedMessages[messageIndex] = updatedMessage;
-            return updatedMessages;
-          } else {
-            return GiftedChat.append(previousMessages, updatedMessage);
+          for (let i = previousMessages.length - 1; i >= 0; i--) {
+            if (previousMessages[i]._id === message._id) {
+              const updatedMessages = [...previousMessages];
+              updatedMessages[i] = { ...message };
+              return updatedMessages;
+            }
           }
+          return GiftedChat.append(previousMessages, [message]);
         });
       }
     });
 
     socket?.on('new_message', messages => {
       const {message, send_id} = messages;
-
+        console.log('new messag ở màn giftechat',send_id)
       if (send_id !== userChat._id) {
         setMessages(previousMessages =>
           GiftedChat.append(previousMessages, message),
@@ -229,6 +243,6 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     handlerdeleteMessage,
     setReplyMessage,
     setReactionPosition,
-    reactionPosition
+    reactionPosition,
   };
 };

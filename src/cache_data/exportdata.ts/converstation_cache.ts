@@ -1,11 +1,12 @@
 import Conversation from '../../type/Home/Converstation_type';
-import { Message_type } from '../../type/Home/Chat_type';
+import {Message_type} from '../../type/Home/Chat_type';
 import {realm} from '../Schema/schema_realm_model';
 import {itemuser} from '../../type/Home/search_type';
-import { BSON, EJSON, ObjectId } from 'bson';
+import {BSON, EJSON, ObjectId} from 'bson';
 
-import { deleteData, postData } from '../../service/resfull_api';
-import { API_ROUTE } from '../../service/api_enpoint';
+import {deleteData, postData} from '../../service/resfull_api';
+import {API_ROUTE} from '../../service/api_enpoint';
+import {converstation} from '../../util/util_chat/converstation';
 const createConversation = async (Conversation: Conversation) => {
   try {
     // Kiểm tra xem cuộc hội thoại có tồn tại không
@@ -33,6 +34,7 @@ const createConversation = async (Conversation: Conversation) => {
         messages: Conversation.messages,
         permission: Conversation.permission,
         isDeleted: Conversation.isDeleted,
+        createdAt: Conversation.createdAt,
       });
     });
 
@@ -41,7 +43,6 @@ const createConversation = async (Conversation: Conversation) => {
     console.error('Lỗi khi tạo cuộc hội thoại:', error);
   }
 };
-
 
 const getConversations = async () => {
   try {
@@ -81,25 +82,20 @@ const update_Converstation = async (
       matchingConversation.messages.unshift(message); // Thêm vào đầu danh sách
       matchingConversation.updatedAt = new Date().toISOString(); // Cập nhật thời gian sửa đổi
     });
-
-  
   } catch (error: any) {
     console.error('Lỗi khi cập nhật cuộc hội thoại:', error.message);
     throw error;
   }
 };
 
-
-
 //
- let isProcessing = false;
+let isProcessing = false;
 const findAndconvertConversation = async (
-  participants:any,
-  participantIds:string[],
-  checking:any,
+  participants: any,
+  participantIds: string[],
+  checking: any,
 ) => {
   try {
-
     // Tạo query lọc các cuộc hội thoại có đủ participantIds
     const conditions = participantIds
       .map((id, index) => `participantIds CONTAINS $${index}`)
@@ -113,11 +109,10 @@ const findAndconvertConversation = async (
       );
 
     let existingConversation = conversations[0] || null; // Lấy cuộc hội thoại đầu tiên nếu có
-  
+
     if (existingConversation) {
       // Nếu đã có, cập nhật updatedAt và trả về ngay
       realm.write(() => {
-
         existingConversation.updatedAt = new Date().toISOString();
         existingConversation.isDeleted = null;
       });
@@ -143,7 +138,7 @@ const findAndconvertConversation = async (
     console.error('Lỗi khi tìm hoặc tạo mới cuộc hội thoại:', error);
     throw error;
   }
-}
+};
 
 const update_permission = async (conversation: Conversation) => {
   const oldConversation = realm.objectForPrimaryKey(
@@ -155,7 +150,7 @@ const update_permission = async (conversation: Conversation) => {
       oldConversation.permission = conversation.permission;
     });
   }
-}
+};
 const delete_converStation = async (
   converstation: Conversation,
   checking: any,
@@ -166,7 +161,7 @@ const delete_converStation = async (
 
     const oldConversation = realm.objectForPrimaryKey(
       'Conversation',
-      converstation._id
+      converstation._id,
     );
 
     if (!oldConversation) {
@@ -195,34 +190,142 @@ const delete_converStation = async (
     // Cập nhật danh sách cuộc hội thoại sau khi xóa
     // const updatedConversations = realm.objects<Conversation>('Conversation');
     // setConversations([...updatedConversations]); // Cập nhật lại state của UI
-
   } catch (error: any) {
     console.error('Lỗi khi xóa cuộc hội thoại:', error.message, error.stack);
     throw error;
   }
 };
-const updateMessage = (participantIds:[string],message:Message_type) => {
-  const conditions = participantIds
-    .map((id, index) => `participantIds CONTAINS $${index}`)
-    .join(' AND ');
 
-  const conversations = realm
-    .objects('Conversation')
-    .filtered(
-      `participantIds.@size == ${participantIds.length} AND ${conditions}`,
-      ...participantIds,
-    );
+const Converstation_Message = async (
+  message: Message_type,
+  conversation: Conversation,
+  send_id: string,
+) => {
+  try {
+    
 
-  let existingConversation = conversations[0] || null; // Lấy cuộc hội thoại đầu tiên nếu có
+    console.log(conversation.participantIds,'dhushdusj')
+    const conditions = conversation.participantIds
+      .map((id: any, index: any) => `participantIds CONTAINS $${index}`)
+      .join(' AND ');
+
+    const conversations = realm
+      .objects('Conversation')
+      .filtered(
+        `participantIds.@size == ${conversation.participantIds.length} AND ${conditions}`,
+        ...conversation.participantIds,
+      );
+
+    let existingConversation = conversations[0] || null;
+
+    realm.write(() => {
+      
+      if (existingConversation) {
+        console.log('tim thấy cuộc thoại');
+        (existingConversation.messages as Message_type[]).unshift(message);
+        existingConversation.updatedAt = message.createdAt;
+      } else {
+        console.log('tạo cuộc thoại mới ')
+        realm.create('Conversation', converstation(conversation, message));
+      }
+    });
+  } catch (error) {
+    console.log(error);
+  }
 };
 
+const updateMessage = (message: Message_type, conversation: Conversation) => {
+  realm.write(() => {
+    // 🔍 Tìm cuộc hội thoại
+    let existingConversation = realm
+      .objects<Conversation>('Conversation')
+      .filtered('_id == $0', message.conversation_id)[0];
+    
+    if (!existingConversation) {
+      console.log('cuoocj thoaij khoong dudowjc tim thayas ddeer capaj nhaat');
+      //realm.create('Conversation', converstation(conversation, message));
+      return;
+    }
+
+    let messages = existingConversation.messages as unknown as Message_type[];
+
+    const messageIndex = messages.findIndex(msg => msg._id === message._id);
+
+    if (messageIndex !== -1) {
+      messages[messageIndex] = {...messages[messageIndex], ...message};
+      console.log('✅ Tin nhắn đã được cập nhật!');
+    } else {
+      messages.push(message);
+      console.log('✅ Tin nhắn mới đã được thêm vào cuộc hội thoại!');
+    }
+
+    existingConversation.messages = messages;
+  });
+};
+
+const deleteMessage = (conversation_id: string, message_id: string) => {
+  realm.write(() => {
+    const conversation = realm
+      .objects<Conversation>('Conversation')
+      .filtered('_id == $0', conversation_id)[0];
+
+    if (!conversation) {
+      console.log('❌ Không tìm thấy cuộc hội thoại!');
+      return;
+    }
+    const messages = conversation.messages as unknown as Message_type[];
+
+    const messageIndex = messages.findIndex(msg => msg._id === message_id);
+    if (messageIndex === -1) {
+      console.log('❌ Không tìm thấy tin nhắn!');
+      return;
+    }
+
+    // ❌ Xóa tin nhắn khỏi mảng messages
+    messages.splice(messageIndex, 1);
+
+    console.log(`✅ Tin nhắn ${message_id} đã bị xóa!`);
+  });
+};
+// const handlerUpdateMessage = async ({
+//   converstation_id,
+//   updatedMessage,
+// }: {
+//   converstation_id: string;
+//   updatedMessage: Message_type;
+// }) => {
+//   if (!realm) return;
+//   realm.write(async () => {
+//     const conversation: Conversation = (await realm
+//       .objects<Conversation>('Conversation')
+//       .filtered(
+//         '_id == $0',
+//         converstation_id,
+//       )[0]) as unknown as Conversation;
+//     if (conversation) {
+//       if (!conversation.messages) {
+//         conversation.messages = [];
+//       }
+//       let messageIndex = await conversation.messages.findIndex(
+//         msg => msg._id === updatedMessage._id,
+//       );
+//       if (messageIndex !== -1) {
+//         conversation.messages[messageIndex] = updatedMessage;
+//       } else {
+//         conversation.messages = [...conversation.messages, updatedMessage];
+//       }
+//     }
+//   });
+// };
 export {
-  updateMessage,
+  Converstation_Message,
   createConversation,
   delete_converStation,
   update_Converstation,
   getConversations,
   findAndconvertConversation,
+  updateMessage,
+  deleteMessage,
 };
 
 //const update_Messages_Converstation = async (converstation:Conversation) => {
@@ -274,14 +377,14 @@ export {
 //     throw error;
 //   }
 // }
- // matchingConversation.messages.forEach(message => {
-        //   realm.delete(message.reactions); // Xóa cảm xúc liên quan
-        //   realm.delete(message.attachments); // Xóa file đính kèm
-        //   if (message.replyTo) {
-        //     realm.delete(message.replyTo); // Xóa tin nhắn được trả lời
-        //   }
-        // });
-        // Sau đó xóa tất cả tin nhắn
+// matchingConversation.messages.forEach(message => {
+//   realm.delete(message.reactions); // Xóa cảm xúc liên quan
+//   realm.delete(message.attachments); // Xóa file đính kèm
+//   if (message.replyTo) {
+//     realm.delete(message.replyTo); // Xóa tin nhắn được trả lời
+//   }
+// });
+// Sau đó xóa tất cả tin nhắn
 // realm.delete(matchingConversation.messages)c;
 //const update_Converstation = async(
 //   message: Message_type,
@@ -312,7 +415,7 @@ export {
 //       background: matchingConversation.background,
 //       participants: matchingConversation.participants.map((p:any) => ({...p})), // Deep copy
 //       messages: matchingConversation.messages.map((m:any) => ({...m})), // Deep copy
-     
+
 //     };
 
 //     // Ghi vào Realm trong một giao dịch
@@ -329,7 +432,7 @@ export {
 //         });
 //         // Realm.UpdateMode.Modified,
 //       console.log('Bản ghi mới đã được tạo:111->>>>>  ');
-     
+
 //     });
 //   } catch (error: any) {
 //     console.error('Lỗi khi thay thế cuộc hội thoại:', error.message);

@@ -1,6 +1,6 @@
 
 // import { URL } from '@env';
-const API_URL = 'http://192.168.51.109:8080';
+const API_URL = 'http://192.168.1.24:8080';
 // console.log('hahah', URL)
 import axios from 'axios';
 import { checkAndRefreshToken } from '../util/checkingToken';
@@ -111,18 +111,19 @@ const getResearch = async (route: string, params: any,) => {
 }
 
 // Hàm PUT
-const putData = async (route: string, data: any,check:any) => {
+const putData = async (route: string, data: any,check:any,params:string) => {
   const checking = await checkAndRefreshToken(check.dispatch, check.user);
   if (checking === null) {
     return null
   } else {
     try {
-      const response = await axios.put(`${API_URL}/${route}`, data, {
+      const datas = `${API_URL}/${route}/${params}`
+      console.log(datas)
+      const response = await axios.put(`${API_URL}/${route}/${params}`, data, {
         headers: {
           'Content-Type': 'application/json',
           authorization: `Bearer ${checking.access_token} `,
         },
-
       });
       return response.data;
     } catch (error) {
@@ -133,7 +134,7 @@ const putData = async (route: string, data: any,check:any) => {
 }
 
 // Hàm PATCH
-const patchData = async (route: string, data: any,check:any) => {
+const patchData = async (route: string, data: any,check:any,params:string) => {
   const checking = await checkAndRefreshToken(check.dispatch, check.user);
   if (checking === null) {
     return null
@@ -156,10 +157,15 @@ const patchData = async (route: string, data: any,check:any) => {
 }
 
 // Hàm DELETE
-const deleteData = async (route: string,check:any,_id:string) => {
-  const checking = await checkAndRefreshToken(check.dispatch, check.user,);
+const deleteData = async (
+  route: string,
+  check: any,
+  _id: string,
+  params: string,
+) => {
+  const checking = await checkAndRefreshToken(check.dispatch, check.user);
   if (checking === null) {
-    return null
+    return null;
   } else {
     try {
       const response = await axios.delete(`${API_URL}/${route}/${_id}`, {

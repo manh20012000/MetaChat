@@ -25,11 +25,11 @@ export const API_ROUTE = {
   GET_GROUP_BY_ADMIN: '/chatservice/api/get_group_by_admin',
   GET_CONVERTSTATION_CHAT: 'api/chatservice/get_convertstation',
   SEND_MESSAGE: 'api/chatservice/sendmessage',
-  REFESSHTOKEN_USER: '/api/user/refreshtoken',
-  REFRESH_TOKEN: '/api/user/refreshToken',
+  REFRESH_TOKEN: '/api/user/refreshtoken',
   GET_LIST_FRIEND_CHAT: 'api/chatservice/friendchat',
   CREATE_CONVERSTATION: 'api/chatservice/create_converstaion',
   DELETE_CONVERSTATION: 'api/chatservice/delete_converstation',
   UPDATE_MESSAGE: 'api/chatservice/update_message',
-  DELATE_MESSAGE: 'api/ chatservice/delete_message'
+  DELATE_MESSAGE: 'api/chatservice/delete_message',
+  RECALL_MESSAGE:'api/chatservice/recall_message'
 };
