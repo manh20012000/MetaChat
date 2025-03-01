@@ -1,6 +1,6 @@
 
 // import { URL } from '@env';
-const API_URL = 'http://192.168.1.24:8080';
+const API_URL = 'http://192.168.51.109:8080';
 // console.log('hahah', URL)
 import axios from 'axios';
 import { checkAndRefreshToken } from '../util/checkingToken';
@@ -19,7 +19,6 @@ const postData = async (route: string, data: any, check: any) => {
           'Content-Type': 'application/json',
           authorization: `Bearer ${checking.access_token} `,
         },
-
       });
       return response.data; // Trả về dữ liệu từ API
     } catch (error) {

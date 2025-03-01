@@ -13,7 +13,7 @@ const createListfriend = async (friend: any) => {
       realm.write(() => {
         realm.create('friend', friend);
       });
-      console.log(`Đã thêm user: ${friend._id}`);
+ 
     } else {
       console.log(`User với _id: ${friend._id} đã tồn tại, không thêm.`);
     }

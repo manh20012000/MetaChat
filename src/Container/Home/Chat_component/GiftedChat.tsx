@@ -11,7 +11,8 @@ import RenderOptionMessage from '../../../Screen/Component/Gifchat/RenderOptionM
 import Conversation from '../../../type/Home/Converstation_type';
 import MediaGrid from '../../../Constants/GirdMedia';
 import { ReactionIcons } from '../../../Screen/Component/Gifchat/ViewRender/ReactionIcons';
-
+import { Message_type } from '../../../type/Home/Chat_type';
+import ModalChatMore from '../../../Constants/ModalMoreChat';
 export const GiftedChatView = ({ conversation }: { conversation: Conversation }) => {
   const {
     color,
@@ -34,9 +35,10 @@ export const GiftedChatView = ({ conversation }: { conversation: Conversation })
     handlerReaction,
     handlerreplyTo,
     handleLongPress,
-    handlerdeleteMessage,
     setReactionPosition,
-    reactionPosition
+    reactionPosition,
+    messageMoreAction,
+    setMessageMoreAction
   } = useGiftedChatLogic(conversation);
 
   return (
@@ -68,7 +70,7 @@ export const GiftedChatView = ({ conversation }: { conversation: Conversation })
             )}
             scrollToBottom={true}
             renderSend={renderSend}
-            renderMessage={props => (
+            renderMessage={(props:any) => (
               <MessageItem
              
                 currentMessage={props.currentMessage}
@@ -120,9 +122,18 @@ export const GiftedChatView = ({ conversation }: { conversation: Conversation })
             userChat={userChat}
             conversation={conversation}
             selectedMessages={selectedMessages}
-            handlerdeleteMessage={handlerdeleteMessage}
+            setSelectedMessages={setSelectedMessages}
+            setMessageMoreAction={setMessageMoreAction}
           />
         </>
+      )}
+      {messageMoreAction && (
+        < ModalChatMore
+          conversation={conversation}
+          messageMoreAction={messageMoreAction}
+          setMessageMoreAction={setMessageMoreAction}
+          userChat={userChat}
+        />
       )}
     </>
   );

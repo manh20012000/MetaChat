@@ -48,6 +48,7 @@ export type Message_type = {
   };
   other: string;
   statusSendding: boolean;
+  status: string;
 };
 
 export type reactions ={

@@ -9,17 +9,21 @@ import { deleteData, putData } from '../../../service/resfull_api';
 import { API_ROUTE } from '../../../service/api_enpoint';
 import useCheckingService from '../../../service/Checking_service';
 import { useSelector } from 'react-redux';
+import useUserRenderOption from './ViewRender/hook/use-renderOption';
+import { Message_type } from '../../../type/Home/Chat_type';
 interface MessageProps {
     userChat: userMessage;
     conversation: any;
     selectedMessages: any;
-    handlerdeleteMessage: (message: any) => void;
+   
+    setSelectedMessages: React.Dispatch<React.SetStateAction<any>>;
+    setMessageMoreAction :React.Dispatch<React.SetStateAction<any>>
 }
-
 const RenderOptionMessage: React.FC<MessageProps> = ({
     selectedMessages,
     userChat,
-    handlerdeleteMessage
+
+    conversation, setSelectedMessages, setMessageMoreAction
 }) => {
     const color = useSelector(
         (value: { colorApp: { value: any } }) => value.colorApp.value,
@@ -28,22 +32,16 @@ const RenderOptionMessage: React.FC<MessageProps> = ({
     const [showReactions, setShowReactions] = useState(false);
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
-    
+    // console.log(selectedMessages.user)
 
-    const handlerdelete = async () => {
-           
-        handlerdeleteMessage(selectedMessages)
-        // const data = await deleteData(
-        //     API_ROUTE.DELATE_MESSAGE,
-        //    { user, dispatch },
-        //     selectedMessages._id
-        // );
-        // if (data.status === 200) {
-        //     console.log('Cập nhật thành công');
-        // } else {
-        //     console.log('Cập nhật thất bại');
-        // }
-    };
+    const { handlerMore, issendMessage } = useUserRenderOption(
+      userChat,
+      conversation,
+      selectedMessages,
+        setMessageMoreAction,
+        setSelectedMessages
+        
+  );
 
     return (
         <View
@@ -60,10 +58,10 @@ const RenderOptionMessage: React.FC<MessageProps> = ({
 
             <TouchableOpacity
                 style={{alignItems: 'center',justifyContent:'center',}}
-                onPress={handlerdelete}
+                onPress={handlerMore}
             >
-                <MaterialIcons name='delete' size={28} color="red" />
-                <Text style={{ color: color.white, fontWeight: '700' }}>Delete</Text>
+                <MaterialIcons name='read-more' size={30} color="red" />
+                <Text style={{ color: color.white, fontWeight: '700' }}>More</Text>
             </TouchableOpacity>
             <TouchableOpacity
                 style={{ alignItems: 'center', justifyContent: 'center', }}

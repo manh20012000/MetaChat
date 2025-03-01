@@ -84,7 +84,7 @@ const MessageItem: React.FC<MessageProps> = ({
   };
 
   const handlerReactIcon = async (item: any) => {
-    console.log('hahahsss', item)
+
     // const message = handlerMessage(currentMessage, [
     //   ...currentReaction,
     //   {user: userChat, reaction: item},
@@ -107,7 +107,7 @@ const MessageItem: React.FC<MessageProps> = ({
 
   return (
     <Pressable onPress={() => {
-      console.log('hahahahdffsd')
+
       setSelectedMessages(null)
     }}
     

@@ -1,8 +1,9 @@
 import React from 'react';
 import { Text } from 'react-native';
+import { Message_type } from '../../../../type/Home/Chat_type';
 
 interface MessageStatusProps {
-    currentMessage: any;
+    currentMessage:Message_type;
     isMyMessage: boolean;
 }
 

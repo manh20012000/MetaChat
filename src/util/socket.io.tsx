@@ -36,7 +36,7 @@ export const SocketProvider: React.FC<HomeProviderProps> = ({ children }) => {
           if (!accessToken) {
             throw new Error('JWT token not found');
           }
-          console.log(api_socket, 'api')
+    
           const newSocket: Socket = socketIOClient(`${api_socket}`, {
             transports: ['websocket'],
             reconnection: true,

@@ -36,6 +36,8 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   const [selectedMessages, setSelectedMessages] = useState<Message_type | null>(
     null,
   );
+  const [messageMoreAction, setMessageMoreAction] =
+    useState<Message_type | null>(null);
   const [reactionPosition, setReactionPosition] = useState({x: 0, y: 0});
   const [userChat] = useState<any>(
     conversation.participants.find(
@@ -163,7 +165,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
       for (let i = previousMessages.length - 1; i >= 0; i--) {
         if (previousMessages[i]._id === message._id) {
           const updatedMessages = [...previousMessages];
-          updatedMessages[i] = { ...message };
+          updatedMessages[i] = {...message};
           return updatedMessages;
         }
       }
@@ -176,14 +178,13 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   }, []);
 
   useEffect(() => {
-    socket?.on('update_message', ({ message, send_id }) => {
-      console.log(message);
+    socket?.on('update_message', ({message, send_id}) => {
       if (send_id !== userChat.user_id) {
         setMessages(previousMessages => {
           for (let i = previousMessages.length - 1; i >= 0; i--) {
             if (previousMessages[i]._id === message._id) {
               const updatedMessages = [...previousMessages];
-              updatedMessages[i] = { ...message };
+              updatedMessages[i] = {...message};
               return updatedMessages;
             }
           }
@@ -194,7 +195,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
 
     socket?.on('new_message', messages => {
       const {message, send_id} = messages;
-        console.log('new messag ở màn giftechat',send_id)
+
       if (send_id !== userChat._id) {
         setMessages(previousMessages =>
           GiftedChat.append(previousMessages, message),
@@ -213,12 +214,14 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     setSelectedMessages(message);
   }, []);
 
-  const handlerdeleteMessage = useCallback(async (message: any) => {
-    setMessages((prevMessages: any) =>
-      prevMessages.filter((id: any) => id._id !== message._id),
-    );
-    setSelectedMessages(null);
-  }, []);
+  // const handlerMoreMessage = useCallback(async (message: any) => {
+  //   console.log(message)
+  //   setMessageMoreAction(message)
+  //   // setMessages((prevMessages: any) =>
+  //   //   prevMessages.filter((id: any) => id._id !== message._id),
+  //   // );
+  //   // setSelectedMessages(null);
+  // }, []);
 
   return {
     color,
@@ -240,9 +243,10 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     handlerReaction,
     handlerreplyTo,
     handleLongPress,
-    handlerdeleteMessage,
+    setMessageMoreAction,
     setReplyMessage,
     setReactionPosition,
     reactionPosition,
+    messageMoreAction,
   };
 };

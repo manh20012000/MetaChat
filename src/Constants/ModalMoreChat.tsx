@@ -8,37 +8,36 @@ import {ReactionIcons} from '../Screen/Component/Gifchat/ViewRender/ReactionIcon
 type modelType = {
   userChat: userMessage;
   conversation: Conversation;
-  selectedMessages: any;
-  handlerdeleteMessage: (messsage: Message_type) => void;
+  messageMoreAction: Message_type|null;
+  setMessageMoreAction:React.Dispatch<React.SetStateAction<any>>
+ 
 };
-const ModalView: React.FC<modelType> = ({
+const ModalChatMore: React.FC<modelType> = ({
   userChat,
   conversation,
-  selectedMessages,
-  handlerdeleteMessage,
+  messageMoreAction,
+  setMessageMoreAction,
 }) => {
   return (
-    <Modal transparent={true} visible={true} onRequestClose={() => {}}>
+    <Modal transparent={true} visible={true} onRequestClose={() => {
+      console.log('hahahah')
+    }}>
       <View
         style={{
           flex: 1,
           justifyContent: 'center',
           alignItems: 'center',
-           backgroundColor:'gray',
           width: '100%',
           height: '100%',
           position: 'relative',
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          
         }}>
-    
-        <RenderOptionMessage
-          userChat={userChat}
-          conversation={conversation}
-          selectedMessages={selectedMessages}
-          handlerdeleteMessage={handlerdeleteMessage}
-        />
+         
+       
       </View>
     </Modal>
   );
 };
 
-export default ModalView;
+export default ModalChatMore;

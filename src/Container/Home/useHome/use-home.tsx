@@ -99,7 +99,7 @@ export const useHomeLogic = (navigation: any) => {
       skipfriend,
       {dispatch, user},
     );
-     console.log(listuser.friend)
+  
     if (listuser.friend.length > 0) {
       setData_friend(listuser.friend);
       listuser.friend.forEach(async (element: any) => {
@@ -162,7 +162,7 @@ export const useHomeLogic = (navigation: any) => {
 
     const handleNewMessage = async (messages: any) => {
       const {message, conversation, send_id} = messages;
-      console.log(send_id, 'màn homechat ')
+      console.log('có tin nhắn mới ')
       await Converstation_Message(message, conversation, send_id);
     };
 
@@ -185,8 +185,7 @@ export const useHomeLogic = (navigation: any) => {
     const conversationObjects = realm.objects('Conversation');
     const updateConversations = async () => {
       let data_converstation = await getConversations();
-      setData_convertStation(data_converstation);
-      console.log('gọi lai hàm cập nhât')
+      setData_convertStation(data_converstation)
       // let data_friend_chat = await getListfriend();
       // if (data_friend_chat.length > 0) {
       //   setData_friend(data_friend_chat);

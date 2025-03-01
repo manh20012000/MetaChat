@@ -335,7 +335,7 @@ const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
               Bạn chưa có tài khoản
               <Text
                 onMagicTap={() => {
-                  console.log('sjndscnjsdn');
+                
                 }}
                 onPress={() => {
 
