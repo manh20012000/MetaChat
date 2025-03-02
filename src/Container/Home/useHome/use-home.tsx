@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {Dimensions, useWindowDimensions} from 'react-native';
+import {Alert, Button, Dimensions, useWindowDimensions} from 'react-native';
 import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -20,9 +20,7 @@ import {
 } from '../../../cache_data/exportdata.ts/friend_cache.ts';
 import {useSocket} from '../../../util/socket.io.tsx';
 import {realm} from '../../../cache_data/Schema/schema_realm_model.tsx';
-import {Message_type} from '../../../type/Home/Chat_type.ts';
 import Conversation from '../../../type/Home/Converstation_type.ts';
-import {converstation} from '../../../util/util_chat/converstation.ts';
 dayjs.extend(relativeTime);
 
 export const useHomeLogic = (navigation: any) => {
@@ -31,7 +29,7 @@ export const useHomeLogic = (navigation: any) => {
   const user = useSelector((state: any) => state.auth.value);
   const dispatch = useDispatch();
   const user_Status = useSelector((state: any) => state.statusUser.value);
-
+  const checkConnect = useSelector((state: any) => state.network.value);
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const isPortrait = height > width;
   const insets = useSafeAreaInsets();
@@ -41,29 +39,49 @@ export const useHomeLogic = (navigation: any) => {
   const [skip, setSkiped] = useState(0);
   const [skipfriend, setSkipfriend] = useState(0);
   const [onloading, setLoading] = useState<boolean>(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [orientation, setOrientation] = useState(
     Dimensions.get('window').height > Dimensions.get('window').width
       ? 'portrait'
       : 'landscape',
   );
   const [data_friend, setData_friend] = useState([]);
-  const [selectConverstion, setSelectConverstation] = useState<Conversation>();
+  const [selectConverstion, setSelectConverstation] =
+    useState<Conversation | null>(null);
   const snapPoints = useMemo(() => ['70%'], []);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
-  const handleDelete = useCallback(() => {
-    if (!selectConverstion) return;
+  const handleDeleteConverStation = useCallback(() => {
+    console.log('nhấn vào xxoas', selectConverstion?._id);
+    if (!selectConverstion) {
+      console.log('retuen1');
+      setModalVisible(false);
+      return;
+    }
+    if (!checkConnect) {
+      Alert.alert('warning', 'Kết nối không ổn định vui lòng thử lại');
+      return;
+    }
+
+    // setData_convertStation((previewConverstatiom:Conversation[]) => {
+    //   return previewConverstatiom.filter((item: Conversation) => item._id !== selectConverstion._id
+    //   )
+    // })
     setModalVisible(false);
-    delete_converStation(selectConverstion, {dispatch, user});
-  }, [selectConverstion]);
+    delete_converStation(selectConverstion, { dispatch, user });
+    setSelectConverstation(null)
+     
+  }, []);
 
   const handlerShowmodal = useCallback((status: boolean) => {
     setModalVisible(status);
+    console.log(selectConverstion, 'ẩn modal');
   }, []);
 
   const handlePresentModalPress = useCallback((item: Conversation) => {
-    setSelectConverstation(item);
     bottomSheetModalRef.current?.present();
+    console.log(item._id, 'lấy được item');
+    setSelectConverstation(item);
   }, []);
 
   const handleSheetChanges = useCallback((index: number) => {
@@ -77,10 +95,11 @@ export const useHomeLogic = (navigation: any) => {
       skip,
       {dispatch, user},
     );
-    
+
     if (data_converstation.data.length > 0) {
       try {
         setSkiped(data_converstation.data.length);
+        console.log(data_converstation.data.length, 'lấy được mấy cuộc thoại');
         data_converstation.data.forEach(async (element: Conversation) => {
           await createConversation(element);
         });
@@ -99,7 +118,7 @@ export const useHomeLogic = (navigation: any) => {
       skipfriend,
       {dispatch, user},
     );
-  
+
     if (listuser.friend.length > 0) {
       setData_friend(listuser.friend);
       listuser.friend.forEach(async (element: any) => {
@@ -162,19 +181,18 @@ export const useHomeLogic = (navigation: any) => {
 
     const handleNewMessage = async (messages: any) => {
       const {message, conversation, send_id} = messages;
-      console.log('có tin nhắn mới ')
+      console.log('có tin nhắn mới ', message.recall);
       await Converstation_Message(message, conversation, send_id);
     };
 
-    const handlerUpdateMessage = async (messages: any) => { 
-      const { message, conversation, send_id } = messages;
+    const handlerUpdateMessage = async (messages: any) => {
+
+      const {message, conversation, send_id} = messages;
       if (send_id !== user._id) {
         // console.log(user.name,'cập nhật cho ')
-         updateMessage(message, conversation,)
+        updateMessage(message, conversation);
       }
-     
-
-    }
+    };
     if (socket.connected) {
       handleConnect();
     } else {
@@ -184,15 +202,19 @@ export const useHomeLogic = (navigation: any) => {
     socket.on('new_message', handleNewMessage);
     const conversationObjects = realm.objects('Conversation');
     const updateConversations = async () => {
+      if (!realm || realm.isClosed) {
+        console.warn("Realm đã bị đóng hoặc không hợp lệ.");
+        return;
+      }
       let data_converstation = await getConversations();
-      setData_convertStation(data_converstation)
+      console.log('gọi hàm cập nhật')
+      setData_convertStation(data_converstation);
       // let data_friend_chat = await getListfriend();
       // if (data_friend_chat.length > 0) {
       //   setData_friend(data_friend_chat);
       //   setSkipfriend(data_friend_chat.length);
       // }
     };
-
     conversationObjects.addListener(updateConversations);
     return () => {
       socket.off('new_message', handleNewMessage);
@@ -201,7 +223,16 @@ export const useHomeLogic = (navigation: any) => {
       conversationObjects.removeListener(updateConversations);
     };
   }, [socket?.connected]);
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    const timer = setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
 
+    return () => {
+      clearTimeout(timer);
+    };
+  }, []);
   return {
     color,
     user,
@@ -213,14 +244,16 @@ export const useHomeLogic = (navigation: any) => {
     data_convertstation,
     onloading,
     data_friend,
-    selectConverstion,
     snapPoints,
     modalVisible,
-    handleDelete,
+    handleDeleteConverStation,
     setModalVisible,
     handlerShowmodal,
     handlePresentModalPress,
     handleSheetChanges,
     navigation,
+    refreshing,
+    onRefresh,
+  
   };
 };

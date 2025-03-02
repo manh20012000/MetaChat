@@ -48,6 +48,7 @@ const CustomInputToolbar = (props: any) => {
         user: replyMessage.user,
         messageType:replyMessage.messageType,
       },
+      recall:false
     };
   };
 

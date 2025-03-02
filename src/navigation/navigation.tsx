@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View, Modal } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, Modal, Alert } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Login from '../Screen/User_Auth/login.tsx';
@@ -17,28 +17,38 @@ import Friend from '../Screen/Home/Draw_navigation/Friend.tsx';
 import Setting_Chat from '../Screen/Home/Draw_navigation/Setting_Chat.tsx';
 import Adttenment from '../Screen/Home/Draw_navigation/Adttenment.tsx';
 import Private_Converstation from '../Screen/Home/Draw_navigation/Private_Converstation.tsx';
+import NetInfo from '@react-native-community/netinfo';
+import { check } from '../Redux_Toolkit/Reducer/network_connect.ts';
 const Stack = createNativeStackNavigator();
+const screens = [
+  { name: 'Login', component: Login },
+  { name: 'Register', component: Register },
+  { name: 'Bottomtab_Navigation', component: Bottomtab_Navigation },
+  { name: 'ChatScreen', component: ChatScreen },
+  { name: 'SearchScreen', component: SearchScreen },
+  { name: 'HomeChatPersion', component: HomeChatPersion },
+];
+
 const Navigation: React.FC = () => {
   const dispath = useDispatch();
   const [loading, setLoading] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isConnected, setIsConnected] = useState<boolean | null>(null);
 
   useEffect(() => {
-
     const checkLoginStatus = async () => {
-
       try {
         const user_String: any = await AsyncStorage.getItem('user');
         const userObject = JSON.parse(user_String);
 
         if (userObject !== null) {
-
           const decoded: JwtPayload = jwtDecode(userObject.refresh_token);
-          const isTokenExpired = decoded.exp ? decoded.exp * 1000 < Date.now() : true;
+          const isTokenExpired = decoded.exp
+            ? decoded.exp * 1000 < Date.now()
+            : true;
           if (isTokenExpired) {
             setIsLoggedIn(false);
           } else {
-
             setIsLoggedIn(true);
             dispath(login(userObject));
           }
@@ -53,33 +63,41 @@ const Navigation: React.FC = () => {
     };
     checkLoginStatus();
   }, []);
+  const checkNetworkStatus = useCallback(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      if (state.isConnected !== isConnected) {
+        setIsConnected(state.isConnected);
+        dispath(check(state.isConnected));
+
+        if (!state.isConnected) {
+          Alert.alert(
+            'No Internet Connection',
+            'Your network connection is too weak or unavailable.',
+          );
+        }
+      }
+    });
+
+    return unsubscribe;
+  }, [isConnected]);
+  useEffect(() => {
+    const unsubscribe = checkNetworkStatus();
+    return () => unsubscribe();
+  }, [checkNetworkStatus]);
+
   return (
     loading && (
       <NavigationContainer>
         <Stack.Navigator
           initialRouteName={isLoggedIn ? 'Bottomtab_Navigation' : 'Login'}
-          screenOptions={{headerShown: false}}>
-          <Stack.Screen name="Login" component={Login} />
-          <Stack.Screen
-            name="Bottomtab_Navigation"
-            component={Bottomtab_Navigation}
-          />
-          <Stack.Screen name="Register" component={Register} />
-          <Stack.Screen name="ChatScreen" component={ChatScreen} />
-          <Stack.Screen name="SearchScreen" component={SearchScreen} />
-          <Stack.Screen name="HomeChatPersion" component={HomeChatPersion} />
-          {/* <Stack.Screen name="Create_Group" component={Create_Group} />
-          <Stack.Screen name="Friend" component={Friend} />
-          <Stack.Screen name="Setting_Chat" component={Setting_Chat} />
-          <Stack.Screen name="Adttenment" component={Adttenment} />
-          <Stack.Screen
-            name="Private_Converstation"
-            component={Private_Converstation}
-          /> */}
+          screenOptions={{ headerShown: false }}>
+          {screens.map(({ name, component }) => (
+            <Stack.Screen key={name} name={name} component={component} />
+          ))}
         </Stack.Navigator>
       </NavigationContainer>
     )
   );
 };
 export default Navigation;
-const styles = StyleSheet.create({});
+

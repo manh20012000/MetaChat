@@ -1,5 +1,5 @@
 import { Image, View } from 'react-native';
-import { itemuser } from '../../../interface/search_user.interface';
+
 import { useSelector } from 'react-redux';
 
 const AvatarChat = ({ item }:any) => {

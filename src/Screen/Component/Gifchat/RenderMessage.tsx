@@ -11,10 +11,11 @@ import { ReactionIcons } from './ViewRender/ReactionIcons';
 import { TextMessage } from './ViewRender/TextMessage ';
 import { MessageStatus } from './ViewRender/MessageStatus';
 import { messageIcon } from '../../../type/react-type';
+import { Message_type } from '../../../type/Home/Chat_type';
 
 
 interface MessageProps {
-  currentMessage: any;
+  currentMessage: Message_type;
   previousMessage?: any;
   userChat: userMessage;
   handleLongPress: (message: any) => void;
@@ -28,6 +29,8 @@ interface MessageProps {
 }
 
 const MessageItem: React.FC<MessageProps> = ({
+  // New comment to explain the component
+
   currentMessage,
   previousMessage,
   userChat,
@@ -46,13 +49,10 @@ const MessageItem: React.FC<MessageProps> = ({
   const SWIPE_THRESHOLD = width * 0.3; // Tăng ngưỡng vuốt
   const MAX_SWIPE_DISTANCE = width * 0.4; // Tăng khoảng cách tối đa
   const [showReactions, setShowReactions] = useState(false);
-  const [currentReaction, setCurrentReaction] = useState(currentMessage.reactions || null);
   const isMyMessage = currentMessage.user._id === userChat._id;
   const isFirstMessage = !previousMessage || currentMessage.user._id !== previousMessage.user._id;
-  
+    //  console.log(currentMessage.recall,'recal;')
   const translateX = useRef(new Animated.Value(0)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-
 
   const panResponder = useRef(
     PanResponder.create({
@@ -77,82 +77,63 @@ const MessageItem: React.FC<MessageProps> = ({
     }),
   ).current;
 
-  const handleLongPressMessage = ({ x, y }: { x: number; y: number }, message: any) => {
+const handleLongPressMessage = ({ x, y }: { x: number; y: number }, message: any) => {
+  // Handle long press on message
+
     setReactionPosition({ x, y }); // Lưu vị trí nhấn giữ
     handleLongPress(message); // Gọi hàm xử lý nhấn giữ
     setShowReactions(true);
   };
 
-  const handlerReactIcon = async (item: any) => {
-
-    // const message = handlerMessage(currentMessage, [
-    //   ...currentReaction,
-    //   {user: userChat, reaction: item},
-    // ]);
-    // const data = await putData(
-    //   API_ROUTE.UPDATE_MESSAGE,
-    //   {
-    //     converstation_id: currentMessage.conversation_id,
-    //     user: userChat,
-    //     message: message,
-    //   },
-    //   {user, dispatch},
-    // );
-    // if (data.status === 200) {
-    //   console.log('thành côngcông');
-    // } else {
-    //   console.log('thất bại thất bại');
-    // }
-  };
-
   return (
     <Pressable onPress={() => {
-
       setSelectedMessages(null)
     }}
-    
     >
-      <View style={{ marginBottom: 2, marginHorizontal: 10, position: 'relative', }}>
+      <View style={{ marginBottom: 2, marginHorizontal: 10, position: 'relative' }}>
         <Day {...props} />
-        <Animated.View {...panResponder.panHandlers} style={{ transform: [{ translateX }] }}>
-          {currentMessage.replyTo !== null && (
-            <ReplyMessage
-              currentMessage={currentMessage}
-              isMyMessage={isMyMessage}
-              scrollToMessage={scrollToMessage}
-              userChat={userChat}
-            />
-          )}
+        {
+          currentMessage.recall === false ? (
+            currentMessage.reciver.includes(userChat.user_id) && (
+              <Animated.View {...panResponder.panHandlers} style={{ transform: [{ translateX }] }}>
+                {currentMessage.replyTo !== null && currentMessage.replyTo.user && (
+                  <ReplyMessage
+                    currentMessage={currentMessage}
+                    isMyMessage={isMyMessage}
+                    scrollToMessage={scrollToMessage}
+                    userChat={userChat}
+                  />
+                )}
+                {currentMessage.messageType === 'text' && ( 
+                  // Render text message
 
-          {/* {selectedMessages_id === currentMessage._id && (
-            <ReactionIcons
-              isMyMessage={isMyMessage}
-              // handlerReactIcon={handlerReactIcon}
-              userChat={userChat}
-            />
-          )} */}
-
-          {currentMessage.messageType === 'text' && (
-            <TextMessage
-              isFirstMessage={isFirstMessage}
-              isMyMessage={isMyMessage}
-              currentMessage={currentMessage}
-              props={props}
-              handleLongPressMessage={handleLongPressMessage}
-              color={color}
-              userChat={userChat}
-              handlderHidenIcon={() => { }}
-              setSelectedMessages={setSelectedMessages}
+                  <TextMessage
+                    isFirstMessage={isFirstMessage}
+                    isMyMessage={isMyMessage}
+                    currentMessage={currentMessage}
+                    props={props}
+                    handleLongPressMessage={handleLongPressMessage}
+                    color={color}
+                    userChat={userChat}
+                    handlderHidenIcon={() => { }}
+                    setSelectedMessages={setSelectedMessages}
             
-            />
-          )}
+                  />
+                )}
+                {currentMessage.messageType === 'image' && ( 
+                  <Image source={{ uri: currentMessage.attachments[0].url }} style={{ width: 100, height: 100 }} />
+                )}
 
-          {currentMessage.messageType === 'image' && (
-            <Image source={{ uri: currentMessage.image }} style={{ width: 100, height: 100 }} />
-          )}
-
-          {currentMessage.messageType === 'attachment' && MediaGrid(currentMessage.attachments)}
-        </Animated.View>
+                {currentMessage.messageType === 'attachment' && MediaGrid(currentMessage.attachments)} 
+              
+              </Animated.View>
+            ))
+            : (
+              <View style={{ alignSelf:  isMyMessage ? 'flex-end' : 'flex-start',backgroundColor:color.gray,padding:5,borderRadius:5 }}>
+              <Text style={{fontWeight:'bold',fontSize:15}}>Tin nhắn này bị thu hồi</Text>
+            </View>
+          )
+        }
 
         {currentMessage.status && (
           <MessageStatus currentMessage={currentMessage} isMyMessage={isMyMessage} />

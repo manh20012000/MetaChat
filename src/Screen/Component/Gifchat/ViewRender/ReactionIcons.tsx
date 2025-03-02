@@ -23,6 +23,24 @@ export const ReactionIcons: React.FC<ReactionIconsProps> = ({
   }, [selectedMessages]);
 
   const handlerReactMessage = (item: any) => {
+    // Tìm index của reaction của user hiện tại
+    const reactionIndex = selectedMessages.reactions.findIndex(
+      (reaction) => reaction.user._id === userChat._id
+    );
+
+    // Nếu user đã có reaction, cập nhật lại reaction đó
+    if (reactionIndex !== -1) {
+      return {
+        ...selectedMessages,
+        reactions: selectedMessages.reactions.map((reaction, index) =>
+          index === reactionIndex
+            ? { ...reaction, reaction: item._id } // Cập nhật reaction của user
+            : reaction
+        ),
+        other: `đã bày tỏ cảm xúc ${item.icon}`,
+      };
+    }
+
     return {
       ...selectedMessages,
       reactions: [
@@ -32,7 +50,7 @@ export const ReactionIcons: React.FC<ReactionIconsProps> = ({
           reaction: item._id,
         },
       ],
-      other: 'đã bày tỏ cảm xúc ' + item.icon,
+      other: `đã bày tỏ cảm xúc ${item.icon}`,
     };
   };
 

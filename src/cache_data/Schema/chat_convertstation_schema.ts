@@ -41,24 +41,7 @@ const userSchema = {
   },
 };
 
-const LastMessageSchema = {
-  name: 'LastMessage',
-  properties: {
-    _id: 'string?',
-    conversation_id: 'string',
-    user: 'user?',
-    messageType: 'string?',
-    voice: 'string?',
-    text: 'string?',
-    attachments: 'Attachment[]',
-    callDetails: 'CallDetail?',
-    createdAt: 'string?',
-    reactions: 'Reaction[]',
-    isRead: 'IsRead[]',
-    replyTo: 'ReplyTo?',
-    statusSendding: 'bool?',
-  },
-};
+
 
 const MessageSchema = {
   name: 'Message',
@@ -78,6 +61,8 @@ const MessageSchema = {
     statusSendding: 'bool?',
     reciver: 'string[]',
     recall: "bool?",
+    
+    
   },
   // Đánh chỉ mục cho các trường thường xuyên truy vấn
 };
@@ -123,14 +108,15 @@ const ConversationSchema = {
     updatedAt: 'string?', // Thời gian sửa đổi gần nhất
     permission: 'string?',
     participantIds: 'string[]',
-    isDeleted:'string[]'
+    isDeleted: 'string[]',
+    messageError: 'Message[]',
   },
 };
 
 export {
   ParticipantSchema,
   MessageSchema,
-  LastMessageSchema,
+
   ConversationSchema,
   AttachmentSchema,
   CallDetailSchema,

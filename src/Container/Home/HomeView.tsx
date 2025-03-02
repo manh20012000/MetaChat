@@ -8,6 +8,7 @@ import {
   Pressable,
   ActivityIndicator,
   Modal,
+  RefreshControl,
 } from 'react-native';
 import {
   BottomSheetModalProvider,
@@ -33,14 +34,13 @@ export const HomeView = ({navigation}: {navigation: any}) => {
     data_convertstation,
     onloading,
     data_friend,
-    selectConverstion,
     setModalVisible,
     snapPoints,
     modalVisible,
-    handleDelete,
+    handleDeleteConverStation,
     handlerShowmodal,
     handlePresentModalPress,
-    handleSheetChanges,
+    handleSheetChanges, onRefresh, refreshing, 
   } = useHomeLogic(navigation);
 
   return (
@@ -62,9 +62,8 @@ export const HomeView = ({navigation}: {navigation: any}) => {
               }
               keyExtractor={(item, index) => item._id}
               initialNumToRender={10}
-              data={data_convertstation}
-                renderItem={({ item }: { item: Conversation }) => {
-               
+                data={data_convertstation}
+              renderItem={({item}: {item: Conversation}) => {
                 const statusUser: boolean = item.participantIds.some(
                   (participantIds: string) => {
                     if (participantIds !== user._id) {
@@ -72,6 +71,8 @@ export const HomeView = ({navigation}: {navigation: any}) => {
                     }
                   },
                 );
+                const ConverstationShow = item.isDeleted.includes(user._id);
+                if (ConverstationShow) return null; // Trả về null thay vì false
                 return (
                   <Pressable
                     onPress={() => {
@@ -84,12 +85,14 @@ export const HomeView = ({navigation}: {navigation: any}) => {
                           recipientIds: recipientIds,
                         });
                       }
-                      
+
                       navigation.navigate('HomeChatPersion', {
                         conversation: item,
                       });
                     }}
-                    onLongPress={() => handlePresentModalPress(item)}
+                    onLongPress={() => {handlePresentModalPress(item)
+                      
+                    }}
                     style={({pressed}) => [
                       {
                         width: '100%',
@@ -149,7 +152,6 @@ export const HomeView = ({navigation}: {navigation: any}) => {
                           const count = filteredParticipants.length;
 
                           if (count === 1) {
-                           
                             return (
                               <>
                                 <Image
@@ -168,7 +170,6 @@ export const HomeView = ({navigation}: {navigation: any}) => {
                           } else if (count === 2) {
                             return (
                               <>
-                               
                                 <Image
                                   style={{
                                     width: 30,
@@ -269,13 +270,14 @@ export const HomeView = ({navigation}: {navigation: any}) => {
                             color: color.white,
                             width: 100,
                           }}>
-                          {
-                            item.messages && item.messages.length > 0
-                              ? item.messages[0]?.user?.user_id === user._id
-                                ? 'You: ' + (item.messages[0]?.text || 'Bắt đầu cuộc thoại')
-                                : item.messages[0]?.user?.name + ': ' + (item.messages[0]?.text || 'Bắt đầu cuộc thoại')
-                              : 'Bắt đầu cuộc thoại'
-                          }
+                          {item.messages && item.messages.length > 0
+                            ? item.messages[0]?.user?.user_id === user._id
+                              ? 'You: ' +
+                                (item.messages[0]?.text || 'Bắt đầu cuộc thoại')
+                              : item.messages[0]?.user?.name +
+                                ': ' +
+                                (item.messages[0]?.text || 'Bắt đầu cuộc thoại')
+                            : 'Bắt đầu cuộc thoại'}
                         </Text>
                         <Text ellipsizeMode="tail" numberOfLines={1}>
                           {dayjs(item.messages[0]?.createdAt).from(new Date())}
@@ -284,7 +286,10 @@ export const HomeView = ({navigation}: {navigation: any}) => {
                     </View>
                   </Pressable>
                 );
-              }}
+                }}
+                refreshControl={
+                  <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }
             />
           </View>
         )}
@@ -320,7 +325,7 @@ export const HomeView = ({navigation}: {navigation: any}) => {
           <View
             style={{
               width: '80%',
-              backgroundColor: 'white',
+              backgroundColor: color.gray,
               padding: 20,
               borderRadius: 10,
               alignItems: 'center',
@@ -329,11 +334,17 @@ export const HomeView = ({navigation}: {navigation: any}) => {
             <Text style={{fontSize: 18, fontWeight: 'bold', marginTop: 10}}>
               Xác nhận xóa?
             </Text>
-            <Text style={{marginTop: 10, textAlign: 'center'}}>
+            <Text
+              style={{
+                marginTop: 10,
+                textAlign: 'center',
+                color: color.white,
+                fontWeight: 'bold',
+              }}>
               Bạn có chắc chắn muốn xóa cuộc trò chuyện này không?
             </Text>
             <View style={{flexDirection: 'row', marginTop: 20}}>
-              <Pressable
+              <TouchableOpacity
                 style={{
                   flex: 1,
                   padding: 10,
@@ -344,8 +355,8 @@ export const HomeView = ({navigation}: {navigation: any}) => {
                 }}
                 onPress={() => setModalVisible(false)}>
                 <Text style={{color: 'white'}}>Hủy</Text>
-              </Pressable>
-              <Pressable
+              </TouchableOpacity>
+              <TouchableOpacity
                 style={{
                   flex: 1,
                   padding: 10,
@@ -353,9 +364,9 @@ export const HomeView = ({navigation}: {navigation: any}) => {
                   alignItems: 'center',
                   backgroundColor: 'red',
                 }}
-                onPress={handleDelete}>
+                onPress={handleDeleteConverStation}>
                 <Text style={{color: 'white'}}>Xóa</Text>
-              </Pressable>
+              </TouchableOpacity>
             </View>
           </View>
         </TouchableOpacity>

@@ -160,6 +160,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   }, []);
 
   const handlerReaction = useCallback(async (message: Message_type) => {
+
     setSelectedMessages(null);
     setMessages(previousMessages => {
       for (let i = previousMessages.length - 1; i >= 0; i--) {
@@ -178,6 +179,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   }, []);
 
   useEffect(() => {
+  
     socket?.on('update_message', ({message, send_id}) => {
       if (send_id !== userChat.user_id) {
         setMessages(previousMessages => {

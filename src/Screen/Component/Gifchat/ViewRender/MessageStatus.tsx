@@ -6,7 +6,6 @@ interface MessageStatusProps {
     currentMessage:Message_type;
     isMyMessage: boolean;
 }
-
 export const MessageStatus: React.FC<MessageStatusProps> = ({
     currentMessage,
     isMyMessage,
