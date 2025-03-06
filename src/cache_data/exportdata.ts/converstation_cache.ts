@@ -118,13 +118,14 @@ const findAndconvertConversation = async (
       );
 
     let existingConversation = conversations[0] || null; // Lấy cuộc hội thoại đầu tiên nếu có
-
+    
     if (existingConversation) {
+      console.log('nảy vào đây')
       // Nếu đã có, cập nhật updatedAt và trả về ngay
       realm.write(() => {
   
         existingConversation.updatedAt = new Date().toISOString();
-        existingConversation.isDeleted = null;
+        existingConversation.isDeleted = [];
       });
       return existingConversation;
     } else {
@@ -250,7 +251,7 @@ const Converstation_Message = async (
 const updateMessage = (message: Message_type, conversation: Conversation) => {
   realm.write(() => {
     // 🔍 Tìm cuộc hội thoại
-    console.log(message.reciver)
+    console.log(message.receiver)
     let existingConversation = realm
       .objects<Conversation>('Conversation')
       .filtered('_id == $0', message.conversation_id)[0];
@@ -278,8 +279,8 @@ const updateMessage = (message: Message_type, conversation: Conversation) => {
       if (message.other !== undefined) existingMessage.other = message.other;
 
       // ✅ Cập nhật `reciver` (xóa hết phần tử cũ và thêm mới)
-      if (message.reciver !== undefined) {
-        existingMessage.reciver.splice(0, existingMessage.reciver.length, ...message.reciver);
+      if (message.receiver !== undefined) {
+        existingMessage.receiver.splice(0, existingMessage.receiver.length, ...message.receiver);
       }
     } else {
       // ✅ Nếu chưa có tin nhắn, thêm mới
@@ -290,7 +291,34 @@ const updateMessage = (message: Message_type, conversation: Conversation) => {
     existingConversation.createdAt = new Date();
   });
 };
+const recallMessage = (conversation_id: string, message_id: string) => {
+  realm.write(() => {
+    const conversation = realm
+      .objects<Conversation>('Conversation')
+      .filtered('_id == $0', conversation_id)[0];
 
+    if (!conversation) {
+
+      return;
+    }
+    const messages = conversation.messages as unknown as Message_type[];
+
+    const messageIndex = messages.findIndex(msg => msg._id === message_id);
+    if (messageIndex === -1) {
+
+      return;
+    }
+    messages[messageIndex].recall = true; // Thêm cờ nhận diện
+    messages[messageIndex].messageType = "recall";
+    messages[messageIndex].attachments = [],
+      messages[messageIndex].text = null,
+      messages[messageIndex].isRead = []
+    messages[messageIndex].receiver=[];
+    conversation.createdAt = new Date();
+    conversation.otherContent="tin nhắn đã được gỡ"
+
+  });
+}
 
 
 const deleteMessage = (conversation_id: string, message_id: string) => {
@@ -307,7 +335,7 @@ const deleteMessage = (conversation_id: string, message_id: string) => {
 
     const messageIndex = messages.findIndex(msg => msg._id === message_id);
     if (messageIndex === -1) {
-
+         
       return;
     }
     messages.splice(messageIndex, 1);
@@ -354,6 +382,7 @@ export {
   findAndconvertConversation,
   updateMessage,
   deleteMessage,
+  recallMessage
 };
 
 //const update_Messages_Converstation = async (converstation:Conversation) => {

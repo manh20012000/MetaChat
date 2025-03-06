@@ -158,7 +158,21 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
       console.error('send message failed:', error);
     }
   }, []);
-
+  const handlerDeleteMessage = useCallback(async (message: Message_type) => {
+    //  console.log(message)
+    setMessageMoreAction(null)
+    setSelectedMessages(null);
+    setMessages(previousMessages => {
+      for (let i = previousMessages.length - 1; i >= 0; i--) {
+        if (previousMessages[i]._id === message._id) {
+          const updatedMessages = [...previousMessages];
+          updatedMessages[i] = { ...message };
+          return updatedMessages;
+        }
+      }
+      return GiftedChat.append(previousMessages, [message]);
+    });
+  }, []);
   const handlerReaction = useCallback(async (message: Message_type) => {
 
     setSelectedMessages(null);
@@ -250,5 +264,6 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     setReactionPosition,
     reactionPosition,
     messageMoreAction,
+    handlerDeleteMessage
   };
 };

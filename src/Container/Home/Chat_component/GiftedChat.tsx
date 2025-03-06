@@ -38,9 +38,10 @@ export const GiftedChatView = ({ conversation }: { conversation: Conversation })
     setReactionPosition,
     reactionPosition,
     messageMoreAction,
-    setMessageMoreAction
+    setMessageMoreAction,
+    handlerDeleteMessage
   } = useGiftedChatLogic(conversation);
-
+  
   return (
     <>
       <Pressable
@@ -133,6 +134,8 @@ export const GiftedChatView = ({ conversation }: { conversation: Conversation })
           messageMoreAction={messageMoreAction}
           setMessageMoreAction={setMessageMoreAction}
           userChat={userChat}
+          handlerDeleteMessage={handlerDeleteMessage} // ✅ Đảm bảo hàm nhận tham số
+
         />
       )}
     </>

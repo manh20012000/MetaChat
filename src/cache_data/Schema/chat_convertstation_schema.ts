@@ -58,13 +58,11 @@ const MessageSchema = {
     reactions: 'Reaction[]', // Danh sách cảm xúc
     isRead: 'user[]', // Danh sách người đã đọc
     replyTo: 'ReplyTo?', // ✅ Đổi từ `replyTo` thành `replyTo`
-    statusSendding: 'bool?',
-    reciver: 'string[]',
+    statusSendding:'bool?',
+    receiver: 'string[]',
     recall: "bool?",
-    
-    
   },
-  // Đánh chỉ mục cho các trường thường xuyên truy vấn
+
 };
 const AttachmentSchema = {
   name: 'Attachment',
@@ -110,6 +108,7 @@ const ConversationSchema = {
     participantIds: 'string[]',
     isDeleted: 'string[]',
     messageError: 'Message[]',
+    otherContent:'string?'
   },
 };
 

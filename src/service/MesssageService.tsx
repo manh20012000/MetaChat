@@ -39,7 +39,7 @@ export const updateMessageReaction = async (
     }
   } catch (error) {
     console.log('câp nhât thất baik');
-    const failedMessage: Message_type = {...message, statusSendding: false};
+      const failedMessage: Message_type = { ...message, statusSendding: false};
     await updateMessage(failedMessage, conversation);
   }
 };

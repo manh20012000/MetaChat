@@ -1,5 +1,4 @@
-import {Message_type} from '../../type/Chat_type';
-import { reactions } from '../../type/Chat_type';
+import { Message_type, reactions } from "../../type/Home/Chat_type";
 const handlerMessage = (
   messageCurrent: Message_type | null,
   reaction: reactions[] = [], // ✅ Định nghĩa kiểu dữ liệu đúng
@@ -22,7 +21,7 @@ const handlerMessage = (
     reactions: reaction.length > 0 ? reaction:messageCurrent.reactions ,
     other: messageCurrent.other || 'bày tỏ cảm xúc', // ✅ Thêm vào thuộc tính mới nếu cần
     recall: messageCurrent.recall,
-    reciver:messageCurrent.reciver,
+    receiver:messageCurrent.receiver,
   };
 
   return message;

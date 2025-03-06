@@ -25,5 +25,7 @@ type Conversation= {
   participantIds: string[];
   firstMessageTime?: string;
   permission: string;
+  messageError: Message_type[];
+  otherContent: string;
 }
 export default Conversation;

@@ -10,13 +10,14 @@ const useModalMoreChat = (
     userChat: userMessage | null,
     conversation: Conversation | null,
     messageMoreAction: Message_type | null,
-    setMessageMoreAction: React.Dispatch<React.SetStateAction<Message_type | null>>
+    setMessageMoreAction: React.Dispatch<React.SetStateAction<Message_type | null>>,
+    handlerDeleteMessage: (message: any) => void,
 ) => {
     const color = useSelector((state: any) => state.colorApp.value);
     const [modalVisible, setModalVisible] = useState(true);
     const [notifiModalVisible, setNotifiModalVisible] = useState<boolean>(true);
     const [selectedOption, setSelectedOption] = useState<string>("");
-    const { user,dispatch} = useCheckingService()
+    const { user, dispatch } = useCheckingService()
     const handlerMoreMessage = async (index: number) => {
         if (index === 3) {
             setNotifiModalVisible(false);
@@ -28,35 +29,29 @@ const useModalMoreChat = (
     };
 
     const handleConfirmation = (confirmed: boolean) => {
-            
+
         if (confirmed) {
             if (selectedOption === "Delete") {
-              
-                const message = 
-                    {
+                console.log('nhảy xuống deleet')
+                const message =
+                {
                     ...messageMoreAction,
-                    reciver: messageMoreAction?.reciver?.filter((id: string) => id !== userChat?.user_id) || [],
-                    
-                
+                    receiver: messageMoreAction?.receiver?.filter((id: string) => id !== userChat?.user_id) || [],
                 }
+                console.log(message.receiver)
+                handlerDeleteMessage(message)
                 handlerDelete(message, userChat, conversation, { user, dispatch });
-            };
+            } else if (selectedOption === "Recall") {
+                const message = {
+                    ...messageMoreAction,
+                    receiver: [],
+                    recall: true,
+                };
+                handlerDeleteMessage(message)
+             handlerRecall(message, userChat, conversation, { user, dispatch });
+            }
 
-                  
-        } else if (selectedOption === "Recall") {
-            // if (messageMoreAction?.reciver?.length > 0) {
-            //     const message = {
-            //         ...messageMoreAction,
-            //         reciver: messageMoreAction.reciver.filter((id: string) => id !== userChat?.user_id),
-            //     };
-            //     handlerRecall(message, userChat, conversation);
-            // } else {
-            //     const message = {
-            //         ...messageMoreAction,
-            //         reciver: [],
-            //     };
-            //     handlerRecall(message, userChat, conversation);
-            // }
+
         }
         setNotifiModalVisible(true);
         setModalVisible(false);
@@ -73,7 +68,8 @@ const useModalMoreChat = (
         handlerMoreMessage,
         notifiModalVisible,
         selectedOption,
-        handleConfirmation, color
+        handleConfirmation,
+        color
     };
 };
 

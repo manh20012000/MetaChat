@@ -1,17 +1,23 @@
-
+import { response } from '../type/response_type';
 // import { URL } from '@env';
-const API_URL = 'http://192.168.51.109:8080';
+const API_URL = 'http://192.168.1.138:8080';
 // console.log('hahah', URL)
 import axios from 'axios';
 import { checkAndRefreshToken } from '../util/checkingToken';
+
 // import User_type from '../interface/user.Interface';
 
-const postData = async (route: string, data: any, check: any) => {
+const postData = async (route: string, data: any, check: any): Promise<response> => {
 
   const checking = await checkAndRefreshToken(check.dispatch, check.user);
 
   if (checking === null) {
-    return null;
+    return {
+      data: null
+      , code: 404,
+      message: 'Token is invalid or expired',
+      status:false
+    };
   } else {
     try {
       const response = await axios.post(`${API_URL}/${route}`, data, {

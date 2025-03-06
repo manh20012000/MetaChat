@@ -40,7 +40,7 @@ const CustomInputToolbar = (props: any) => {
       callDetails:null,
       createdAt: newdate,
       reactions: [],
-      reciver: conversation.participantIds,
+      receiver: conversation.participantIds,
       isRead: [],
       replyTo: replyMessage === null ? null : {
         _id:replyMessage._id,

@@ -8,14 +8,14 @@ export type Message_type = {
     user_id: string;
   };
   messageType: string;
-  voice: string;
-  text: string;
+  voice: string|null;
+  text: string|null;
   attachments: [
     {
       type: string;
       url: string;
     },
-  ];
+  ]|[];
   callDetails: {
     duration: {
       type: number; // Thời lượng cuộc gọi (giây)
@@ -32,11 +32,11 @@ export type Message_type = {
     };
     reaction:number,
   }[];
-  reciver: string[];
+  receiver: string[];
   recall: boolean;
   isRead: [
     {user: {_id: string; avatar: string; name: string}; status: boolean},
-  ];
+  ]|[];
   replyTo: {
     _id: string;
     text: string; // Nội dung của tin nhắn reply
@@ -47,8 +47,10 @@ export type Message_type = {
       user_id: string,}
   };
   other: string;
-  statusSendding: boolean;
   status: string;
+  statusSendding:boolean,
+  
+
 };
 
 export type reactions ={

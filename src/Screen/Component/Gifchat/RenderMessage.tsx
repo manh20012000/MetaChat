@@ -84,17 +84,18 @@ const handleLongPressMessage = ({ x, y }: { x: number; y: number }, message: any
     handleLongPress(message); // Gọi hàm xử lý nhấn giữ
     setShowReactions(true);
   };
-
+//  console.log('mES',currentMessage)
   return (
     <Pressable onPress={() => {
       setSelectedMessages(null)
     }}
     >
       <View style={{ marginBottom: 2, marginHorizontal: 10, position: 'relative' }}>
-        <Day {...props} />
+       <Day {...props} />
         {
           currentMessage.recall === false ? (
-            currentMessage.reciver.includes(userChat.user_id) && (
+            currentMessage.receiver.includes(userChat.user_id) && ( 
+            <>
               <Animated.View {...panResponder.panHandlers} style={{ transform: [{ translateX }] }}>
                 {currentMessage.replyTo !== null && currentMessage.replyTo.user && (
                   <ReplyMessage
@@ -121,12 +122,13 @@ const handleLongPressMessage = ({ x, y }: { x: number; y: number }, message: any
                   />
                 )}
                 {currentMessage.messageType === 'image' && ( 
-                  <Image source={{ uri: currentMessage.attachments[0].url }} style={{ width: 100, height: 100 }} />
+                  <Image source={{ uri: currentMessage.attachments[0]?.url }} style={{ width: 100, height: 100 }} />
                 )}
 
                 {currentMessage.messageType === 'attachment' && MediaGrid(currentMessage.attachments)} 
               
-              </Animated.View>
+                </Animated.View>
+              </>
             ))
             : (
               <View style={{ alignSelf:  isMyMessage ? 'flex-end' : 'flex-start',backgroundColor:color.gray,padding:5,borderRadius:5 }}>

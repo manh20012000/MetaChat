@@ -9,6 +9,7 @@ import { useSelector } from 'react-redux';
 type modelType = {
   userChat: userMessage;
   conversation: Conversation;
+  handlerDeleteMessage: (message: Message_type) => void; 
   messageMoreAction: Message_type | null;
   setMessageMoreAction: React.Dispatch<React.SetStateAction<any>>;
 };
@@ -18,13 +19,15 @@ const ModalChatMore: React.FC<modelType> = ({
   conversation,
   messageMoreAction,
   setMessageMoreAction,
+  handlerDeleteMessage,
 }) => {
 
   const { modalVisible, toggleModal, color,handlerMoreMessage, notifiModalVisible, selectedOption, handleConfirmation } = useModalMoreChat(
     userChat,
     conversation,
     messageMoreAction,
-    setMessageMoreAction
+    setMessageMoreAction,
+    handlerDeleteMessage
   );
 
   const options = ['Pin', 'Forward', 'Bump', 'Delete', 'Report', 'Recall'];

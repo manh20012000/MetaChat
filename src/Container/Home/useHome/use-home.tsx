@@ -189,7 +189,7 @@ export const useHomeLogic = (navigation: any) => {
 
       const {message, conversation, send_id} = messages;
       if (send_id !== user._id) {
-        // console.log(user.name,'cập nhật cho ')
+      
         updateMessage(message, conversation);
       }
     };
