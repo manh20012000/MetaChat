@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
   View,
   TextInput,
@@ -6,29 +6,46 @@ import {
   Text,
   useWindowDimensions,
   Animated,
+  Alert,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { InputToolbar } from 'react-native-gifted-chat';
-import { useSelector } from 'react-redux';
-import { Send } from '../../../assets/svg/svgfile';
+import {InputToolbar} from 'react-native-gifted-chat';
+import {useSelector} from 'react-redux';
+import {Send} from '../../../assets/svg/svgfile';
 import Conversation from '../../../type/Home/Converstation_type';
-import { BSON } from 'bson';
-
-const CustomInputToolbar = (props: any) => {
-  const { onSend, userChat, replyMessage, setReplyMessage } = props;
-  const { width, height } = useWindowDimensions();
+import {BSON} from 'bson';
+import PermissionCamera from '../../../util/Permision/CameraChatPermission';
+import userMessage from '../../../type/Home/useMessage_type';
+import {Message_type} from '../../../type/Home/Chat_type';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {RootStackParamList} from '../../../type/rootStackScreen';
+import {eventEmitter} from '../../../eventEmitter/EventEmitter';
+type NavigationProps = NavigationProp<RootStackParamList>;
+type TCusttomTypeInput = {
+  onSend: any;
+  userChat: userMessage;
+  replyMessage: Message_type | null;
+  conversation: Conversation;
+  setReplyMessage: React.Dispatch<React.SetStateAction<Message_type | null>>;
+};
+const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
+  const {onSend, userChat, replyMessage, setReplyMessage} = props;
+  const {width, height} = useWindowDimensions();
   const color = useSelector(
-    (value: { colorApp: { value: any } }) => value.colorApp.value,
+    (value: {colorApp: {value: any}}) => value.colorApp.value,
   );
+  const navigation = useNavigation<NavigationProps>();
 
   const conversation: Conversation = props.conversation;
   const [isShowSendText, setIsShowSendText] = useState(true);
+
   const [changeIcon, setChangeIcon] = useState(true);
   const [text, settext] = useState('');
   const [inputHeight, setInputHeight] = useState(30);
   const newdate = new Date().toISOString();
 
-  const handMessage = () => {
+  const handMessage = useCallback(() => {
+   
     return {
       _id: new BSON.ObjectId().toString(),
       conversation_id: conversation._id,
@@ -37,29 +54,83 @@ const CustomInputToolbar = (props: any) => {
       text: text,
       voice: '',
       attachments: [],
-      callDetails:null,
+      callDetails: null,
       createdAt: newdate,
       reactions: [],
       receiver: conversation.participantIds,
       isRead: [],
-      replyTo: replyMessage === null ? null : {
-        _id:replyMessage._id,
-        text: replyMessage.messageType === "text" ? replyMessage.text : "reply atatment",
-        user: replyMessage.user,
-        messageType:replyMessage.messageType,
-      },
-      recall:false
+      replyTo:
+        replyMessage === null
+          ? null
+          : {
+              _id: replyMessage._id,
+              text:
+                replyMessage.messageType === 'text'
+                  ? replyMessage.text
+                  : 'reply atatment',
+              user: replyMessage.user,
+              messageType: replyMessage.messageType,
+            },
+      recall: false,
     };
-  };
+  }, [text]);
 
-  const handleSend = () => {
+  const handleSend = useCallback(() => {
     if (text.trim() !== '') {
-      onSend(handMessage(), []); // Gửi text về hàm onSend
-      settext(''); // Reset text input sau khi gửi
+      onSend(handMessage(), [], true);
+      settext('');
       setChangeIcon(true);
-      setReplyMessage(null)
+      setReplyMessage(null);
     }
-  };
+  }, [text]);
+
+  useEffect(() => {
+    const listener = (files: []) => {
+      let filesOrder = files.map((file: any, index: number) => {
+        return {
+          index,
+          type: file.type,
+        };
+      });
+      
+      if (files.length > 0) {
+        const message = {
+          _id: new BSON.ObjectId().toString(),
+          conversation_id: conversation._id,
+          user: userChat,
+          messageType: 'attachment',
+          text: null,
+          voice: null,
+          attachments: files,
+          callDetails: null,
+          createdAt: newdate,
+          reactions: [],
+          receiver: conversation.participantIds,
+          isRead: [],
+          replyTo: null,
+          recall: false,
+        };
+
+        onSend(message, filesOrder, true);
+        setChangeIcon(true);
+        setReplyMessage(null);
+      }
+    };
+
+    eventEmitter.on('onCapture', listener);
+    return () => {
+      eventEmitter.off('onCapture', listener);
+    };
+  }, []);
+
+  const handlePress = useCallback(async () => {
+    const permission = await PermissionCamera();
+    if (permission) {
+      navigation.navigate('CameraChat');
+    } else {
+      Alert.alert('Permission camera denied');
+    }
+  }, []);
 
   return (
     <>
@@ -68,18 +139,27 @@ const CustomInputToolbar = (props: any) => {
           style={{
             width: width,
             marginBottom: 70,
-            alignContent: "center",
+            alignContent: 'center',
             paddingHorizontal: 10,
             borderTopWidth: 2,
             borderTopColor: 'gray',
-            justifyContent: "center",
+            justifyContent: 'center',
             alignSelf: 'center',
-          }}
-        >
-          <Text style={{ color: "white", fontWeight: "bold" }}>Replying to {replyMessage.user !== userChat.user_id?'youself':replyMessage.user.name}</Text>
-          <Text style={{ color: "white", width:width-50,fontSize:18 }}
+          }}>
+          <Text style={{color: 'white', fontWeight: 'bold'}}>
+            Replying to{' '}
+            {replyMessage.user !== userChat.user_id
+              ? 'youself'
+              : replyMessage.user.name}
+          </Text>
+          <Text
+            style={{color: 'white', width: width - 50, fontSize: 18}}
             numberOfLines={1}
-            ellipsizeMode="tail" >{replyMessage.messageType==="text"?replyMessage.text:"reply atatment"}</Text>
+            ellipsizeMode="tail">
+            {replyMessage.messageType === 'text'
+              ? replyMessage.text
+              : 'reply atatment'}
+          </Text>
           <TouchableOpacity
             onPress={() => setReplyMessage(null)}
             style={{
@@ -87,18 +167,17 @@ const CustomInputToolbar = (props: any) => {
               borderRadius: 100,
               height: 30,
               width: 30,
-              position: "absolute",
+              position: 'absolute',
               right: 10,
               alignSelf: 'center',
               justifyContent: 'center',
-
             }}>
             <Text
               style={{
                 color: 'white',
                 fontWeight: 'bold',
                 fontSize: 25,
-                textAlign: 'center'
+                textAlign: 'center',
               }}>
               x
             </Text>
@@ -114,10 +193,8 @@ const CustomInputToolbar = (props: any) => {
           position: 'absolute',
           bottom: 0,
           backgroundColor: color.black,
-          paddingVertical:10
-
+          paddingVertical: 10,
         }}>
-
         {changeIcon ? (
           <View
             style={{
@@ -146,7 +223,7 @@ const CustomInputToolbar = (props: any) => {
                 size={30}
               />
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handlePress}>
               <MaterialCommunityIcons
                 name="camera"
                 color={color.blue}
@@ -211,10 +288,14 @@ const CustomInputToolbar = (props: any) => {
         </View>
         {isShowSendText ? (
           <TouchableOpacity>
-            <Text style={{ fontSize: 25 }}>{conversation?.icon}</Text>
+            <Text style={{fontSize: 25}}>{conversation?.icon}</Text>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity onPress={handleSend}>
+          <TouchableOpacity
+            onPress={() => {
+              handleSend();
+         
+            }}>
             <Send />
           </TouchableOpacity>
         )}

@@ -19,6 +19,7 @@ import Adttenment from '../Screen/Home/Draw_navigation/Adttenment.tsx';
 import Private_Converstation from '../Screen/Home/Draw_navigation/Private_Converstation.tsx';
 import NetInfo from '@react-native-community/netinfo';
 import { check } from '../Redux_Toolkit/Reducer/network_connect.ts';
+import CameraChat from '../Container/Home/Chat_component/CameraChat/CamaraView.tsx';
 const Stack = createNativeStackNavigator();
 const screens = [
   { name: 'Login', component: Login },
@@ -27,6 +28,7 @@ const screens = [
   { name: 'ChatScreen', component: ChatScreen },
   { name: 'SearchScreen', component: SearchScreen },
   { name: 'HomeChatPersion', component: HomeChatPersion },
+   {name:'CameraChat',  component:CameraChat},
 ];
 
 const Navigation: React.FC = () => {

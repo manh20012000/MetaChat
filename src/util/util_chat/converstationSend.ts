@@ -1,5 +1,5 @@
 
-import { Message_type } from '../../type/Chat_type';
+import { Message_type } from '../../type/Home/Chat_type';
 import Conversation from '../../type/Home/Converstation_type';
 
 

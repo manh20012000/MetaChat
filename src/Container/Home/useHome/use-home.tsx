@@ -35,7 +35,7 @@ export const useHomeLogic = (navigation: any) => {
   const insets = useSafeAreaInsets();
   const socket = useSocket();
 
-  const [data_convertstation, setData_convertStation] = useState<any>([]);
+  const [data_convertstation, setData_convertStation] = useState<Conversation[]>([]);
   const [skip, setSkiped] = useState(0);
   const [skipfriend, setSkipfriend] = useState(0);
   const [onloading, setLoading] = useState<boolean>(false);
@@ -45,6 +45,7 @@ export const useHomeLogic = (navigation: any) => {
       ? 'portrait'
       : 'landscape',
   );
+
   const [data_friend, setData_friend] = useState([]);
   const [selectConverstion, setSelectConverstation] =
     useState<Conversation | null>(null);
@@ -63,26 +64,26 @@ export const useHomeLogic = (navigation: any) => {
       return;
     }
 
-    // setData_convertStation((previewConverstatiom:Conversation[]) => {
-    //   return previewConverstatiom.filter((item: Conversation) => item._id !== selectConverstion._id
-    //   )
-    // })
+    setData_convertStation((previewConverstatiom:Conversation[]) => {
+      return previewConverstatiom.filter((item: Conversation) => item._id !== selectConverstion._id
+      )
+    })
     setModalVisible(false);
     delete_converStation(selectConverstion, { dispatch, user });
     setSelectConverstation(null)
      
-  }, []);
+  }, [selectConverstion]);
 
   const handlerShowmodal = useCallback((status: boolean) => {
     setModalVisible(status);
-    console.log(selectConverstion, 'ẩn modal');
-  }, []);
+    console.log(selectConverstion?._id, 'ẩn modal');
+  }, [selectConverstion]);
 
   const handlePresentModalPress = useCallback((item: Conversation) => {
     bottomSheetModalRef.current?.present();
     console.log(item._id, 'lấy được item');
     setSelectConverstation(item);
-  }, []);
+  }, [selectConverstion]);
 
   const handleSheetChanges = useCallback((index: number) => {
     console.log('handleSheetChanges', index);
@@ -181,7 +182,6 @@ export const useHomeLogic = (navigation: any) => {
 
     const handleNewMessage = async (messages: any) => {
       const {message, conversation, send_id} = messages;
-      console.log('có tin nhắn mới ', message.recall);
       await Converstation_Message(message, conversation, send_id);
     };
 
@@ -207,7 +207,6 @@ export const useHomeLogic = (navigation: any) => {
         return;
       }
       let data_converstation = await getConversations();
-      console.log('gọi hàm cập nhật')
       setData_convertStation(data_converstation);
       // let data_friend_chat = await getListfriend();
       // if (data_friend_chat.length > 0) {

@@ -5,7 +5,8 @@ import userMessage from '../../../../type/Home/useMessage_type';
 import {messageIcon} from '../../../../type/react-type';
 import {Message_type} from '../../../../type/Home/Chat_type';
 import {TouchableOpacity} from 'react-native';
-interface TextMessageProps {
+import PreviewImage from '../../../../Container/Home/Chat_component/PreviewAttenment/ImagePreview';
+type TextMessageProps = {
   isFirstMessage: boolean;
   isMyMessage: boolean;
   currentMessage: Message_type;
@@ -18,7 +19,7 @@ interface TextMessageProps {
   userChat: userMessage;
   handlderHidenIcon: any;
   setSelectedMessages: React.Dispatch<React.SetStateAction<any>>;
-}
+};
 
 export const TextMessage: React.FC<TextMessageProps> = ({
   isFirstMessage,
@@ -44,43 +45,50 @@ export const TextMessage: React.FC<TextMessageProps> = ({
     <>
       <Pressable
         onPress={() => {
+        
           setSelectedMessages(null);
           handlderHidenIcon(false);
         }}
         ref={messageRef} // Gán ref vào Pressable để đo được tọa độ
         style={{
-          flexDirection: 'row',
-          alignItems: 'flex-end',
+       
           marginVertical: 1,
         }}>
         {isFirstMessage && currentMessage.user._id !== userChat._id && (
           <Avatar {...props} style={{}} />
         )}
-
-        <Bubble
-          {...props}
-          onLongPress={getPosition}
-          wrapperStyle={{
-            left: {
-              backgroundColor: color.gray2,
-              maxWidth: '65%',
-              padding: 5,
-            },
-            right: {
-              backgroundColor: isMyMessage ? color.blue : color.gray2,
-              maxWidth: '65%',
-              padding: 5,
-            },
-          }}
-          textStyle={{
-            left: {color: 'white'},
-            right: {color: 'white'},
-          }}
-        />
+        {currentMessage.messageType === 'text' && (
+          <Bubble
+            {...props}
+            onLongPress={getPosition}
+            wrapperStyle={{
+              left: {
+                backgroundColor: color.gray2,
+                maxWidth: '65%',
+                padding: 5,
+              },
+              right: {
+                backgroundColor: isMyMessage ? color.blue : color.gray2,
+                maxWidth: '65%',
+                padding: 5,
+              },
+            }}
+            textStyle={{
+              left: {color: 'white'},
+              right: {color: 'white'},
+            }}
+          />
+        )}
+        {currentMessage.messageType === 'attachment' && (
+            <PreviewImage
+              isMyMessage={isMyMessage}
+              currentMessage={currentMessage}
+              getPosition={getPosition}
+            />
+        )}
       </Pressable>
       {currentMessage.reactions.length > 0 && (
         <View
-          
           style={{
             flexDirection: 'row',
             alignSelf: isMyMessage ? 'flex-end' : 'flex-start',

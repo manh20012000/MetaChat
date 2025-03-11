@@ -10,6 +10,7 @@ dayjs.extend(relativeTime);
 
 // Hàm xác định nội dung hiển thị dựa trên messageType
 const getMessageContent = (message: Message_type) => {
+    if(!message)return 
     switch (message.messageType) {
         case 'text':
             return message.text || 'Bắt đầu cuộc thoại';

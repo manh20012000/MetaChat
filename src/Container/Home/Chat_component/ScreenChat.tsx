@@ -235,7 +235,10 @@ const HomeChatPersion: React.FC<{ route: any, navigation: any }> = ({ route, nav
             height: '1%',
           }}></View>
 
-        <GiftedChatView conversation={conversation}/>
+        <GiftedChatView
+          conversation={conversation}
+          navigation={navigation}
+        />
       </View>
     );
 }

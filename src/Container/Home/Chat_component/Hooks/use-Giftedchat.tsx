@@ -11,6 +11,8 @@ import Conversation from '../../../../type/Home/Converstation_type';
 import {Message_type} from '../../../../type/Home/Chat_type';
 import {
   Converstation_Message,
+  deleteMessageError,
+  MessageError,
   update_Converstation,
 } from '../../../../cache_data/exportdata.ts/converstation_cache';
 import {Vibration} from 'react-native';
@@ -24,11 +26,13 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   );
   const {user, dispatch} = useCheckingService();
   const socket = useSocket();
+  const networkConnect = useSelector((value: any) => value.network.value);
   const isPortrait = height > width;
 
-  const [messages, setMessages] = useState<any[]>(
-    Array.from(conversation.messages),
-  );
+  const [messages, setMessages] = useState<any[]> (Array.from([
+    ...conversation.messageError,
+    ...conversation.messages,
+  ]));
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [buttonScale] = useState(new Animated.Value(1));
   const [maginTextInput, setMaginTextInput] = useState<boolean>(false);
@@ -105,68 +109,93 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
       }
     });
   }, []);
-
-  const onSend = useCallback(async (message: Message_type, filesOrder: any) => {
-    const dataSaveSend = await converstationsend(
-      message,
-      filesOrder,
-      userChat,
-      conversation,
-    );
-    const newMessage = {
-      ...message,
-      user: {
-        _id: userChat._id,
-        name: userChat.name,
-        avatar: userChat.avatar,
-        use_id: user._id,
-      },
-      status: 'sending',
-    };
-
-    try {
-      setMessages(previousMessages =>
-        GiftedChat.append(previousMessages, [newMessage]),
+  // useEffect(() => {
+  //   console.log('có connect ', conversation.messageError);
+  //   // if (conversation.messageError.length > 0) {
+  //   //   console.log('connect lại');
+  //   //   conversation.messageError.forEach((message: Message_type) => {
+  //   //     onSend(message, [], false);
+  //   //   });
+  //   // }
+  // }, []);
+  const onSend = useCallback(
+   
+    async (message: Message_type, filesOrder: [], statusMessage: boolean) => { 
+      const dataSaveSend = await converstationsend(
+        message,
+        filesOrder,
+        userChat,
+        conversation,
       );
-
-      const response = await postFormData(
-        API_ROUTE.SEND_MESSAGE,
-        dataSaveSend,
-        {
-          dispatch,
-          user,
+    
+      const newMessage = {
+        ...message,
+        user: {
+          _id: userChat._id,
+          name: userChat.name,
+          avatar: userChat.avatar,
+          use_id: user._id,
         },
-      );
+        status: 'sending',
+      };
 
-      if (response.status === 200) {
-        setMessages(previousMessages =>
-          previousMessages.map(msg =>
-            msg._id === newMessage._id ? {...msg, status: 'sent'} : msg,
+      try {
+        if (statusMessage) {
+          setMessages(previousMessages =>
+            GiftedChat.append(previousMessages, [newMessage]),
+          );
+        }
+        const response = await postFormData(
+          API_ROUTE.SEND_MESSAGE,
+          dataSaveSend,
+          {
+            dispatch,
+            user,
+          },
+        );
+
+        if (response.status === 200) {
+          setMessages(previousMessages =>
+            previousMessages.map(msg =>
+              msg._id === newMessage._id
+                ? {...msg, status: 'sent', statusSendding: true}
+                : msg,
+            ),
+          );
+          if (!statusMessage) {
+            deleteMessageError(conversation._id, message._id);
+          }
+        } else {
+          throw new Error('Message sending failed');
+        }
+      } catch (error) {
+        const failedMessage: Message_type = {...message, statusSendding: false};
+        if (!statusMessage) {
+       
+        } else {
+         
+          await MessageError(failedMessage, conversation, userChat);
+        }
+        setMessages((previousMessages: Message_type[]) =>
+          previousMessages.map((msg: Message_type) =>
+            msg._id === newMessage._id
+              ? {...msg, status: 'failed', statusSendding: false}
+              : msg,
           ),
         );
-      } else {
-        throw new Error('Message sending failed');
+        console.error('send message failed:', error);
       }
-    } catch (error) {
-      const failedMessage: Message_type = {...message, statusSendding: false};
-      await Converstation_Message(failedMessage, conversation, userChat);
-      setMessages((previousMessages: Message_type[]) =>
-        previousMessages.map((msg: Message_type) =>
-          msg._id === newMessage._id ? {...msg, status: 'failed'} : msg,
-        ),
-      );
-      console.error('send message failed:', error);
-    }
-  }, []);
+    },
+    [],
+  );
   const handlerDeleteMessage = useCallback(async (message: Message_type) => {
-    //  console.log(message)
-    setMessageMoreAction(null)
+    setMessageMoreAction(null);
     setSelectedMessages(null);
     setMessages(previousMessages => {
       for (let i = previousMessages.length - 1; i >= 0; i--) {
         if (previousMessages[i]._id === message._id) {
           const updatedMessages = [...previousMessages];
-          updatedMessages[i] = { ...message };
+          updatedMessages[i] = {...message};
           return updatedMessages;
         }
       }
@@ -174,7 +203,6 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     });
   }, []);
   const handlerReaction = useCallback(async (message: Message_type) => {
-
     setSelectedMessages(null);
     setMessages(previousMessages => {
       for (let i = previousMessages.length - 1; i >= 0; i--) {
@@ -193,7 +221,6 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   }, []);
 
   useEffect(() => {
-  
     socket?.on('update_message', ({message, send_id}) => {
       if (send_id !== userChat.user_id) {
         setMessages(previousMessages => {
@@ -264,6 +291,6 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     setReactionPosition,
     reactionPosition,
     messageMoreAction,
-    handlerDeleteMessage
+    handlerDeleteMessage,
   };
 };

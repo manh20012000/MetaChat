@@ -22,9 +22,10 @@ import Statusbar from '../../Constants/StatusBar.tsx';
 import BottonsheetHome from '../../Screen/Home/homeComponent/BottomsheetHome.tsx';
 import dayjs from 'dayjs';
 import Conversation from '../../type/Home/Converstation_type.ts';
-import MessageItem from './conponent/ItemConversation.tsx';
+import MessageItem from './component/ItemConversation.tsx';
 
 export const HomeView = ({navigation}: {navigation: any}) => {
+  
   const {
     color,
     user,
@@ -44,7 +45,7 @@ export const HomeView = ({navigation}: {navigation: any}) => {
     handlePresentModalPress,
     handleSheetChanges, onRefresh, refreshing, 
   } = useHomeLogic(navigation);
-
+ 
   return (
     <BottomSheetModalProvider>
       <View style={{flex: 1, backgroundColor: color.white}}>

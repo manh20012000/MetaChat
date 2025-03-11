@@ -12,6 +12,7 @@ import { TextMessage } from './ViewRender/TextMessage ';
 import { MessageStatus } from './ViewRender/MessageStatus';
 import { messageIcon } from '../../../type/react-type';
 import { Message_type } from '../../../type/Home/Chat_type';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 
 interface MessageProps {
@@ -20,7 +21,6 @@ interface MessageProps {
   userChat: userMessage;
   handleLongPress: (message: any) => void;
   handlerreplyTo: (message: any) => void;
-  MediaGrid: (attachments: any) => React.ReactNode;
   scrollToMessage: (messageId: string) => void;
   props: any;
   selectedMessages_id: any;
@@ -36,7 +36,7 @@ const MessageItem: React.FC<MessageProps> = ({
   userChat,
   handleLongPress,
   handlerreplyTo,
-  MediaGrid,
+
   scrollToMessage,
   props,
   selectedMessages_id,
@@ -76,7 +76,7 @@ const MessageItem: React.FC<MessageProps> = ({
       },
     }),
   ).current;
-
+  //  console.log(currentMessage)
 const handleLongPressMessage = ({ x, y }: { x: number; y: number }, message: any) => {
   // Handle long press on message
 
@@ -84,7 +84,7 @@ const handleLongPressMessage = ({ x, y }: { x: number; y: number }, message: any
     handleLongPress(message); // Gọi hàm xử lý nhấn giữ
     setShowReactions(true);
   };
-//  console.log('mES',currentMessage)
+//  console.log('mES',currentMessage.statusSendding)
   return (
     <Pressable onPress={() => {
       setSelectedMessages(null)
@@ -105,9 +105,10 @@ const handleLongPressMessage = ({ x, y }: { x: number; y: number }, message: any
                     userChat={userChat}
                   />
                 )}
-                {currentMessage.messageType === 'text' && ( 
-                  // Render text message
-
+                 <View style={{flexDirection:'row',alignSelf: isMyMessage ? 'flex-end' : 'flex-start',alignItems:'center',gap:10}}>
+                   {currentMessage.statusSendding===null || currentMessage.statusSendding===false &&(
+                    <MaterialIcons name="sms-failed" size={30} color={'red'}/>
+                   )}
                   <TextMessage
                     isFirstMessage={isFirstMessage}
                     isMyMessage={isMyMessage}
@@ -120,14 +121,8 @@ const handleLongPressMessage = ({ x, y }: { x: number; y: number }, message: any
                     setSelectedMessages={setSelectedMessages}
             
                   />
-                )}
-                {currentMessage.messageType === 'image' && ( 
-                  <Image source={{ uri: currentMessage.attachments[0]?.url }} style={{ width: 100, height: 100 }} />
-                )}
-
-                {currentMessage.messageType === 'attachment' && MediaGrid(currentMessage.attachments)} 
-              
-                </Animated.View>
+              </View>
+              </Animated.View>
               </>
             ))
             : (

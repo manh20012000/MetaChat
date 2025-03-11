@@ -13,7 +13,9 @@ import MediaGrid from '../../../Constants/GirdMedia';
 import { ReactionIcons } from '../../../Screen/Component/Gifchat/ViewRender/ReactionIcons';
 import { Message_type } from '../../../type/Home/Chat_type';
 import ModalChatMore from '../../../Constants/ModalMoreChat';
-export const GiftedChatView = ({ conversation }: { conversation: Conversation }) => {
+import { NavigationProp, RouteProp } from '@react-navigation/native'; // Import các type cần thiết
+
+export const GiftedChatView = ({ conversation, navigation }: { conversation: Conversation, navigation:any }) => {
   const {
     color,
     userChat,
@@ -79,7 +81,6 @@ export const GiftedChatView = ({ conversation }: { conversation: Conversation })
                 userChat={userChat}
                 handleLongPress={handleLongPress}
                 handlerreplyTo={handlerreplyTo}
-                MediaGrid={MediaGrid}
                 scrollToMessage={scrollToMessage}
                 selectedMessages_id={selectedMessages?._id}
                 setSelectedMessages={setSelectedMessages}

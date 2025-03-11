@@ -36,9 +36,7 @@ export const checkAndRefreshToken = async (dispatch: any, user:User_type) => {
         const data = response.data;
 
         if (response.status === 200 && data) {
-          // Lưu token mới vào AsyncStorage
-          console.log('cập nhật lại data', data.data.access_token
-          )
+          
           const userDataString = data.data;
           await AsyncStorage.setItem('user', JSON.stringify(userDataString));
           await AsyncStorage.setItem('access_token', JSON.stringify(data.data.access_token));
