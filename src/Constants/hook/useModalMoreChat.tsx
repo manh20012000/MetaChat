@@ -32,13 +32,12 @@ const useModalMoreChat = (
 
         if (confirmed) {
             if (selectedOption === "Delete") {
-                console.log('nhảy xuống deleet')
+            
                 const message =
                 {
                     ...messageMoreAction,
                     receiver: messageMoreAction?.receiver?.filter((id: string) => id !== userChat?.user_id) || [],
                 }
-                console.log(message.receiver)
                 handlerDeleteMessage(message)
                 handlerDelete(message, userChat, conversation, { user, dispatch });
             } else if (selectedOption === "Recall") {

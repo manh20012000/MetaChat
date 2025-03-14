@@ -67,7 +67,7 @@ const ModalChatMore: React.FC<modelType> = ({
                   borderBottomColor: '#555',
                 }}
                 onPress={() => {
-                  console.log(`${option} clicked`);
+        
                   handlerMoreMessage(index);
                 }}
               >

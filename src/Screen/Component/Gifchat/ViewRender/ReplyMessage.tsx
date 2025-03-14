@@ -16,7 +16,7 @@ export const ReplyMessage: React.FC<ReplyMessageProps> = ({
     scrollToMessage,
     userChat
 }) => {
- 
+
     return (
         <View
             style={{

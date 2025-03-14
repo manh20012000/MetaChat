@@ -14,15 +14,13 @@ import { ReactionIcons } from '../../../Screen/Component/Gifchat/ViewRender/Reac
 import { Message_type } from '../../../type/Home/Chat_type';
 import ModalChatMore from '../../../Constants/ModalMoreChat';
 import { NavigationProp, RouteProp } from '@react-navigation/native'; // Import các type cần thiết
+import ButtonSelection from './EditMediaChat/ButtonSelect';
 
-export const GiftedChatView = ({ conversation, navigation }: { conversation: Conversation, navigation:any }) => {
+export const GiftedChatView = ({ conversation, navigation }: { conversation: Conversation, navigation: any }) => {
   const {
     color,
     userChat,
-    messages,
-    selectedItems,
-    buttonScale,
-    maginTextInput,
+    messages, maginViewGiftedchat,
     setReplyMessage,
     replyMessage,
     selectedMessages,
@@ -31,8 +29,8 @@ export const GiftedChatView = ({ conversation, navigation }: { conversation: Con
     handlePresentModalPress,
     handleSheetChanges,
     scrollToMessage,
-    handleSelect,
-    onSend,
+    handlerSelectMedia,
+    onSend, selectedItemsMedia,
     setSelectedMessages,
     handlerReaction,
     handlerreplyTo,
@@ -41,19 +39,20 @@ export const GiftedChatView = ({ conversation, navigation }: { conversation: Con
     reactionPosition,
     messageMoreAction,
     setMessageMoreAction,
-    handlerDeleteMessage
+    handlerDeleteMessage, setSelectedItemsMedia
   } = useGiftedChatLogic(conversation);
-  
+
   return (
     <>
       <Pressable
         onPress={() => {
           Keyboard.dismiss();
+
           setSelectedMessages(null);
         }}
         style={{ flex: 1 }}
         accessible={true}>
-        <View style={{ flex: 1, marginBottom: 0, backgroundColor: color.black }}>
+        <View style={{ flex: 1, marginBottom: maginViewGiftedchat, backgroundColor: color.black }}>
           <GiftedChat
             messages={messages}
             user={{
@@ -69,13 +68,14 @@ export const GiftedChatView = ({ conversation, navigation }: { conversation: Con
                 conversation={conversation}
                 replyMessage={replyMessage}
                 setReplyMessage={setReplyMessage}
+                handlePresentModalPress={handlePresentModalPress}
+
               />
             )}
             scrollToBottom={true}
             renderSend={renderSend}
-            renderMessage={(props:any) => (
+            renderMessage={(props: any) => (
               <MessageItem
-             
                 currentMessage={props.currentMessage}
                 props={props}
                 userChat={userChat}
@@ -85,8 +85,8 @@ export const GiftedChatView = ({ conversation, navigation }: { conversation: Con
                 selectedMessages_id={selectedMessages?._id}
                 setSelectedMessages={setSelectedMessages}
                 setReactionPosition={setReactionPosition}
-         
-                
+
+
               />
             )}
             renderTime={() => null}
@@ -105,21 +105,24 @@ export const GiftedChatView = ({ conversation, navigation }: { conversation: Con
           ref={bottomSheetModalRef}
           onChange={handleSheetChanges}
           enablePanDownToClose={true}
+          enableContentPanningGesture={false}
           snapPoints={snapPoints}>
-          <BottomSheetView style={{ flex: 1, backgroundColor: color.dark }}>
-            <GetAllMedia_Bottomsheet handleSelect={handleSelect} />
+          <BottomSheetView
+
+            style={{ flex: 1, backgroundColor: color.dark }}>
+            <GetAllMedia_Bottomsheet handlerSelectMedia={handlerSelectMedia} />
           </BottomSheetView>
         </BottomSheetModal>
       </BottomSheetModalProvider>
       {selectedMessages && (
         <>
-            <ReactionIcons
+          <ReactionIcons
             isMyMessage={true}
             userChat={userChat}
             handlerReactIcon={handlerReaction}
             reactionPosition={reactionPosition}
             selectedMessages={selectedMessages}
-            />
+          />
           <RenderOptionMessage
             userChat={userChat}
             conversation={conversation}
@@ -138,6 +141,17 @@ export const GiftedChatView = ({ conversation, navigation }: { conversation: Con
           handlerDeleteMessage={handlerDeleteMessage} // ✅ Đảm bảo hàm nhận tham số
 
         />
+      )}
+      {selectedItemsMedia.length > 0 && (
+
+        <ButtonSelection
+           onSend={onSend}
+          selected={selectedItemsMedia}
+          setSelectedItemsMedia={setSelectedItemsMedia}
+          userChat={userChat}
+          conversation={conversation}
+        />
+
       )}
     </>
   );

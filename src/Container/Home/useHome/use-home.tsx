@@ -53,9 +53,9 @@ export const useHomeLogic = (navigation: any) => {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
   const handleDeleteConverStation = useCallback(() => {
-    console.log('nhấn vào xxoas', selectConverstion?._id);
+
     if (!selectConverstion) {
-      console.log('retuen1');
+
       setModalVisible(false);
       return;
     }
@@ -76,12 +76,12 @@ export const useHomeLogic = (navigation: any) => {
 
   const handlerShowmodal = useCallback((status: boolean) => {
     setModalVisible(status);
-    console.log(selectConverstion?._id, 'ẩn modal');
+
   }, [selectConverstion]);
 
   const handlePresentModalPress = useCallback((item: Conversation) => {
     bottomSheetModalRef.current?.present();
-    console.log(item._id, 'lấy được item');
+ 
     setSelectConverstation(item);
   }, [selectConverstion]);
 
@@ -100,7 +100,6 @@ export const useHomeLogic = (navigation: any) => {
     if (data_converstation.data.length > 0) {
       try {
         setSkiped(data_converstation.data.length);
-        console.log(data_converstation.data.length, 'lấy được mấy cuộc thoại');
         data_converstation.data.forEach(async (element: Conversation) => {
           await createConversation(element);
         });

@@ -25,8 +25,8 @@ const PreviewMedia: React.FC<PreviewMediaProps> = ({ isMyMessage, currentMessage
   const itemWidth = (screenWidth - 40) / numColumns; // 40 là padding tổng
 
   const renderItem = ({ item, index }: { item: any; index: number }) => {
-     const type=  item.type.startsWith('image/') ? 'image' :
-     item.type.startsWith('video/') ? 'video' : 'file';
+     const type=  item.type.startsWith('image') ? 'image' :
+     item.type.startsWith('video') ? 'video' : 'file';
     return (
       <TouchableOpacity
       onLongPress={getPosition}

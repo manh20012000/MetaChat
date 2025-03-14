@@ -2,7 +2,6 @@ import { Message_type } from "../../type/Home/Chat_type";
 import Conversation from "../../type/Home/Converstation_type";
 
 export const converstation = (conversation: Conversation, messages:Message_type) => {
-  console.log('lueu cuộc thoại ')
   return {
     _id: conversation._id,
     roomName: conversation.roomName,

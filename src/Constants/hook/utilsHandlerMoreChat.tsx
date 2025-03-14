@@ -16,7 +16,7 @@ export const hanldlerPin = async (
   user: userMessage,
 ) => {};
 export const handlerDelete = async (
-  message: Message_type,
+  message: any,
   user: userMessage | null,
   conversation: Conversation | null,
   checking: any,
@@ -64,7 +64,6 @@ export const handlerRecall = async (
   checking: any,
 ) => {
   if (message && user && conversation) {
-    console.log('gỡ luôn tin nhắn ');
     try {
       if (message.statusSendding === null || message.statusSendding === false) {
         deleteMessageError(conversation._id, message._id);

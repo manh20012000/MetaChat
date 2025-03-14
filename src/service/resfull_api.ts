@@ -1,7 +1,6 @@
 import {response} from '../type/response_type';
 // import { URL } from '@env';
 const API_URL = 'http://192.168.1.138:8080';
-// console.log('hahah', URL)
 import axios from 'axios';
 import {checkAndRefreshToken} from '../util/checkingToken';
 const postData = async (
@@ -35,7 +34,6 @@ const postData = async (
 };
 const postFormData = async (route: string, data: any, check: any) => {
   const checking = await checkAndRefreshToken(check.dispatch, check.user);
-  console.log(data.message.attachments);
   const formData = new FormData();
   formData.append('message', JSON.stringify(data.message));
   formData.append('conversation', JSON.stringify(data.conversation));
@@ -68,18 +66,18 @@ const postFormData = async (route: string, data: any, check: any) => {
       //   parts.forEach((part) => {
       //     console.log(part.headers, part, "màn hình post video1");
       //   });
-      // // console.log(formData)
+      //  console.log(formData.append,"dhsdjisjid",formData.getParts)
       const response = await axios.post(`${API_URL}/${route}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-           Accept: 'application/json',
-           authorization: `Bearer ${checking.access_token}`,
+          Accept: 'application/json',
+          authorization: `Bearer ${checking.access_token}`,
         },
       });
-      return response.data; 
+      return response.data;
     } catch (error) {
       console.error('not send message', error);
-      throw error; 
+      throw error;
     }
   }
 };

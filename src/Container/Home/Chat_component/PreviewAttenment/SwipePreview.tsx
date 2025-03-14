@@ -22,8 +22,8 @@ const SwipePreview: React.FC<{
   const videoRef = useRef<VideoRef>(null);
 
   const renderItem = ({ item }: { item: any }) => {
-    const type=  item.type.startsWith('image/') ? 'image' :
-     item.type.startsWith('video/') ? 'video' : 'file';
+    const type=  item.type.startsWith('image') ? 'image' :
+     item.type.startsWith('video') ? 'video' : 'file';
     return (
       <View style={styles.mediaContainer}>
         {type === "image" ? (

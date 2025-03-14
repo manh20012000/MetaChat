@@ -117,7 +117,7 @@ const findAndconvertConversation = async (
     let existingConversation = conversations[0] || null; // Lấy cuộc hội thoại đầu tiên nếu có
 
     if (existingConversation) {
-      console.log('nảy vào đây');
+      
       // Nếu đã có, cập nhật updatedAt và trả về ngay
       realm.write(() => {
         existingConversation.updatedAt = new Date().toISOString();
@@ -184,9 +184,7 @@ const delete_converStation = async (
         checking.user._id,
       ];
 
-      console.log(
-        `Đã xóa tin nhắn và messageError, user ${checking.user._id} được đánh dấu đã xóa`,
-      );
+     
     });
     const response = await deleteData(
       API_ROUTE.DELETE_CONVERSTATION,
@@ -268,8 +266,6 @@ const MessageError = async (
 };
 const updateMessage = (message: Message_type, conversation: Conversation) => {
   realm.write(() => {
-    // 🔍 Tìm cuộc hội thoại
-    console.log(message.receiver);
     let existingConversation = realm
       .objects<Conversation>('Conversation')
       .filtered('_id == $0', message.conversation_id)[0];
@@ -438,7 +434,7 @@ export {
 //                     converstation_item.color = converstation.color;
 //                     converstation_item.icon = converstation.icon;
 //                     converstation_item.background = converstation.background;
-//                     console.log('Cuộc hội thoại đã được cập nhật thành công.');
+//                    
 //                 });
 //             }
 //         })

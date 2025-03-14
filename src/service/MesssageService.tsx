@@ -11,14 +11,10 @@ export const updateMessageReaction = async (
   message: Message_type,
   conversation: Conversation,
   userChat: userMessage,
-    Checking:any
+  Checking: any,
 ) => {
-  
-    try {
-        console.log('dhsjdsjdhjs')
-        const { user, dispatch } = Checking;
-      
-      
+  try {
+    const {user, dispatch} = Checking;
     const response = await putData(
       API_ROUTE.UPDATE_MESSAGE,
       {
@@ -31,15 +27,14 @@ export const updateMessageReaction = async (
     );
 
     if (response.status === 200) {
-      console.log('Cập nhật phản ứng thành công');
-      const failedMessage: Message_type = { ...message, statusSendding: true };
+      const failedMessage: Message_type = {...message, statusSendding: true};
       await updateMessage(failedMessage, conversation);
     } else {
       throw new Error('Cập nhật phản ứng thất bại');
     }
   } catch (error) {
     console.log('câp nhât thất baik');
-      const failedMessage: Message_type = { ...message, statusSendding: false};
+    const failedMessage: Message_type = {...message, statusSendding: false};
     await updateMessage(failedMessage, conversation);
   }
 };

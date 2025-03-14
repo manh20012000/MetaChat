@@ -84,9 +84,10 @@ const handleLongPressMessage = ({ x, y }: { x: number; y: number }, message: any
     handleLongPress(message); // Gọi hàm xử lý nhấn giữ
     setShowReactions(true);
   };
-//  console.log('mES',currentMessage.statusSendding)
+ 
   return (
-    <Pressable onPress={() => {
+    <Pressable 
+    onPress={() => {
       setSelectedMessages(null)
     }}
     >
@@ -107,7 +108,7 @@ const handleLongPressMessage = ({ x, y }: { x: number; y: number }, message: any
                 )}
                  <View style={{flexDirection:'row',alignSelf: isMyMessage ? 'flex-end' : 'flex-start',alignItems:'center',gap:10}}>
                    {currentMessage.statusSendding===null || currentMessage.statusSendding===false &&(
-                    <MaterialIcons name="sms-failed" size={30} color={'red'}/>
+                    <MaterialIcons name="sms-failed" size={20} color={'red'}/>
                    )}
                   <TextMessage
                     isFirstMessage={isFirstMessage}

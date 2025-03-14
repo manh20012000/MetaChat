@@ -22,12 +22,11 @@ const HeaderHome: React.FC<{navigation: any; data_friend: any}> = ({
   const isPortrait = height > width;
   const dispatch = useDispatch();
   const color = useSelector((state: any) => state.colorApp.value);
-  const [user_data, setUser_Data] = useState(data_friend);
-  // console.log(data_friend, 'datafiewnd');
+  // const [user_data, setUser_Data] = useState(data_friend);
       const user_Status = useSelector((state: any) => state.statusUser.value);
-  useEffect(() => {
-    // Fetch user data
-  }, [user]);
+  // useEffect(() => {
+  //   // Fetch user data
+  // }, [user]);
 
   const HeaderTop_Chat = () => {
     return (

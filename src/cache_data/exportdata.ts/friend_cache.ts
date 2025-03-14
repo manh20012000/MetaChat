@@ -14,8 +14,6 @@ const createListfriend = async (friend: any) => {
         realm.create('friend', friend);
       });
  
-    } else {
-      console.log(`User với _id: ${friend._id} đã tồn tại, không thêm.`);
     }
   } catch (error) {
     console.error('Lỗi khi thêm bạn bè vào danh sách:', error);

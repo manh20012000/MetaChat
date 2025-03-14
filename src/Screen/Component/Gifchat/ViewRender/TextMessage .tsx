@@ -34,6 +34,7 @@ export const TextMessage: React.FC<TextMessageProps> = ({
 }) => {
   const messageRef = useRef<View>(null);
   const getPosition = () => {
+    // console.log('hdhdjshdjsj')
     if (messageRef.current) {
       messageRef.current.measureInWindow((x, y, width, height) => {
         handleLongPressMessage({x, y}, currentMessage);

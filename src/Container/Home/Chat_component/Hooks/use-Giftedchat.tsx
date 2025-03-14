@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useSelector} from 'react-redux';
-import {Animated, FlatList, useWindowDimensions, Easing} from 'react-native';
+import {Animated, FlatList, useWindowDimensions, Easing, Keyboard} from 'react-native';
 import {GiftedChat} from 'react-native-gifted-chat';
 import {API_ROUTE} from '../../../../service/api_enpoint';
 import {useSocket} from '../../../../util/socket.io';
@@ -27,13 +27,14 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   const {user, dispatch} = useCheckingService();
   const socket = useSocket();
   const networkConnect = useSelector((value: any) => value.network.value);
+  const[maginViewGiftedchat,setMaginViewGiftedchat]=useState<number>(0)
   const isPortrait = height > width;
-
+  const sheetHeight40 = height * 0.4;
   const [messages, setMessages] = useState<any[]> (Array.from([
     ...conversation.messageError,
     ...conversation.messages,
   ]));
-  const [selectedItems, setSelectedItems] = useState<any[]>([]);
+  const [selectedItemsMedia, setSelectedItemsMedia] = useState<any[]>([]);
   const [buttonScale] = useState(new Animated.Value(1));
   const [maginTextInput, setMaginTextInput] = useState<boolean>(false);
   const [replyMessage, setReplyMessage] = useState<Message_type | null>(null);
@@ -52,13 +53,17 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   const snapPoints = useMemo(() => ['40%', '90%'], []);
 
   const handlePresentModalPress = useCallback(() => {
+    setMaginViewGiftedchat(sheetHeight40)
+    Keyboard.dismiss()
     bottomSheetModalRef.current?.present();
+ 
   }, []);
 
   const handleSheetChanges = useCallback((index: number) => {
     if (index === -1) {
       setMaginTextInput(false);
-      setSelectedItems([]);
+      setSelectedItemsMedia([]);
+      setMaginViewGiftedchat(0);
     }
   }, []);
 
@@ -80,10 +85,10 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   };
 
   useEffect(() => {
-    if (selectedItems.length > 0) {
+    if (selectedItemsMedia.length > 0) {
       triggerAnimation();
     }
-  }, [selectedItems]);
+  }, [selectedItemsMedia]);
 
   const flatListRef = useRef<FlatList<any> | null>(null);
 
@@ -94,21 +99,21 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     }
   };
 
-  const handleSelect = useCallback((item: any) => {
-    setSelectedItems(prevSelectedItems => {
+  const handlerSelectMedia = useCallback((item: any) => {
+    setSelectedItemsMedia(prevSelectedItems => {
       const isSelected = prevSelectedItems.some(
-        (selected: any) => selected.id === item.node.id,
+        (selected: any) => selected.id === item.id,
       );
 
       if (isSelected) {
         return prevSelectedItems.filter(
-          (selected: any) => selected.id !== item.node.id,
+          (selected: any) => selected.id !== item.id,
         );
       } else {
-        return [...prevSelectedItems, item.node];
+        return [...prevSelectedItems, item];
       }
     });
-  }, []);
+  }, [selectedItemsMedia]);
   // useEffect(() => {
   //   console.log('có connect ', conversation.messageError);
   //   // if (conversation.messageError.length > 0) {
@@ -270,18 +275,18 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     color,
     userChat,
     messages,
-    selectedItems,
+    selectedItemsMedia,
     buttonScale,
     maginTextInput,
     replyMessage,
     selectedMessages,
-    bottomSheetModalRef,
+    bottomSheetModalRef,maginViewGiftedchat,
     snapPoints,
     setSelectedMessages,
     handlePresentModalPress,
-    handleSheetChanges,
+    handleSheetChanges,setSelectedItemsMedia,
     scrollToMessage,
-    handleSelect,
+    handlerSelectMedia,
     onSend,
     handlerReaction,
     handlerreplyTo,
