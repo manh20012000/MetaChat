@@ -50,7 +50,6 @@ const MessageSchema = {
     conversation_id: 'string', // ID cuộc hội thoại
     user: 'user?', // Người gửi
     messageType: 'string?', // Loại tin nhắn ("text", "attachment", ...)
-    voice: 'string?',
     text: 'string?', // Nội dung tin nhắn văn bản
     attachments: 'Attachment[]', // File đính kèm
     callDetails: 'CallDetail?', // Chi tiết cuộc gọi

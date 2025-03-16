@@ -1,6 +1,6 @@
 import {response} from '../type/response_type';
 // import { URL } from '@env';
-const API_URL = 'http://192.168.1.138:8080';
+const API_URL = 'http://192.168.51.109:8080';
 import axios from 'axios';
 import {checkAndRefreshToken} from '../util/checkingToken';
 const postData = async (
@@ -38,23 +38,13 @@ const postFormData = async (route: string, data: any, check: any) => {
   formData.append('message', JSON.stringify(data.message));
   formData.append('conversation', JSON.stringify(data.conversation));
   formData.append('user', JSON.stringify(data.user));
-  // formData.append('participant_id',JSON.stringify(data.participateId));
   formData.append('filesOrder', JSON.stringify(data.filesOrder));
   data.message.attachments.forEach((file: any, index: number) => {
-    const extension = file.name?.split('.').pop() || 'file'; // Lấy phần mở rộng nếu có
-    const name =
-      file.name || `${new Date().toISOString().slice(0, -5)}.${extension}`;
-    let type = file.type;
-    if (!type) {
-      // Gán MIME type dựa trên phần mở rộng
-      if (extension.match(/(jpg|jpeg|png|gif)/i)) type = `image/${extension}`;
-      else if (extension.match(/(mp4|mov|avi)/i)) type = `video/${extension}`;
-      else type = 'application/octet-stream'; // Mặc định nếu không rõ
-    }
+    // console.log(file.url)
     formData.append('media', {
       uri: file.url || `file://${file.path}`,
-      name,
-      type,
+      name:file.name,
+      type:file.type,
     });
   });
 
@@ -87,7 +77,6 @@ const getData = async (route: string, query: any, param: any, check: any) => {
   if (checking === null) {
     return null;
   }
-
   try {
     const response = await axios.get(`${API_URL}/${route}/${param}`, {
       params: query ?? null,
@@ -212,3 +201,13 @@ export {
   getResearch,
   API_URL,
 };
+  // const extension = file.name?.split('.').pop() || 'file'; // Lấy phần mở rộng nếu có
+    // const name =
+    //   file.name || `${new Date().toISOString().slice(0, -5)}.${extension}`;
+    // let type = ;
+    // if (!type) {
+    //   // Gán MIME type dựa trên phần mở rộng
+    //   if (extension.match(/(jpg|jpeg|png|gif)/i)) type = `image/${extension}`;
+    //   else if (extension.match(/(mp4|mov|avi)/i)) type = `video/${extension}`;
+    //   else type = 'application/octet-stream'; // Mặc định nếu không rõ
+    // }

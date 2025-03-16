@@ -7,4 +7,24 @@ const formatSeconds = (secs:number) => {
   
     return `${pad(h)}:${pad(m)}:${pad(s)}`;
   }
-    export default formatSeconds;
+ 
+
+    const formatTime=(secon:number)=>{
+      const pad = (n:number) => n < 10 ? `0${n}` : n;
+  
+    const h = Math.floor(secon / 3600);
+    const m = Math.floor(secon / 60) - (h * 60);
+    const s = Math.floor(secon - h * 3600 - m * 60);
+    
+     
+      if(secon>3600){
+        return `${pad(h)}:${pad(m)}:${pad(s)}`;
+      }else{
+        return `${pad(m)}:${pad(s)}`;
+      }
+    
+
+   
+    }  
+   export default formatSeconds;
+    export{formatTime}

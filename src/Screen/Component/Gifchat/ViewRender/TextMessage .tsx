@@ -6,6 +6,7 @@ import {messageIcon} from '../../../../type/react-type';
 import {Message_type} from '../../../../type/Home/Chat_type';
 import {TouchableOpacity} from 'react-native';
 import PreviewImage from '../../../../Container/Home/Chat_component/PreviewAttenment/ImagePreview';
+import AudioMessage from '../../../../Container/Home/Chat_component/PreviewAttenment/PreviewAudio';
 type TextMessageProps = {
   isFirstMessage: boolean;
   isMyMessage: boolean;
@@ -21,7 +22,7 @@ type TextMessageProps = {
   setSelectedMessages: React.Dispatch<React.SetStateAction<any>>;
 };
 
-export const TextMessage: React.FC<TextMessageProps> = ({
+export const MessageComponent: React.FC<TextMessageProps> = ({
   isFirstMessage,
   isMyMessage,
   currentMessage,
@@ -82,10 +83,18 @@ export const TextMessage: React.FC<TextMessageProps> = ({
         )}
         {currentMessage.messageType === 'attachment' && (
             <PreviewImage
+            
               isMyMessage={isMyMessage}
               currentMessage={currentMessage}
               getPosition={getPosition}
             />
+        )}
+        {currentMessage.messageType==="audio"&&(
+          <AudioMessage
+          isMyMessage={isMyMessage}
+          currentMessage={currentMessage}
+          getPosition={getPosition}
+          />
         )}
       </Pressable>
       {currentMessage.reactions.length > 0 && (

@@ -79,6 +79,5 @@
    <string>App cần truy cập camera</string>
     <key>NSMicrophoneUsageDescription</key>
      <string>App cần truy cập microphone để quay video</string>
-
 </dict>
 </plist>

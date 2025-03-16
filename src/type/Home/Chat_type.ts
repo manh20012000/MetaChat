@@ -8,7 +8,7 @@ export type Message_type = {
     user_id: string;
   };
   messageType: string;
-  voice: string|null;
+
   text: string|null;
   attachments: [
     {

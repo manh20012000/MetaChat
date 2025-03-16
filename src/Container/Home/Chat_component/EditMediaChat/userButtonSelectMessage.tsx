@@ -31,7 +31,6 @@ const UseButtonMessage = ({
         user: userChat,
         messageType: 'attachment',
         text: null,
-        voice: null,
         attachments: selected,
         callDetails: null,
         createdAt: new Date(),

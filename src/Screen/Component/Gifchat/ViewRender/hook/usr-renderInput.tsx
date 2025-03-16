@@ -45,7 +45,6 @@ const useRenderInput = (props: any) => {
       user: userChat,
       messageType: 'text',
       text: text,
-      voice: '',
       attachments: [],
       callDetails: null,
       createdAt: newdate,
@@ -85,7 +84,7 @@ const useRenderInput = (props: any) => {
           type: file.type,
         };
       });
-    
+    console.log(files)
       if (files.length > 0) {
         const message = {
           _id: new BSON.ObjectId().toString(),
@@ -93,7 +92,7 @@ const useRenderInput = (props: any) => {
           user: userChat,
           messageType: 'attachment',
           text: null,
-          voice: null,
+     
           attachments: files,
           callDetails: null,
           createdAt: newdate,

@@ -124,7 +124,6 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   //   // }
   // }, []);
   const onSend = useCallback(
-   
     async (message: Message_type, filesOrder: [], statusMessage: boolean) => { 
       const dataSaveSend = await converstationsend(
         message,

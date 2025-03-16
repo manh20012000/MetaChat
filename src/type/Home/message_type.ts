@@ -8,7 +8,7 @@ export type IMessage ={
     avatar: string;
     user_id: string;
   };
-  voice: string;
+
   conversationId: string; // ID cuộc hội thoại
   sent?: boolean;
   pending?: boolean;

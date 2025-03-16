@@ -16,7 +16,6 @@ const handlerMessage = (
     replyTo: messageCurrent.replyTo || null,
     statusSendding: false, // ✅ Giữ nguyên
     callDetails: messageCurrent.callDetails || null,
-    voice: messageCurrent.voice || '',
     attachments: messageCurrent.attachments || [],
     reactions: reaction.length > 0 ? reaction:messageCurrent.reactions ,
     other: messageCurrent.other || 'bày tỏ cảm xúc', // ✅ Thêm vào thuộc tính mới nếu cần

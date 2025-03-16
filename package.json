@@ -26,6 +26,8 @@
     "@react-navigation/native-stack": "^7.1.0",
     "@reduxjs/toolkit": "^2.3.0",
     "@shopify/flash-list": "^1.7.2",
+    "@simform_solutions/react-native-audio-waveform": "^2.1.5",
+    "@types/rn-fetch-blob": "^1.2.7",
     "axios": "^1.7.7",
     "bson": "^6.10.1",
     "dayjs": "^1.11.13",

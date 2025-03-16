@@ -8,7 +8,7 @@ import userMessage from '../../../type/Home/useMessage_type';
 import useCheckingService from '../../../service/Checking_service';
 import { ReplyMessage } from './ViewRender/ReplyMessage';
 import { ReactionIcons } from './ViewRender/ReactionIcons';
-import { TextMessage } from './ViewRender/TextMessage ';
+import { MessageComponent } from './ViewRender/TextMessage ';
 import { MessageStatus } from './ViewRender/MessageStatus';
 import { messageIcon } from '../../../type/react-type';
 import { Message_type } from '../../../type/Home/Chat_type';
@@ -76,7 +76,7 @@ const MessageItem: React.FC<MessageProps> = ({
       },
     }),
   ).current;
-  //  console.log(currentMessage)
+  // /  console.log(currentMessage.attachments)
 const handleLongPressMessage = ({ x, y }: { x: number; y: number }, message: any) => {
   // Handle long press on message
 
@@ -110,7 +110,7 @@ const handleLongPressMessage = ({ x, y }: { x: number; y: number }, message: any
                    {currentMessage.statusSendding===null || currentMessage.statusSendding===false &&(
                     <MaterialIcons name="sms-failed" size={20} color={'red'}/>
                    )}
-                  <TextMessage
+                  <MessageComponent
                     isFirstMessage={isFirstMessage}
                     isMyMessage={isMyMessage}
                     currentMessage={currentMessage}

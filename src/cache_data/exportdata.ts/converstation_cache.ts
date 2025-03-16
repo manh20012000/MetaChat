@@ -280,7 +280,7 @@ const updateMessage = (message: Message_type, conversation: Conversation) => {
     if (existingMessage) {
       // ✅ Cập nhật từng trường một cách thủ công
       if (message.text !== undefined) existingMessage.text = message.text;
-      if (message.voice !== undefined) existingMessage.voice = message.voice;
+    
       if (message.messageType !== undefined)
         existingMessage.messageType = message.messageType;
       if (message.attachments !== undefined)

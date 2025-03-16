@@ -97,6 +97,7 @@ export const GiftedChatView = ({ conversation, navigation }: { conversation: Con
               marginBottom: replyMessage === null ? 60 : 0,
               paddingVertical: 10,
             }}
+            // isTyping={true}
           />
         </View>
       </Pressable>

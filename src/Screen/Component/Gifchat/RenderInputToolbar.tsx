@@ -7,8 +7,10 @@ import {
   useWindowDimensions,
   Animated,
   Alert,
+  Linking,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {InputToolbar} from 'react-native-gifted-chat';
 import {useSelector} from 'react-redux';
 import {Send} from '../../../assets/svg/svgfile';
@@ -21,6 +23,8 @@ import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {RootStackParamList} from '../../../type/rootStackScreen';
 import {eventEmitter} from '../../../eventEmitter/EventEmitter';
 import useRenderInput from './ViewRender/hook/usr-renderInput';
+import MicroChat from '../../../Container/Home/Chat_component/Microphone/MicroChat';
+import MicrophonePermission from '../../../util/Permision/MicrophonePermision';
 type NavigationProps = NavigationProp<RootStackParamList>;
 type TCusttomTypeInput = {
   onSend: any;
@@ -28,15 +32,23 @@ type TCusttomTypeInput = {
   replyMessage: Message_type | null;
   conversation: Conversation;
   setReplyMessage: React.Dispatch<React.SetStateAction<Message_type | null>>;
-  handlePresentModalPress:()=>void
+  handlePresentModalPress: () => void;
 };
 const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
   const {width, height} = useWindowDimensions();
-  const {handlePresentModalPress, userChat, replyMessage, setReplyMessage, conversation} = props;
+  const {
+    handlePresentModalPress,
+    userChat,
+    replyMessage,
+    setReplyMessage,
+    conversation,
+    onSend,
+  } = props;
+
   const color = useSelector(
     (value: {colorApp: {value: any}}) => value.colorApp.value,
   );
-
+  const [turnOnMic, setTurnOnMic] = useState<boolean>(false);
   const {
     handlePress,
     text,
@@ -101,119 +113,140 @@ const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
           </TouchableOpacity>
         </View>
       )}
-      <View
-        style={{
-          width: width,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-around',
-          position: 'absolute',
-          bottom: 0,
-          backgroundColor: color.black,
-          paddingVertical: 10,
-        }}>
-        {changeIcon ? (
+      {turnOnMic === false ? (
+        <View
+          style={{
+            width: width,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-around',
+            position: 'absolute',
+            bottom: 0,
+            paddingVertical: 10,
+            zIndex: 1,
+          }}>
+          {changeIcon ? (
+            <View
+              style={{
+                flexDirection: 'row',
+                columnGap: 10,
+                alignItems: 'center',
+              }}>
+              <TouchableOpacity>
+                <FontAwesome
+                  name="location-arrow"
+                  color={color.blue}
+                  size={30}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={async () => {
+                  const check = await MicrophonePermission();
+                  if (check) {
+                    setTurnOnMic(true);
+                  } else {
+                    Linking.openSettings();
+                    console.log('cấp quyền thất bại ');
+                  }
+                }}>
+                <MaterialCommunityIcons
+                  name="microphone"
+                  color={color.blue}
+                  size={30}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handlePresentModalPress}>
+                <MaterialCommunityIcons
+                  name="image"
+                  color={color.blue}
+                  size={30}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handlePress}>
+                <MaterialCommunityIcons
+                  name="camera"
+                  color={color.blue}
+                  size={30}
+                />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity onPress={() => setChangeIcon(true)}>
+              <MaterialCommunityIcons
+                name="chevron-right"
+                color={color.blue}
+                size={30}
+              />
+            </TouchableOpacity>
+          )}
           <View
             style={{
-              flexDirection: 'row',
-              columnGap: 10,
+              backgroundColor: color.gray,
+              width: changeIcon ? '45%' : '80%',
+              height: inputHeight,
+              minHeight: 30,
+              maxHeight: 100,
+              borderRadius: 10,
+              paddingHorizontal: 10,
+              justifyContent: 'space-between',
               alignItems: 'center',
+              flexDirection: 'row',
             }}>
+            <TextInput
+              multiline
+              placeholder="Message"
+              value={text}
+              style={{
+                minHeight: 30,
+                maxHeight: 100,
+                width: '85%',
+                height: inputHeight,
+              }}
+              onContentSizeChange={e =>
+                setInputHeight(Math.min(100, e.nativeEvent.contentSize.height))
+              }
+              onFocus={() => setChangeIcon(true)}
+              onChangeText={value => {
+                if (value !== '') {
+                  setChangeIcon(false);
+                  setIsShowSendText(false);
+                } else {
+                  setChangeIcon(true);
+                  setIsShowSendText(true);
+                }
+                settext(value);
+              }}
+            />
             <TouchableOpacity>
-              <MaterialCommunityIcons name="map" color={color.blue} size={30} />
-            </TouchableOpacity>
-            <TouchableOpacity>
               <MaterialCommunityIcons
-                name="microphone"
-                color={color.blue}
-                size={30}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handlePresentModalPress}
-            >
-              <MaterialCommunityIcons
-                name="image"
-                color={color.blue}
-                size={30}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handlePress}>
-              <MaterialCommunityIcons
-                name="camera"
+                name="emoticon"
                 color={color.blue}
                 size={30}
               />
             </TouchableOpacity>
           </View>
-        ) : (
-          <TouchableOpacity onPress={() => setChangeIcon(true)}>
-            <MaterialCommunityIcons
-              name="chevron-right"
-              color={color.blue}
-              size={30}
-            />
-          </TouchableOpacity>
-        )}
-        <View
-          style={{
-            backgroundColor: color.gray,
-            width: changeIcon ? '45%' : '80%',
-            height: inputHeight,
-            minHeight: 30,
-            maxHeight: 100,
-            borderRadius: 10,
-            paddingHorizontal: 10,
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexDirection: 'row',
-          }}>
-          <TextInput
-            multiline
-            placeholder="Message"
-            value={text}
-            style={{
-              minHeight: 30,
-              maxHeight: 100,
-              width: '85%',
-              height: inputHeight,
-            }}
-            onContentSizeChange={e =>
-              setInputHeight(Math.min(100, e.nativeEvent.contentSize.height))
-            }
-            onFocus={() => setChangeIcon(true)}
-            onChangeText={value => {
-              if (value !== '') {
-                setChangeIcon(false);
-                setIsShowSendText(false);
-              } else {
-                setChangeIcon(true);
-                setIsShowSendText(true);
-              }
-              settext(value);
-            }}
-          />
-          <TouchableOpacity>
-            <MaterialCommunityIcons
-              name="emoticon"
-              color={color.blue}
-              size={30}
-            />
-          </TouchableOpacity>
+          {isShowSendText ? (
+            <TouchableOpacity>
+              <Text style={{fontSize: 25}}>{conversation?.icon}</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={() => {
+                handleSend();
+              }}>
+              <Send />
+            </TouchableOpacity>
+          )}
         </View>
-        {isShowSendText ? (
-          <TouchableOpacity>
-            <Text style={{fontSize: 25}}>{conversation?.icon}</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            onPress={() => {
-              handleSend();
-            }}>
-            <Send />
-          </TouchableOpacity>
-        )}
-      </View>
+      ) : (
+        <MicroChat
+          onSend={onSend}
+          userChat={userChat}
+          replyMessage={replyMessage}
+          conversation={conversation}
+          setTurnOnMic={setTurnOnMic}
+        />
+      )}
     </>
   );
 };

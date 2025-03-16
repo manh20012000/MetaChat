@@ -10,7 +10,7 @@ export const renderCreateMessage= (message:Message_type,conversation:Conversatio
         user: userChat,
         messageType:message.messageType,
         text: message.text,
-        voice: message.voice,
+
         attachments: [],
         callDetails:null,
         createdAt: message.createdAt,
