@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useSelector} from 'react-redux';
-import {Animated, FlatList, useWindowDimensions, Easing, Keyboard} from 'react-native';
+import {Animated, FlatList, useWindowDimensions, Easing, Keyboard, Linking, NativeSyntheticEvent, NativeScrollEvent} from 'react-native';
 import {GiftedChat} from 'react-native-gifted-chat';
 import {API_ROUTE} from '../../../../service/api_enpoint';
 import {useSocket} from '../../../../util/socket.io';
@@ -18,6 +18,8 @@ import {
 import {Vibration} from 'react-native';
 import {converstationsend} from '../../../../util/util_chat/converstationSend';
 import {updateMessageReaction} from '../../../../service/MesssageService';
+import userMessage from '../../../../type/Home/useMessage_type';
+import { User } from '@react-native-google-signin/google-signin';
 
 export const useGiftedChatLogic = (conversation: Conversation) => {
   const {width, height} = useWindowDimensions();
@@ -25,6 +27,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     (value: {colorApp: {value: any}}) => value.colorApp.value,
   );
   const {user, dispatch} = useCheckingService();
+  const giftedChatRef = useRef<any>(null);
   const socket = useSocket();
   const networkConnect = useSelector((value: any) => value.network.value);
   const[maginViewGiftedchat,setMaginViewGiftedchat]=useState<number>(0)
@@ -34,6 +37,8 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     ...conversation.messageError,
     ...conversation.messages,
   ]));
+
+  const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
   const [selectedItemsMedia, setSelectedItemsMedia] = useState<any[]>([]);
   const [buttonScale] = useState(new Animated.Value(1));
   const [maginTextInput, setMaginTextInput] = useState<boolean>(false);
@@ -41,6 +46,8 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   const [selectedMessages, setSelectedMessages] = useState<Message_type | null>(
     null,
   );
+  const[markMessage,SetMarkMessage]=useState(conversation.isRead)
+  const [typingUsers, setTypingUsers] = useState<{user:userMessage,isTyping:boolean}>();
   const [messageMoreAction, setMessageMoreAction] =
     useState<Message_type | null>(null);
   const [reactionPosition, setReactionPosition] = useState({x: 0, y: 0});
@@ -59,11 +66,21 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
  
   }, []);
 
+ const onPressPhoneNumber=async(phone:number)=>{
+
+    const url = `tel:${phone}`;
+    const supported = await Linking.canOpenURL(url);
+    
+    if (supported) {
+      await Linking.openURL(url);
+    }
+ }
   const handleSheetChanges = useCallback((index: number) => {
     if (index === -1) {
       setMaginTextInput(false);
       setSelectedItemsMedia([]);
       setMaginViewGiftedchat(0);
+      bottomSheetModalRef.current?.dismiss();
     }
   }, []);
 
@@ -90,12 +107,14 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     }
   }, [selectedItemsMedia]);
 
-  const flatListRef = useRef<FlatList<any> | null>(null);
+  const flatListRef = useRef<FlatList>(null); // Ref của FlatList
 
   const scrollToMessage = (messageId: string) => {
     const index = messages.findIndex(msg => msg._id === messageId);
-    if (index !== -1) {
-      flatListRef.current?.scrollToIndex({index, animated: true});
+    if (index !== -1 && flatListRef.current) {
+      setHighlightedMessageId(messageId); // Đánh dấu tin nhắn đang highlight
+      flatListRef.current.scrollToIndex({ index, animated: true });
+      setTimeout(() => setHighlightedMessageId(null), 2000);
     }
   };
 
@@ -114,15 +133,39 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
       }
     });
   }, [selectedItemsMedia]);
+  const markMessageAsSeen = (messageId: string) => {
+    socket?.emit("message_seen", { readingUser:conversation.isRead.filter(value=>{
+       value.user._id===userChat._id
+       return value
+      }), roomId:conversation._id });
+  };
+  
   // useEffect(() => {
   //   console.log('có connect ', conversation.messageError);
-  //   // if (conversation.messageError.length > 0) {
-  //   //   console.log('connect lại');
-  //   //   conversation.messageError.forEach((message: Message_type) => {
-  //   //     onSend(message, [], false);
-  //   //   });
-  //   // }
+  //   if (conversation.messageError.length > 0) {
+  //     console.log('connect lại');
+  //     conversation.messageError.forEach((message: Message_type) => {
+  //       onSend(message, [], false);
+  //     });
+  //   }
   // }, []);
+  useEffect(() => {
+    socket?.on("userTyping", ({ user, isTyping }) => {
+      setTypingUsers({user,isTyping});
+    });
+    // socket?.emit("message_seen", { messageId:messages[messages.length]._id, userChat, roomId:conversation._id  });
+    return () => {
+      socket?.off("userTyping");
+    };
+  }, []);
+  // const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+  //   const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+  //   const isAtBottom = contentOffset.y + layoutMeasurement.height >= contentSize.height - 20;
+  
+  //   if (isAtBottom) {
+  //     socket?.emit("message_seen", { messageId:messages[messages.length]._id, userChat, roomId:conversation._id });
+  //   }
+  // };
   const onSend = useCallback(
     async (message: Message_type, filesOrder: [], statusMessage: boolean) => { 
       const dataSaveSend = await converstationsend(
@@ -260,7 +303,42 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     Vibration.vibrate(50);
     setSelectedMessages(message);
   }, []);
+  // useEffect(() => {
+  //   // 📌 Lọc ra tin nhắn cuối cùng mà người khác gửi
+  //   const lastMessage = messages
+  //     .filter(msg => msg.user._id !== user._id) // Chỉ lấy tin nhắn người khác gửi
+  //     .pop(); // Lấy tin nhắn cuối cùng
 
+  //   if (!lastMessage) return; // Nếu không có tin nhắn thì không làm gì cả
+
+  //   // 📌 Kiểm tra xem tin nhắn đã có trong isRead chưa
+  //   const isAlreadyRead = markMessage.some(
+  //     read => read.messageId === lastMessage._id && read.user._id === user._id
+  //   );
+
+  //   if (!isAlreadyRead) {
+  //     // 📌 Nếu chưa đọc, gửi sự kiện "message:read" lên server
+  //     socket?.emit("message:read", {
+  //       conversationId: conversation._id,
+  //       messageId: lastMessage._id,
+  //       user: {
+  //         _id: user._id,
+  //         name: user.name,
+  //         avatar: user.avatar
+  //       },
+  //       readAt: new Date().toISOString(),
+  //     });
+  //     // Cập nhật state để không gửi lại sự kiện
+  //     // SetMarkMessage(prev => 
+        
+  //     //   {
+  //     //     user: { _id: user._id, name: user.name, avatar: user.avatar },
+  //     //     messageId: lastMessage._id,
+  //     //     readAt: new Date().toISOString(),
+  //     //   },
+  //     // );
+  //   }
+  // }, [messages]); // Chạy khi tin nhắn thay đổi
   // const handlerMoreMessage = useCallback(async (message: any) => {
   //   console.log(message)
   //   setMessageMoreAction(message)
@@ -280,7 +358,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     replyMessage,
     selectedMessages,
     bottomSheetModalRef,maginViewGiftedchat,
-    snapPoints,
+    snapPoints,onPressPhoneNumber,
     setSelectedMessages,
     handlePresentModalPress,
     handleSheetChanges,setSelectedItemsMedia,
@@ -291,10 +369,10 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     handlerreplyTo,
     handleLongPress,
     setMessageMoreAction,
-    setReplyMessage,
+    setReplyMessage,flatListRef,
     setReactionPosition,
     reactionPosition,
     messageMoreAction,
-    handlerDeleteMessage,
+    handlerDeleteMessage,highlightedMessageId,typingUsers
   };
 };

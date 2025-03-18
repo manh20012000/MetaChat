@@ -7,48 +7,58 @@ import SwipePreview from "./SwipePreview";
 type PreviewMediaProps = {
   isMyMessage: boolean;
   currentMessage: Message_type;
-  getPosition:()=>void
+  getPosition: () => void;
+  highlightedMessageId:any,
 };
 
-const PreviewMedia: React.FC<PreviewMediaProps> = ({ isMyMessage, currentMessage,getPosition }) => {
+const PreviewMedia: React.FC<PreviewMediaProps> = ({ isMyMessage, currentMessage, getPosition,highlightedMessageId }) => {
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  // Kiểm tra nếu không có attachments
   if (!currentMessage.attachments || currentMessage.attachments.length === 0) {
     return null;
   }
 
-  // Kích thước mỗi item trong grid (tính toán dựa trên chiều rộng màn hình)
   const screenWidth = Dimensions.get("window").width;
-  const numColumns = 3; // Số cột trong grid
-  const itemWidth = (screenWidth - 40) / numColumns; // 40 là padding tổng
+  const screenHeight = Dimensions.get("window").height;
+  const numAttachments = currentMessage.attachments.length;
+  // console.log(highlightedMessageId)
+  const highlighted=(currentMessage._id===highlightedMessageId)
+  // Nếu chỉ có 1 ảnh -> hiển thị đúng tỉ lệ ảnh
+  const isSingleMedia = numAttachments === 1;
+  const singleMediaWidth = screenWidth / 2; // 70% width màn hình
+  const singleMediaHeight = screenHeight / 3; // 1/3 chiều cao màn hình
+
+  // Nếu có nhiều hơn 1 ảnh, hiển thị dạng grid
+  const numColumns = numAttachments === 1 ? 1 : 2;
+  const gridItemSize = 120;
 
   const renderItem = ({ item, index }: { item: any; index: number }) => {
-     const type=  item.type.startsWith('image') ? 'image' :
-     item.type.startsWith('video') ? 'video' : 'file';
+    const type = item.type.startsWith("image") ? "image" :
+                 item.type.startsWith("video") ? "video" : "file";
+
+    const mediaStyle = isSingleMedia
+      ? { width: singleMediaWidth, height: singleMediaHeight }
+      : { width: gridItemSize, height: gridItemSize };
+  // console.log('highlighted',highlighted)
     return (
       <TouchableOpacity
-      onLongPress={getPosition}
-        style={[styles.itemContainer, { width: itemWidth, height: itemWidth }]}
+        onLongPress={getPosition}
+        style={[styles.itemContainer, mediaStyle,highlighted?{borderWidth:3,borderColor:'white'}:{}]}
         onPress={() => {
           setSelectedIndex(index);
           setIsPreviewVisible(true);
         }}
       >
         {type === "image" ? (
-          <Image
-          source={{ uri:item.url }}
-            style={styles.media}
-            resizeMode="cover"
-          />
+          <Image source={{ uri: item.url }} style={styles.media} resizeMode="cover" />
         ) : type === "video" ? (
-          <Video
-            source={{ uri: item.url }}
-            style={styles.media}
-            resizeMode="cover"
-            paused={true} // Tạm dừng video
-            controls={true} // Hiển thị thanh điều khiển
+          <Video 
+            source={{ uri: item.url }} 
+            style={styles.media} 
+            resizeMode="cover" 
+            paused={true} 
+            controls={true} 
           />
         ) : null}
       </TouchableOpacity>
@@ -57,20 +67,17 @@ const PreviewMedia: React.FC<PreviewMediaProps> = ({ isMyMessage, currentMessage
 
   return (
     <View
-      style={{
-        alignSelf: isMyMessage ? "flex-end" : "flex-start",
-        marginVertical: 5,
-        alignContent: "center",
-        justifyContent: "space-around",
-        backgroundColor: "green",
-      }}
+      style={[
+        styles.container,
+        { alignSelf: isMyMessage ? "flex-end" : "flex-start" }
+      ]}
     >
       <FlatList
         data={currentMessage.attachments}
         renderItem={renderItem}
         keyExtractor={(item, index) => `${item.url}-${index}`}
         numColumns={numColumns}
-        scrollEnabled={false} // Tắt cuộn nếu cần
+        scrollEnabled={false}
       />
       {isPreviewVisible && (
         <SwipePreview
@@ -85,6 +92,11 @@ const PreviewMedia: React.FC<PreviewMediaProps> = ({ isMyMessage, currentMessage
 
 // Styles
 const styles = StyleSheet.create({
+  container: {
+    marginVertical: 5,
+    alignContent: "center",
+    justifyContent: "center",
+  },
   itemContainer: {
     margin: 2,
     borderRadius: 8,

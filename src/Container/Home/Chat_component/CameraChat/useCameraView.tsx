@@ -114,7 +114,7 @@ const useCameraView = (cameraRef: React.RefObject<Camera>) => {
         name: `video_${Date.now()}.${fileType}`,
         type: mimeType,
       };
-   
+  
       eventEmitter.emit('onCapture', [videoCapture]);
     }
   

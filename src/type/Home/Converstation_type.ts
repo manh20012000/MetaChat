@@ -1,6 +1,6 @@
-import { Message_type } from "./Chat_type";
+import {Message_type} from './Chat_type';
 
-type Conversation= {
+type Conversation = {
   _id: string; // ID của cuộc trò chuyện
   roomName: string | null; // Tên của nhóm hoặc tên động được tạo từ các thành viên
   avatar: string | null; // Ảnh đại diện nhóm hoặc danh sách ảnh đại diện
@@ -20,12 +20,20 @@ type Conversation= {
       user_id: string;
     },
   ];
-  isDeleted:string,
+  isDeleted: string;
   createdAt: Date;
   participantIds: string[];
   firstMessageTime?: string;
   permission: string;
   messageError: Message_type[];
   otherContent: string;
-}
+  isRead: [
+    {
+      user: { _id: string; name: string; avatar: string }, // Người đã đọc tin nhắn
+      messageId: string, // ID tin nhắn đã đọc
+      readAt: string, // Thời gian đọc tin nhắn
+    }
+  ];
+  
+};
 export default Conversation;

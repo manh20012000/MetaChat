@@ -6,6 +6,7 @@ type UseButtonMessageProps= {
   userChat: any; // Replace 'any' with the appropriate type
   conversation: any; // Replace 'any' with the appropriate type
   setSelectedItemsMedia: (items: any[]) => void; // Replace 'any' with the appropriate type
+  handleSheetChanges:(index:number)=>void
 }
 
 const UseButtonMessage = ({
@@ -14,6 +15,7 @@ const UseButtonMessage = ({
   userChat,
   conversation,
   setSelectedItemsMedia,
+  handleSheetChanges
 }: UseButtonMessageProps) => {
   const hanlderMessSend = () => {
     let filesOrder = selected.map((file: any, index: number) => {
@@ -22,7 +24,7 @@ const UseButtonMessage = ({
         type: file.type,
       };
     });
-   
+    handleSheetChanges(-1)
 
     if (selected.length > 0) {
       const message = {

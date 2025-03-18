@@ -24,7 +24,8 @@ const IsReadSchema = {
   name: 'IsRead',
   properties: {
     user: 'user?', // Người gửi tin nhắn gốc
-    status:'bool?'
+    messageId:'string?',
+    readAt:'string'
   },
 };
 
@@ -55,7 +56,6 @@ const MessageSchema = {
     callDetails: 'CallDetail?', // Chi tiết cuộc gọi
     createdAt: 'string?', // Thời gian tạo
     reactions: 'Reaction[]', // Danh sách cảm xúc
-    isRead: 'user[]', // Danh sách người đã đọc
     replyTo: 'ReplyTo?', // ✅ Đổi từ `replyTo` thành `replyTo`
     statusSendding:'bool?',
     receiver: 'string[]',
@@ -107,7 +107,9 @@ const ConversationSchema = {
     participantIds: 'string[]',
     isDeleted: 'string[]',
     messageError: 'Message[]',
-    otherContent:'string?'
+    otherContent:'string?',
+    isRead:'IsRead[]'
+
   },
 };
 

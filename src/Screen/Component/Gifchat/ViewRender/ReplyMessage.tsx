@@ -16,7 +16,7 @@ export const ReplyMessage: React.FC<ReplyMessageProps> = ({
     scrollToMessage,
     userChat
 }) => {
-
+//    console.log(currentMessage)
     return (
         <View
             style={{
@@ -41,6 +41,7 @@ export const ReplyMessage: React.FC<ReplyMessageProps> = ({
                     maxWidth: '65%',
                     alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
                 }}>
+                    
                 <Text style={{ color: '#ccc', fontSize: 13, fontWeight: 'bold' }}>
                     {currentMessage.replyTo.messageType === 'text'
                         ? currentMessage.replyTo.text

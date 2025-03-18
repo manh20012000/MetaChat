@@ -19,6 +19,7 @@ interface MessageProps {
   currentMessage: Message_type;
   previousMessage?: any;
   userChat: userMessage;
+  highlightedMessageId:any,
   handleLongPress: (message: any) => void;
   handlerreplyTo: (message: any) => void;
   scrollToMessage: (messageId: string) => void;
@@ -36,7 +37,7 @@ const MessageItem: React.FC<MessageProps> = ({
   userChat,
   handleLongPress,
   handlerreplyTo,
-
+  highlightedMessageId,
   scrollToMessage,
   props,
   selectedMessages_id,
@@ -88,8 +89,10 @@ const handleLongPressMessage = ({ x, y }: { x: number; y: number }, message: any
   return (
     <Pressable 
     onPress={() => {
+      console.log('ạasjasja')
       setSelectedMessages(null)
     }}
+    // style={{backgroundColor:"pink"}}
     >
       <View style={{ marginBottom: 2, marginHorizontal: 10, position: 'relative' }}>
        <Day {...props} />
@@ -111,6 +114,7 @@ const handleLongPressMessage = ({ x, y }: { x: number; y: number }, message: any
                     <MaterialIcons name="sms-failed" size={20} color={'red'}/>
                    )}
                   <MessageComponent
+                  
                     isFirstMessage={isFirstMessage}
                     isMyMessage={isMyMessage}
                     currentMessage={currentMessage}
@@ -120,7 +124,7 @@ const handleLongPressMessage = ({ x, y }: { x: number; y: number }, message: any
                     userChat={userChat}
                     handlderHidenIcon={() => { }}
                     setSelectedMessages={setSelectedMessages}
-            
+                    highlightedMessageId={highlightedMessageId}
                   />
               </View>
               </Animated.View>

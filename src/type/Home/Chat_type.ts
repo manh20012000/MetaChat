@@ -35,7 +35,7 @@ export type Message_type = {
   receiver: string[];
   recall: boolean;
   isRead: [
-    {user: {_id: string; avatar: string; name: string}; status: boolean},
+  {_id: string; avatar: string; name: string},
   ]|[];
   replyTo: {
     _id: string;

@@ -12,6 +12,7 @@ type TextMessageProps = {
   isMyMessage: boolean;
   currentMessage: Message_type;
   props: any;
+  highlightedMessageId:any;
   handleLongPressMessage: (
     position: {x: number; y: number},
     message: any,
@@ -20,6 +21,7 @@ type TextMessageProps = {
   userChat: userMessage;
   handlderHidenIcon: any;
   setSelectedMessages: React.Dispatch<React.SetStateAction<any>>;
+  
 };
 
 export const MessageComponent: React.FC<TextMessageProps> = ({
@@ -27,7 +29,7 @@ export const MessageComponent: React.FC<TextMessageProps> = ({
   isMyMessage,
   currentMessage,
   props,
-  handleLongPressMessage,
+  handleLongPressMessage,highlightedMessageId,
   color,
   userChat,
   handlderHidenIcon,
@@ -35,7 +37,7 @@ export const MessageComponent: React.FC<TextMessageProps> = ({
 }) => {
   const messageRef = useRef<View>(null);
   const getPosition = () => {
-    // console.log('hdhdjshdjsj')
+ 
     if (messageRef.current) {
       messageRef.current.measureInWindow((x, y, width, height) => {
         handleLongPressMessage({x, y}, currentMessage);
@@ -44,20 +46,26 @@ export const MessageComponent: React.FC<TextMessageProps> = ({
   };
 
   return (
-    <>
+    <View style={{flex:1}}>
       <Pressable
         onPress={() => {
-        
+          console.log('nhấn pressss')
           setSelectedMessages(null);
           handlderHidenIcon(false);
         }}
         ref={messageRef} // Gán ref vào Pressable để đo được tọa độ
         style={{
-       
+          flexDirection:"row",
           marginVertical: 1,
+        
+           alignItems:'flex-end',
+          alignSelf:'flex-end'
         }}>
         {isFirstMessage && currentMessage.user._id !== userChat._id && (
-          <Avatar {...props} style={{}} />
+          <Avatar {...props} imageStyle={{
+            left: { width: 25, height: 25 }, 
+            // right: { width: 30, height: 30 },
+          }} containerStyle={{bottom:0,position:'absolute',}}/>
         )}
         {currentMessage.messageType === 'text' && (
           <Bubble
@@ -68,11 +76,17 @@ export const MessageComponent: React.FC<TextMessageProps> = ({
                 backgroundColor: color.gray2,
                 maxWidth: '65%',
                 padding: 5,
+                borderRadius: 15,
+                borderWidth: currentMessage._id === highlightedMessageId ? 3 : 0, // Highlight viền
+                borderColor: currentMessage._id === highlightedMessageId ? 'red' : 'transparent', // Màu viền
               },
               right: {
                 backgroundColor: isMyMessage ? color.blue : color.gray2,
                 maxWidth: '65%',
                 padding: 5,
+                borderRadius: 15,
+                borderWidth: currentMessage._id === highlightedMessageId ? 3 : 0,
+                borderColor: currentMessage._id === highlightedMessageId ? 'red' : 'transparent',
               },
             }}
             textStyle={{
@@ -83,7 +97,7 @@ export const MessageComponent: React.FC<TextMessageProps> = ({
         )}
         {currentMessage.messageType === 'attachment' && (
             <PreviewImage
-            
+            highlightedMessageId={highlightedMessageId}
               isMyMessage={isMyMessage}
               currentMessage={currentMessage}
               getPosition={getPosition}
@@ -106,8 +120,10 @@ export const MessageComponent: React.FC<TextMessageProps> = ({
             borderWidth: 1,
             backgroundColor: '#222222',
             borderRadius: 10,
-            justifyContent: 'center',
-            alignItems: 'center',
+            justifyContent: 'flex-end',
+            alignItems: 'flex-end',
+            position:'absolute',
+            bottom:-15,
           }}>
           {currentMessage.reactions.slice(-2).map((reaction: any) => {
             const icon = messageIcon.find(
@@ -127,6 +143,6 @@ export const MessageComponent: React.FC<TextMessageProps> = ({
           })}
         </View>
       )}
-    </>
+    </View>
   );
 };

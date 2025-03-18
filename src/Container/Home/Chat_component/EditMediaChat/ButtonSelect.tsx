@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {Text, View, TouchableOpacity} from 'react-native';
+import {Text, View, TouchableOpacity, Alert} from 'react-native';
 import Reanimated, {
   useSharedValue,
   useAnimatedStyle,
@@ -17,13 +17,15 @@ type BtnSelectProps = {
   setSelectedItemsMedia: React.Dispatch<React.SetStateAction<any[]>>;
   userChat: userMessage;
   conversation: Conversation;
+  handleSheetChanges:(index:number)=>void
 };
 
 const ButtonSelection: React.FC<BtnSelectProps> = ({
   selected,
   onSend,
   userChat,
-  conversation,setSelectedItemsMedia
+  conversation,setSelectedItemsMedia,
+  handleSheetChanges
 }) => {
   const isExpanded = selected.length >= 2;
 
@@ -48,6 +50,7 @@ const ButtonSelection: React.FC<BtnSelectProps> = ({
     userChat,
     conversation,
     setSelectedItemsMedia,
+    handleSheetChanges,
   }
   );
   return (
@@ -69,6 +72,16 @@ const ButtonSelection: React.FC<BtnSelectProps> = ({
         }}>
         {selected.length < 2 && (
           <AnimatedTouchable
+          onPress={()=>{
+            Alert.alert("warning",'tính năng này đang được phát triển',[
+              {
+                text: 'Cancel',
+                onPress: () => handleSheetChanges(-1),
+                style: 'cancel',
+              },
+              {text: 'OK',  onPress: () => handleSheetChanges(-1),},
+            ])
+          }}
             style={{
               flex: 0.4,
               backgroundColor: 'pink',

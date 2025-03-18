@@ -25,6 +25,8 @@ import {eventEmitter} from '../../../eventEmitter/EventEmitter';
 import useRenderInput from './ViewRender/hook/usr-renderInput';
 import MicroChat from '../../../Container/Home/Chat_component/Microphone/MicroChat';
 import MicrophonePermission from '../../../util/Permision/MicrophonePermision';
+import ModalMap from '../../../Container/Home/Chat_component/Mapshare/ShareMap';
+import MapLocaltedPermission from '../../../util/Permision/MapPermission';
 type NavigationProps = NavigationProp<RootStackParamList>;
 type TCusttomTypeInput = {
   onSend: any;
@@ -49,6 +51,7 @@ const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
     (value: {colorApp: {value: any}}) => value.colorApp.value,
   );
   const [turnOnMic, setTurnOnMic] = useState<boolean>(false);
+
   const {
     handlePress,
     text,
@@ -60,6 +63,9 @@ const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
     inputHeight,
     setInputHeight,
     setChangeIcon,
+    openMap,
+    onchangeTyping,
+    onClose,
   } = useRenderInput(props);
   return (
     <>
@@ -132,7 +138,17 @@ const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
                 columnGap: 10,
                 alignItems: 'center',
               }}>
-              <TouchableOpacity>
+              <TouchableOpacity
+                onPress={async() => {
+                  console.log(await MapLocaltedPermission())
+                  if(await MapLocaltedPermission()){
+                    onClose()
+                  }else{
+                    Linking.openSettings();
+                    console.log('cấp quyền thất bại ');
+                  }
+                  
+                }}>
                 <FontAwesome
                   name="location-arrow"
                   color={color.blue}
@@ -207,6 +223,7 @@ const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
               }
               onFocus={() => setChangeIcon(true)}
               onChangeText={value => {
+                onchangeTyping()
                 if (value !== '') {
                   setChangeIcon(false);
                   setIsShowSendText(false);
@@ -245,6 +262,15 @@ const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
           replyMessage={replyMessage}
           conversation={conversation}
           setTurnOnMic={setTurnOnMic}
+        />
+      )}
+      {openMap && (
+        <ModalMap
+          onClose={onClose}
+          onSend={onSend}
+          userChat={userChat}
+          replyMessage={replyMessage}
+          conversation={conversation}
         />
       )}
     </>
