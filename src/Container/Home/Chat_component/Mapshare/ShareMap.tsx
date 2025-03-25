@@ -38,7 +38,7 @@ const ModalMap: React.FC<TMap> = ({ onClose, onSend, conversation, replyMessage,
       Geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          console.log(latitude,"dsjf", longitude);
+     
           setLocation({ latitude, longitude });
           setIsLoading(false);
         },

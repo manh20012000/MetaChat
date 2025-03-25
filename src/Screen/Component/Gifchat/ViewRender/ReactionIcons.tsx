@@ -4,6 +4,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {Message_type, reactions} from '../../../../type/Home/Chat_type';
 import userMessage from '../../../../type/Home/useMessage_type';
 import {messageIcon} from '../../../../type/react-type';
+
 interface ReactionIconsProps {
   isMyMessage: boolean;
   handlerReactIcon: (item: any) => void;

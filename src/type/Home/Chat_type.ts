@@ -49,7 +49,7 @@ export type Message_type = {
   other: string;
   status: string;
   statusSendding:boolean,
-  
+  lastSync:string
 
 };
 

@@ -30,7 +30,10 @@ const screens = [
   { name: 'HomeChatPersion', component: HomeChatPersion },
    {name:'CameraChat',  component:CameraChat},
 ];
-
+ type propNavigation={
+  linking:any,
+  fallback:any
+ }
 const Navigation: React.FC = () => {
   const dispath = useDispatch();
   const [loading, setLoading] = useState<boolean>(false);
@@ -60,7 +63,6 @@ const Navigation: React.FC = () => {
       } catch (err: any) {
         console.log(err, 'navigation log err');
       }
-
       setLoading(true);
     };
     checkLoginStatus();

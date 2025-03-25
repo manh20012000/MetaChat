@@ -75,7 +75,7 @@ const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
       setLoading(true);
  
       const { data } = await axios.post(
-        `${API_URL}/api/user/login`,
+        `${API_URL}/api/nodeserver/user/login`,
         {
           email: emailphone,
           password: matkhau,

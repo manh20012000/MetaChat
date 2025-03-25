@@ -108,7 +108,8 @@ const ConversationSchema = {
     isDeleted: 'string[]',
     messageError: 'Message[]',
     otherContent:'string?',
-    isRead:'IsRead[]'
+    isRead:'IsRead[]',
+    lastSync:'string?'
 
   },
 };

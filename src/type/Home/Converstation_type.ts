@@ -34,6 +34,6 @@ type Conversation = {
       readAt: string, // Thời gian đọc tin nhắn
     }
   ];
-  
+  lastSync:string
 };
 export default Conversation;

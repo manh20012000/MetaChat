@@ -57,7 +57,7 @@ export class HandlerNotification {
   static update = async (fcmtoken, auth) => {
     try {
       const {data} = await axios.put(
-        `${API_URL}/api/user/fcmtoken/${auth._id}`,
+        `${API_URL}/api/nodeserver/user/fcmtoken/${auth._id}`,
         {fcmtoken},
         {
           headers: {

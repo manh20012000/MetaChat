@@ -35,6 +35,7 @@ const createConversation = async (Conversation: Conversation) => {
         permission: Conversation.permission,
         isDeleted: Conversation.isDeleted,
         createdAt: Conversation.createdAt,
+        lastSync:Conversation.lastSync,
       });
     });
   } catch (error) {
@@ -87,6 +88,7 @@ const update_Converstation = async (
       matchingConversation.lastMessage = message;
       matchingConversation.messages.unshift(message); // Thêm vào đầu danh sách
       matchingConversation.updatedAt = new Date().toISOString(); // Cập nhật thời gian sửa đổi
+      matchingConversation.lastSync=message.lastSync;
     });
   } catch (error: any) {
     console.error('Lỗi khi cập nhật cuộc hội thoại:', error.message);
@@ -122,6 +124,7 @@ const findAndconvertConversation = async (
       realm.write(() => {
         existingConversation.updatedAt = new Date().toISOString();
         existingConversation.isDeleted = [];
+
       });
       return existingConversation;
     } else {
@@ -139,6 +142,7 @@ const findAndconvertConversation = async (
         permission: 'lock',
         isDeleted: null,
         messageError: [],
+        lastSync:new Date().toISOString(),
       };
       return newConversation;
     }
@@ -225,6 +229,7 @@ const Converstation_Message = async (
       if (existingConversation) {
         (existingConversation.messages as Message_type[]).unshift(message);
         existingConversation.updatedAt = message.createdAt;
+        existingConversation.lastSync=message.createdAt;
       } else {
         realm.create('Conversation', converstation(conversation, message));
       }
@@ -308,6 +313,7 @@ const updateMessage = (message: Message_type, conversation: Conversation) => {
       }
     } else {
       // ✅ Nếu chưa có tin nhắn, thêm mới
+      existingConversation.lastSync=message.lastSync
       existingConversation.messages.push(realm.create('Message', message));
     }
 
@@ -338,6 +344,7 @@ const recallMessage = (conversation_id: string, message_id: string) => {
     messages[messageIndex].receiver = [];
     conversation.createdAt = new Date();
     conversation.otherContent = 'tin nhắn đã được gỡ';
+    conversation.lastSync= new Date().toISOString();
   });
 };
 
@@ -369,7 +376,7 @@ const deleteMessageError = (conversation_id: string, message_id: string) => {
       return;
     }
     const messageError = conversation.messageError as unknown as Message_type[];
-
+    
     const messageIndex = messageError.findIndex(msg => msg._id === message_id);
     if (messageIndex === -1) {
       return;

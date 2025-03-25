@@ -9,7 +9,7 @@ import {
   Animated,
   Alert,
 } from 'react-native';
-import _ from "lodash";
+import _, { debounce, throttle } from "lodash";
 import {useSelector} from 'react-redux';
 
 import Conversation from '../../../../../type/Home/Converstation_type';
@@ -86,7 +86,7 @@ const useRenderInput = (props: any) => {
           type: file.type,
         };
       });
-    console.log(files)
+
       if (files.length > 0) {
         const message = {
           _id: new BSON.ObjectId().toString(),
@@ -128,22 +128,32 @@ const useRenderInput = (props: any) => {
   const onClose=()=>{
     setOpenMap(!openMap)
   }
-  // const handleTyping = _.debounce((text: string) => {
-  //   if (text.length > 0 && conversation) {
-  //     socket?.emit("typing", { user:userChat,roomId:conversation._id, isTyping: true });
-  //   } 
-  // }, 1500); // 
-  const handleTyping = () => {
+
+ // Hàm throttle để gửi sự kiện typing trong quá trình nhập liệu
+  const throttledTyping = throttle((isTyping) => {
     if (!conversation || !socket) return;
-    socket.emit("typing", { user: userChat, roomId: conversation._id, isTyping: true });
+    socket.emit("typing", { user: userChat, roomId: conversation._id, isTyping });
+  }, 1000); // Throttle mỗi 1 giây
+
+  // Hàm debounce để gửi sự kiện "dừng nhập"
+  const debouncedStopTyping = debounce(() => {
+    if (!conversation || !socket) return;
+    socket.emit("typing", { user: userChat, roomId: conversation._id, isTyping: false });
+  }, 300); // Debounce 300ms
+
+  const handleTyping = () => {
+    // Gửi sự kiện "đang nhập" với throttle
+    throttledTyping(true);
+
+    // Đặt timeout để gửi sự kiện "dừng nhập" sau 4 giây
     if (typingTimeout.current) {
       clearTimeout(typingTimeout.current);
     }
     typingTimeout.current = setTimeout(() => {
-      socket.emit("typing", { user: userChat, roomId: conversation._id, isTyping: false });
+      debouncedStopTyping();
     }, 4000);
   };
-  
+
   const onchangeTyping = () => {
     handleTyping();
   };

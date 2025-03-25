@@ -14,6 +14,7 @@ import Create_Group from '../Screen/Home/Draw_navigation/Create_Group';
 import Private_Converstation from '../Screen/Home/Draw_navigation/Private_Converstation';
 import { useSelector } from 'react-redux';
 import { Image, StyleSheet, Text, View } from 'react-native';
+import AskToAI from '../Screen/Home/Draw_navigation/Ask_to_AI';
 const Drawer = createDrawerNavigator();
 
 const CustomDrawerContent = (props: any) => {
@@ -52,7 +53,7 @@ const CustomDrawerContent = (props: any) => {
         }}
         onPress={() => props.navigation.navigate('Chats')}
         icon={() => (
-          <Ionicons name="home-outline" size={24} color={color.white} />
+          <Ionicons name='home'size={25} color={'white'}/>
         )}
         labelStyle={[styles.drawerItemLabel, {color: color.light}]}
       />
@@ -85,7 +86,7 @@ const CustomDrawerContent = (props: any) => {
         }}
         onPress={() => props.navigation.navigate('Setting_Chat')}
         icon={() => (
-          <Ionicons name="settings-outline" size={24} color={color.light} />
+          <Ionicons name="settings-sharp" size={24} color={color.light} />
         )}
         labelStyle={[styles.drawerItemLabel, {color: color.light}]}
       />
@@ -96,7 +97,7 @@ const CustomDrawerContent = (props: any) => {
         label="Adttenment"
         onPress={() => props.navigation.navigate('Adttenment')}
         icon={() => (
-          <Ionicons name="calendar-outline" size={24} color={color.light} />
+          <Ionicons name="calendar-number" size={24} color={color.light} />
         )}
         labelStyle={[styles.drawerItemLabel, {color: color.light}]}
       />
@@ -107,11 +108,22 @@ const CustomDrawerContent = (props: any) => {
         label="Private Conversation"
         onPress={() => props.navigation.navigate('Private_Converstation')}
         icon={() => (
-          <MaterialIcons
-            name="chat-bubble-outline"
+          <MaterialCommunityIcons
+            name="message-processing"
             size={24}
             color={color.light}
           />
+        )}
+        labelStyle={[styles.drawerItemLabel, {color: color.light}]}
+      />
+       <DrawerItem
+        label="Ask to AI"
+        style={{
+          backgroundColor: selectedIndex === 6 ? color.red : color.gray,
+        }}
+        onPress={() => props.navigation.navigate('Ask_AI')}
+        icon={() => (
+          <MaterialCommunityIcons name='robot-dead'size={25} color={'white'}/>
         )}
         labelStyle={[styles.drawerItemLabel, {color: color.light}]}
       />
@@ -146,6 +158,10 @@ const DrawerNavigation = () => {
       <Drawer.Screen
         name="Private_Converstation"
         component={Private_Converstation}
+      />
+       <Drawer.Screen
+        name="Ask_AI"
+        component={AskToAI}
       />
     </Drawer.Navigator>
   );

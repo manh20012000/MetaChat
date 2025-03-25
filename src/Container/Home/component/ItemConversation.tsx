@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import { Message_type } from '../../../type/Home/Chat_type';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import Conversation from '../../../type/Home/Converstation_type';
+import TypingIndicator from '../../../Constants/TypingInput';
 dayjs.extend(relativeTime);
 
 // Hàm xác định nội dung hiển thị dựa trên messageType
@@ -44,15 +45,18 @@ const MessageItem = ({
     navigation,
     socket, user_Status,
     handlePresentModalPress,
+    typingUsers
 }: {
     item: Conversation;
     user: userMessage;
     color: any;
     navigation: any;
         socket: any;
-        user_Status:any
+        user_Status:any,
+        typingUsers:any,
     handlePresentModalPress: (item: Conversation) => void;
 }) => {
+
     const statusUser: boolean = item.participantIds.some(
         (participantId: string) => {
             if (participantId !== user._id) {
@@ -65,7 +69,10 @@ const MessageItem = ({
     if (ConversationShow) return null; // Ẩn cuộc trò chuyện nếu bị xóa
 
     return (
-        <Pressable
+        <>
+      { typingUsers?.isTyping ? (
+             <TypingIndicator typingUsers={typingUsers} size={25} dotSize={26} />
+              ) :<Pressable
             onPress={() => {
                 if (item.participantIds.length <= 2) {
                     const recipientIds = item.participantIds.filter(
@@ -107,7 +114,9 @@ const MessageItem = ({
                         zIndex: 1,
                         bottom: 5,
                         left: '12%',
-                    }}></View>
+                    }}>
+
+                    </View>
             )}
             {item.avatar ? (
                 <Image
@@ -267,7 +276,9 @@ const MessageItem = ({
                     </Text>
                 </View>
             </View>
-        </Pressable>
+        </Pressable>}
+        </>
+        
     );
 };
 

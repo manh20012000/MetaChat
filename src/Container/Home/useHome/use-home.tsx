@@ -21,6 +21,7 @@ import {
 import {useSocket} from '../../../util/socket.io.tsx';
 import {realm} from '../../../cache_data/Schema/schema_realm_model.tsx';
 import Conversation from '../../../type/Home/Converstation_type.ts';
+import userMessage from '../../../type/Home/useMessage_type.ts';
 dayjs.extend(relativeTime);
 
 export const useHomeLogic = (navigation: any) => {
@@ -34,8 +35,13 @@ export const useHomeLogic = (navigation: any) => {
   const isPortrait = height > width;
   const insets = useSafeAreaInsets();
   const socket = useSocket();
-
-  const [data_convertstation, setData_convertStation] = useState<Conversation[]>([]);
+  const [typingUsers, setTypingUsers] = useState<{
+    user: userMessage;
+    isTyping: boolean;
+  } | null>();
+  const [data_convertstation, setData_convertStation] = useState<
+    Conversation[]
+  >([]);
   const [skip, setSkiped] = useState(0);
   const [skipfriend, setSkipfriend] = useState(0);
   const [onloading, setLoading] = useState<boolean>(false);
@@ -53,9 +59,7 @@ export const useHomeLogic = (navigation: any) => {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
   const handleDeleteConverStation = useCallback(() => {
-
     if (!selectConverstion) {
-
       setModalVisible(false);
       return;
     }
@@ -64,26 +68,31 @@ export const useHomeLogic = (navigation: any) => {
       return;
     }
 
-    setData_convertStation((previewConverstatiom:Conversation[]) => {
-      return previewConverstatiom.filter((item: Conversation) => item._id !== selectConverstion._id
-      )
-    })
+    setData_convertStation((previewConverstatiom: Conversation[]) => {
+      return previewConverstatiom.filter(
+        (item: Conversation) => item._id !== selectConverstion._id,
+      );
+    });
     setModalVisible(false);
-    delete_converStation(selectConverstion, { dispatch, user });
-    setSelectConverstation(null)
-     
+    delete_converStation(selectConverstion, {dispatch, user});
+    setSelectConverstation(null);
   }, [selectConverstion]);
 
-  const handlerShowmodal = useCallback((status: boolean) => {
-    setModalVisible(status);
+  const handlerShowmodal = useCallback(
+    (status: boolean) => {
+      setModalVisible(status);
+    },
+    [selectConverstion],
+  );
 
-  }, [selectConverstion]);
+  const handlePresentModalPress = useCallback(
+    (item: Conversation) => {
+      bottomSheetModalRef.current?.present();
 
-  const handlePresentModalPress = useCallback((item: Conversation) => {
-    bottomSheetModalRef.current?.present();
- 
-    setSelectConverstation(item);
-  }, [selectConverstion]);
+      setSelectConverstation(item);
+    },
+    [selectConverstion],
+  );
 
   const handleSheetChanges = useCallback((index: number) => {
     console.log('handleSheetChanges', index);
@@ -101,7 +110,8 @@ export const useHomeLogic = (navigation: any) => {
       try {
         setSkiped(data_converstation.data.length);
         data_converstation.data.forEach(async (element: Conversation) => {
-          await createConversation(element);
+          // console.log(element.participants);
+           await createConversation(element);
         });
       } catch (err) {
         console.log(err, 'lỗi thêm cuộc thoại vào local');
@@ -180,15 +190,15 @@ export const useHomeLogic = (navigation: any) => {
     };
 
     const handleNewMessage = async (messages: any) => {
+      
       const {message, conversation, send_id} = messages;
+      console.log('nhận nhậntin nhận tinnhanw mới',send_id)
       await Converstation_Message(message, conversation, send_id);
     };
 
     const handlerUpdateMessage = async (messages: any) => {
-
       const {message, conversation, send_id} = messages;
       if (send_id !== user._id) {
-      
         updateMessage(message, conversation);
       }
     };
@@ -197,12 +207,15 @@ export const useHomeLogic = (navigation: any) => {
     } else {
       socket.on('connect', handleConnect);
     }
+    socket?.on('userTyping', ({user, isTyping}) => {
+      setTypingUsers({user, isTyping});
+    });
     socket.on('update_message', handlerUpdateMessage);
     socket.on('new_message', handleNewMessage);
     const conversationObjects = realm.objects('Conversation');
     const updateConversations = async () => {
       if (!realm || realm.isClosed) {
-        console.warn("Realm đã bị đóng hoặc không hợp lệ.");
+        console.warn('Realm đã bị đóng hoặc không hợp lệ.');
         return;
       }
       let data_converstation = await getConversations();
@@ -219,6 +232,7 @@ export const useHomeLogic = (navigation: any) => {
       socket.off('update_message', handlerUpdateMessage);
       socket.off('connect', handleConnect);
       conversationObjects.removeListener(updateConversations);
+      socket?.off('userTyping');
     };
   }, [socket?.connected]);
   const onRefresh = useCallback(() => {
@@ -231,6 +245,7 @@ export const useHomeLogic = (navigation: any) => {
       clearTimeout(timer);
     };
   }, []);
+
   return {
     color,
     user,
@@ -252,6 +267,6 @@ export const useHomeLogic = (navigation: any) => {
     navigation,
     refreshing,
     onRefresh,
-  
+    typingUsers,
   };
 };

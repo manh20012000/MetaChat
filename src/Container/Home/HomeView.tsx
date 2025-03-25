@@ -43,7 +43,8 @@ export const HomeView = ({navigation}: {navigation: any}) => {
     handleDeleteConverStation,
     handlerShowmodal,
     handlePresentModalPress,
-    handleSheetChanges, onRefresh, refreshing, 
+    handleSheetChanges, onRefresh, refreshing,
+     typingUsers
   } = useHomeLogic(navigation);
  
   return (
@@ -68,6 +69,7 @@ export const HomeView = ({navigation}: {navigation: any}) => {
                 data={data_convertstation}
                 renderItem={({ item }) => (
                   <MessageItem
+                  typingUsers={typingUsers}
                     user_Status={user_Status}
                     item={item}
                     user={user}

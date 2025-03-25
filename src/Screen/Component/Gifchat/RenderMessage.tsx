@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, Image, useWindowDimensions, Animated, PanResponder, TouchableOpacity, Pressable } from 'react-native';
+import { View, Text, Image, useWindowDimensions, Animated, PanResponder, TouchableOpacity, Pressable, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Avatar, Bubble, Day } from 'react-native-gifted-chat';
 import { useDispatch, useSelector } from 'react-redux';
@@ -87,6 +87,7 @@ const handleLongPressMessage = ({ x, y }: { x: number; y: number }, message: any
   };
  
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
     <Pressable 
     onPress={() => {
       console.log('ạasjasja')
@@ -94,13 +95,13 @@ const handleLongPressMessage = ({ x, y }: { x: number; y: number }, message: any
     }}
     // style={{backgroundColor:"pink"}}
     >
-      <View style={{ marginBottom: 2, marginHorizontal: 10, position: 'relative' }}>
+      <View style={{ marginBottom: 2, marginHorizontal: 10, position: 'relative', }}>
        <Day {...props} />
         {
           currentMessage.recall === false ? (
             currentMessage.receiver.includes(userChat.user_id) && ( 
             <>
-              <Animated.View {...panResponder.panHandlers} style={{ transform: [{ translateX }] }}>
+              <Animated.View {...panResponder.panHandlers} style={{ transform: [{ translateX }]}}>
                 {currentMessage.replyTo !== null && currentMessage.replyTo.user && (
                   <ReplyMessage
                     currentMessage={currentMessage}
@@ -142,6 +143,7 @@ const handleLongPressMessage = ({ x, y }: { x: number; y: number }, message: any
         )}
       </View>
     </Pressable>
+    </TouchableWithoutFeedback>
   );
 };
 
