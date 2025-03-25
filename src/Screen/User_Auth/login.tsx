@@ -154,7 +154,7 @@ const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
       const userInfor: any = await GoogleSignin.signIn();
     
       const gguser = userInfor.data.user;
-      c
+
       // thực hiện lấy ra fcm token cho chức năng thông báo 
       const authStatus = await messaging().requestPermission();
  

@@ -1,47 +1,63 @@
-import { Linking, } from 'react-native';
+import { Linking } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import PermissionNotification from './src/util/Permision/NotifictionPermission';
 import { useEffect } from 'react';
 import navigation from './src/navigation/navigation';
-import {color} from './src/assets/color/color.js';
-const NAVIGATION_IDS = [
-  'ChatScreen',
-];
-const UseApp=()=>{
 
+const NAVIGATION_IDS = ['ChatScreen'];
+
+const UseApp = () => {
   useEffect(() => {
     PermissionNotification();
+
     // Khi nhấn vào thông báo từ trạng thái đóng hoàn toàn
-     messaging().getInitialNotification().then((remoteMessage)=>{
-      if(remoteMessage){
-        console.log(remoteMessage.data)
-        // const screen=remoteMessage?.data?.screen
+    messaging()
+      .getInitialNotification()
+      .then(remoteMessage => {
+        if (remoteMessage) {
+          console.log('🔵 App closed - Opened by notification:', remoteMessage.data);
+          handleNotification(remoteMessage.data);
+        }
+      });
+
+    // Khi app đang chạy nền và nhấn vào thông báo
+    const unsubscribeBackground = messaging().onNotificationOpenedApp(remoteMessage => {
+      if (remoteMessage) {
+        console.log('🟡 App in background - Opened by notification:', remoteMessage.data);
+        handleNotification(remoteMessage.data);
       }
-     })
-      // Khi app đang chạy nền và nhấn vào thông báo
-       const unsubscribe=messaging().onNotificationOpenedApp(remoteMessage=>{
-        console.log(remoteMessage.data)
-       })
-   return unsubscribe;
+    });
+
+    // Khi app đang chạy foreground (đang mở)
+    const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
+      if (remoteMessage) {
+        console.log('🟢 App in foreground - Received notification:', remoteMessage.data);
+        // Bạn có thể hiển thị thông báo trong app nếu cần
+      }
+    });
+
+    return () => {
+      unsubscribeBackground();
+      unsubscribeForeground();
+    };
   }, []);
-  const handleNotification = (data:any) => {
-    console.log(data)
+
+  const handleNotification = (data: any) => {
+    console.log('🔔 Handling notification:', data);
     if (data) {
       const { screen, message } = data;
 
-      // Kiểm tra nếu cần điều hướng
       if (NAVIGATION_IDS.includes(screen)) {
-        // navigation?.navigate(screen, { message });
+        // navigation.navigate(screen, { message });
       }
-
     }
   };
-  return {
 
-  }
-}
+  return {};
+};
 
-export default UseApp
+export default UseApp;
+
 // function buildDeepLinkFromNotificationData(data: any): string | null {
 //   const navigationId = data?.navigation;
 //   if (!NAVIGATION_IDS.includes(navigationId)) {

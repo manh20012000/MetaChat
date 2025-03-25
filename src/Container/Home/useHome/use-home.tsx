@@ -192,7 +192,6 @@ export const useHomeLogic = (navigation: any) => {
     const handleNewMessage = async (messages: any) => {
       
       const {message, conversation, send_id} = messages;
-      console.log('nhận nhậntin nhận tinnhanw mới',send_id)
       await Converstation_Message(message, conversation, send_id);
     };
 

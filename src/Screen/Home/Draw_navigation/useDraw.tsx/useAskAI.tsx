@@ -5,7 +5,6 @@ import { GEMINI_KEY } from '@env';
 import axios from 'axios';
 const UseAskAI = () => {
   const [messages, setMessages] = useState<{id:string, text: string; sender: string }[]>([]);
-  // console.log(GEMINI_KEY)
   const[loading,setLoading]=useState(false)
   const user = useSelector((state: any) => state.auth.value);
   const { width, height } = useWindowDimensions();
@@ -14,7 +13,7 @@ const UseAskAI = () => {
   const handleSend = async () => {
      setLoading(true)
     const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
-     console.log(API_URL)
+
     if (inputText.trim() === '') return;
     const textsend=inputText
     const userMessage = { id: new Date().toISOString(), text: inputText, sender: "user" };

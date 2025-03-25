@@ -54,7 +54,7 @@ const TypingIndicator: React.FC<TypingIndicatorProps> = ({
   if (!typingUsers) return null;
 
   return (
-    <View style={{ flexDirection: "row", alignItems: "center", padding: 5 }}>
+    <View style={{ flexDirection: "row", alignItems: "center", padding: 5,}}>
       {/* Avatar */}
       <Image
         key={typingUsers.user._id}
@@ -68,10 +68,10 @@ const TypingIndicator: React.FC<TypingIndicatorProps> = ({
       />
 
       {/* Hiệu ứng typing */}
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
+      <View style={{ flexDirection: "row", alignItems: "center" ,backgroundColor:'gray',borderWidth:1,borderRadius:20}}>
         {animRefs.map((dot, index) => (
           <Animated.View key={index} style={{ opacity: dot, marginRight: 3 }}>
-            <Text style={{ fontSize: dotSize }}>•</Text>
+            <Text style={{ fontSize: dotSize,fontWeight:'bold'}}>•</Text>
           </Animated.View>
         ))}
       </View>

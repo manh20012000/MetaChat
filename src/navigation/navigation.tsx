@@ -6,7 +6,7 @@ import Login from '../Screen/User_Auth/login.tsx';
 import Register from '../Screen/User_Auth/register.tsx';
 import Bottomtab_Navigation from './bottomtab_Navigation.tsx';
 import ChatScreen from '../Container/Home/UserHomeChat.tsx';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../Redux_Toolkit/Reducer/auth.slice.ts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
@@ -20,6 +20,9 @@ import Private_Converstation from '../Screen/Home/Draw_navigation/Private_Conver
 import NetInfo from '@react-native-community/netinfo';
 import { check } from '../Redux_Toolkit/Reducer/network_connect.ts';
 import CameraChat from '../Container/Home/Chat_component/CameraChat/CamaraView.tsx';
+import SettingComponent from '../Screen/User/UseComponent/Setting.tsx';
+import { useSocket } from '../util/socket.io.tsx';
+import { Status } from '../Redux_Toolkit/Reducer/status.User.ts';
 const Stack = createNativeStackNavigator();
 const screens = [
   { name: 'Login', component: Login },
@@ -29,17 +32,20 @@ const screens = [
   { name: 'SearchScreen', component: SearchScreen },
   { name: 'HomeChatPersion', component: HomeChatPersion },
    {name:'CameraChat',  component:CameraChat},
+   {name:"Setting",component:SettingComponent}
 ];
  type propNavigation={
   linking:any,
   fallback:any
  }
 const Navigation: React.FC = () => {
+  const dispatch = useDispatch();
   const dispath = useDispatch();
+  const user = useSelector((state: any) => state.auth.value);
   const [loading, setLoading] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
-
+  const socket = useSocket();
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
@@ -74,11 +80,22 @@ const Navigation: React.FC = () => {
         dispath(check(state.isConnected));
 
         if (!state.isConnected) {
+          // socket?.disconnect();
+          // socket?.removeAllListeners();
+          // socket?.close();
           Alert.alert(
             'No Internet Connection',
             'Your network connection is too weak or unavailable.',
           );
+       
         }
+        //  else {
+        //   console.log("✅ Có mạng trở lại, đang kết nối lại socket...");
+        //   if (!socket?.connected) {
+        //     socket?.connect();
+        //     // dispatch(Status(user._id));
+        //   }
+        // }
       }
     });
 

@@ -84,7 +84,7 @@ const User_profile: React.FC<{ navigation: any }> = ({ navigation }) => {
         backgroundColor={'transparent'}
       /> */}
 
-      {/* <TouchableOpacity
+      <TouchableOpacity
         onPress={handlerLogout}
         style={{
           backgroundColor: 'pink',
@@ -94,7 +94,7 @@ const User_profile: React.FC<{ navigation: any }> = ({ navigation }) => {
         }}>
         <Text>Logout</Text>
       
-      </TouchableOpacity> */}
+      </TouchableOpacity>
       <View style={{backgroundColor: color.gray, flex: 1}}>
         <View
           style={{

@@ -70,9 +70,7 @@ const MessageItem = ({
 
     return (
         <>
-      { typingUsers?.isTyping ? (
-             <TypingIndicator typingUsers={typingUsers} size={25} dotSize={26} />
-              ) :<Pressable
+      <Pressable
             onPress={() => {
                 if (item.participantIds.length <= 2) {
                     const recipientIds = item.participantIds.filter(
@@ -252,7 +250,9 @@ const MessageItem = ({
                             .filter((name: string) => !!name)
                             .join(', ')}
                 </Text>
-                <View
+                { typingUsers?.isTyping ? (
+             <TypingIndicator typingUsers={typingUsers} size={25} dotSize={26} />
+              ) :(<View
                     style={{
                         flexDirection: 'row',
                         width: '80%',
@@ -274,9 +274,9 @@ const MessageItem = ({
                     <Text ellipsizeMode="tail" numberOfLines={1}>
                         {dayjs(item.messages[0]?.createdAt).fromNow()}
                     </Text>
-                </View>
+                </View>)}
             </View>
-        </Pressable>}
+        </Pressable>
         </>
         
     );
