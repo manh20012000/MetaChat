@@ -49,7 +49,7 @@ export const MessageComponent: React.FC<TextMessageProps> = ({
     <View style={{flex:1}}>
       <Pressable
         onPress={() => {
-          console.log('nhấn pressss')
+          console.log('nhấn presss111111s')
           setSelectedMessages(null);
           handlderHidenIcon(false);
         }}

@@ -1,6 +1,15 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useSelector} from 'react-redux';
-import {Animated, FlatList, useWindowDimensions, Easing, Keyboard, Linking, NativeSyntheticEvent, NativeScrollEvent} from 'react-native';
+import {
+  Animated,
+  FlatList,
+  useWindowDimensions,
+  Easing,
+  Keyboard,
+  Linking,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+} from 'react-native';
 import {GiftedChat} from 'react-native-gifted-chat';
 import {API_ROUTE} from '../../../../service/api_enpoint';
 import {useSocket} from '../../../../util/socket.io';
@@ -19,7 +28,7 @@ import {Vibration} from 'react-native';
 import {converstationsend} from '../../../../util/util_chat/converstationSend';
 import {updateMessageReaction} from '../../../../service/MesssageService';
 import userMessage from '../../../../type/Home/useMessage_type';
-import { User } from '@react-native-google-signin/google-signin';
+import {User} from '@react-native-google-signin/google-signin';
 
 export const useGiftedChatLogic = (conversation: Conversation) => {
   const {width, height} = useWindowDimensions();
@@ -30,15 +39,16 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   const giftedChatRef = useRef<any>(null);
   const socket = useSocket();
   const networkConnect = useSelector((value: any) => value.network.value);
-  const[maginViewGiftedchat,setMaginViewGiftedchat]=useState<number>(0)
+  const [maginViewGiftedchat, setMaginViewGiftedchat] = useState<number>(0);
   const isPortrait = height > width;
   const sheetHeight40 = height * 0.4;
-  const [messages, setMessages] = useState<any[]> (Array.from([
-    ...conversation.messageError,
-    ...conversation.messages,
-  ]));
+  const [messages, setMessages] = useState<any[]>(
+    Array.from([...conversation.messageError, ...conversation.messages]),
+  );
 
-  const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
+  const [highlightedMessageId, setHighlightedMessageId] = useState<
+    string | null
+  >(null);
   const [selectedItemsMedia, setSelectedItemsMedia] = useState<any[]>([]);
   const [buttonScale] = useState(new Animated.Value(1));
   const [maginTextInput, setMaginTextInput] = useState<boolean>(false);
@@ -46,8 +56,11 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   const [selectedMessages, setSelectedMessages] = useState<Message_type | null>(
     null,
   );
-  const[markMessage,SetMarkMessage]=useState(conversation.isRead)
-  const [typingUsers, setTypingUsers] = useState<{user:userMessage,isTyping:boolean}>();
+  const [markMessage, SetMarkMessage] = useState(conversation.isRead);
+  const [typingUsers, setTypingUsers] = useState<{
+    user: userMessage;
+    isTyping: boolean;
+  }>();
   const [messageMoreAction, setMessageMoreAction] =
     useState<Message_type | null>(null);
   const [reactionPosition, setReactionPosition] = useState({x: 0, y: 0});
@@ -60,21 +73,19 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   const snapPoints = useMemo(() => ['40%', '90%'], []);
 
   const handlePresentModalPress = useCallback(() => {
-    setMaginViewGiftedchat(sheetHeight40)
-    Keyboard.dismiss()
+    setMaginViewGiftedchat(sheetHeight40);
+    Keyboard.dismiss();
     bottomSheetModalRef.current?.present();
- 
   }, []);
 
- const onPressPhoneNumber=async(phone:number)=>{
-
+  const onPressPhoneNumber = async (phone: number) => {
     const url = `tel:${phone}`;
     const supported = await Linking.canOpenURL(url);
-    
+
     if (supported) {
       await Linking.openURL(url);
     }
- }
+  };
   const handleSheetChanges = useCallback((index: number) => {
     if (index === -1) {
       setMaginTextInput(false);
@@ -113,33 +124,39 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     const index = messages.findIndex(msg => msg._id === messageId);
     if (index !== -1 && flatListRef.current) {
       setHighlightedMessageId(messageId); // Đánh dấu tin nhắn đang highlight
-      flatListRef.current.scrollToIndex({ index, animated: true });
+      flatListRef.current.scrollToIndex({index, animated: true});
       setTimeout(() => setHighlightedMessageId(null), 2000);
     }
   };
 
-  const handlerSelectMedia = useCallback((item: any) => {
-    setSelectedItemsMedia(prevSelectedItems => {
-      const isSelected = prevSelectedItems.some(
-        (selected: any) => selected.id === item.id,
-      );
-
-      if (isSelected) {
-        return prevSelectedItems.filter(
-          (selected: any) => selected.id !== item.id,
+  const handlerSelectMedia = useCallback(
+    (item: any) => {
+      setSelectedItemsMedia(prevSelectedItems => {
+        const isSelected = prevSelectedItems.some(
+          (selected: any) => selected.id === item.id,
         );
-      } else {
-        return [...prevSelectedItems, item];
-      }
-    });
-  }, [selectedItemsMedia]);
+
+        if (isSelected) {
+          return prevSelectedItems.filter(
+            (selected: any) => selected.id !== item.id,
+          );
+        } else {
+          return [...prevSelectedItems, item];
+        }
+      });
+    },
+    [selectedItemsMedia],
+  );
   const markMessageAsSeen = (messageId: string) => {
-    socket?.emit("message_seen", { readingUser:conversation.isRead.filter(value=>{
-       value.user._id===userChat._id
-       return value
-      }), roomId:conversation._id });
+    socket?.emit('message_seen', {
+      readingUser: conversation.isRead.filter(value => {
+        value.user._id === userChat._id;
+        return value;
+      }),
+      roomId: conversation._id,
+    });
   };
-  
+
   // useEffect(() => {
   //   console.log('có connect ', conversation.messageError);
   //   if (conversation.messageError.length > 0) {
@@ -150,31 +167,31 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   //   }
   // }, []);
   useEffect(() => {
-    socket?.on("userTyping", ({ user, isTyping }) => {
-      setTypingUsers({user,isTyping});
+    socket?.on('userTyping', ({user, isTyping}) => {
+      setTypingUsers({user, isTyping});
     });
     // socket?.emit("message_seen", { messageId:messages[messages.length]._id, userChat, roomId:conversation._id  });
     return () => {
-      socket?.off("userTyping");
+      socket?.off('userTyping');
     };
   }, []);
   // const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
   //   const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
   //   const isAtBottom = contentOffset.y + layoutMeasurement.height >= contentSize.height - 20;
-  
+
   //   if (isAtBottom) {
   //     socket?.emit("message_seen", { messageId:messages[messages.length]._id, userChat, roomId:conversation._id });
   //   }
   // };
   const onSend = useCallback(
-    async (message: Message_type, filesOrder: [], statusMessage: boolean) => { 
+    async (message: Message_type, filesOrder: [], statusMessage: boolean) => {
       const dataSaveSend = await converstationsend(
         message,
         filesOrder,
         userChat,
         conversation,
       );
-    
+
       const newMessage = {
         ...message,
         user: {
@@ -218,9 +235,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
       } catch (error) {
         const failedMessage: Message_type = {...message, statusSendding: false};
         if (!statusMessage) {
-       
         } else {
-         
           await MessageError(failedMessage, conversation, userChat);
         }
         setMessages((previousMessages: Message_type[]) =>
@@ -329,8 +344,8 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   //       readAt: new Date().toISOString(),
   //     });
   //     // Cập nhật state để không gửi lại sự kiện
-  //     // SetMarkMessage(prev => 
-        
+  //     // SetMarkMessage(prev =>
+
   //     //   {
   //     //     user: { _id: user._id, name: user.name, avatar: user.avatar },
   //     //     messageId: lastMessage._id,
@@ -357,11 +372,14 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     maginTextInput,
     replyMessage,
     selectedMessages,
-    bottomSheetModalRef,maginViewGiftedchat,
-    snapPoints,onPressPhoneNumber,
+    bottomSheetModalRef,
+    maginViewGiftedchat,
+    snapPoints,
+    onPressPhoneNumber,
     setSelectedMessages,
     handlePresentModalPress,
-    handleSheetChanges,setSelectedItemsMedia,
+    handleSheetChanges,
+    setSelectedItemsMedia,
     scrollToMessage,
     handlerSelectMedia,
     onSend,
@@ -369,10 +387,13 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     handlerreplyTo,
     handleLongPress,
     setMessageMoreAction,
-    setReplyMessage,flatListRef,
+    setReplyMessage,
+    flatListRef,
     setReactionPosition,
     reactionPosition,
     messageMoreAction,
-    handlerDeleteMessage,highlightedMessageId,typingUsers
+    handlerDeleteMessage,
+    highlightedMessageId,
+    typingUsers,
   };
 };

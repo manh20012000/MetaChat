@@ -30,7 +30,7 @@ const ModalChatMore: React.FC<modelType> = ({
     handlerDeleteMessage
   );
 
-  const options = ['Pin', 'Forward', 'Bump', 'Delete', 'Report', 'Recall'];
+  const options = ['Edit', 'Forward', 'Bump', 'Delete', 'Report', 'Recall'];
 
   return (
     <Modal transparent={true} visible={modalVisible} onRequestClose={toggleModal}>

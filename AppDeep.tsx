@@ -10,7 +10,6 @@ const UseApp = () => {
   useEffect(() => {
     PermissionNotification();
 
-    // Khi nhấn vào thông báo từ trạng thái đóng hoàn toàn
     messaging()
       .getInitialNotification()
       .then(remoteMessage => {

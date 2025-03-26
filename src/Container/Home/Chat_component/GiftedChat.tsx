@@ -114,7 +114,7 @@ export const GiftedChatView = ({
             renderTime={() => null}
             isLoadingEarlier={true}
             showUserAvatar={true}
-            keyboardShouldPersistTaps="always"
+            keyboardShouldPersistTaps="handled" 
             listViewProps={{
               initialNumToRender: 15, // Số tin nhắn được render ban đầu
               maxToRenderPerBatch: 10, // Số lượng tin nhắn tối đa được render trong một lần cập nhật
