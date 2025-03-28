@@ -71,6 +71,7 @@ const MessageItem = ({
     return (
         <>
       <Pressable
+       delayLongPress={200}
             onPress={() => {
                 if (item.participantIds.length <= 2) {
                     const recipientIds = item.participantIds.filter(

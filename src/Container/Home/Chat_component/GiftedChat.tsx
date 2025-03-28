@@ -63,6 +63,7 @@ export const GiftedChatView = ({
   return (
     <>
       <Pressable
+       delayLongPress={200}
         onPress={() => {
           Keyboard.dismiss();
 

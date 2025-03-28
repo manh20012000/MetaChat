@@ -27,7 +27,7 @@ const AskToAI = () => {
   } = UseAskAI();
 
   return (
-    <View style={{flex: 1, backgroundColor: '#f5f5f5'}}>
+    <View style={{flex: 1, backgroundColor: '#DF0029'}}>
       <View style={{flex: 1}}>
         <FlashList
           data={messages}
@@ -47,7 +47,7 @@ const AskToAI = () => {
           // onSubmitEditing={handleSend}
           onContentSizeChange={handleContentSizeChange}
         />
-        {loading? <ActivityIndicator size="small" color="#0000ff" />: (
+        {loading? <ActivityIndicator size="large" color="#0000ff" />: (
           <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
             <Ionicons name="send" size={24} color="#007AFF" />
           </TouchableOpacity>

@@ -1,5 +1,5 @@
-import React, {useRef} from 'react';
-import {Pressable, Text, View} from 'react-native';
+import React, {useEffect, useRef} from 'react';
+import {Pressable, Text, View, TouchableWithoutFeedback} from 'react-native';
 import {Bubble, Avatar} from 'react-native-gifted-chat';
 import userMessage from '../../../../type/Home/useMessage_type';
 import {messageIcon} from '../../../../type/react-type';
@@ -12,16 +12,15 @@ type TextMessageProps = {
   isMyMessage: boolean;
   currentMessage: Message_type;
   props: any;
-  highlightedMessageId:any;
+  highlightedMessageId: any;
   handleLongPressMessage: (
     position: {x: number; y: number},
     message: any,
   ) => void;
   color: any;
   userChat: userMessage;
-  handlderHidenIcon: any;
+  setSizeMessage:React.Dispatch<React.SetStateAction<any>>;
   setSelectedMessages: React.Dispatch<React.SetStateAction<any>>;
-  
 };
 
 export const MessageComponent: React.FC<TextMessageProps> = ({
@@ -29,89 +28,112 @@ export const MessageComponent: React.FC<TextMessageProps> = ({
   isMyMessage,
   currentMessage,
   props,
-  handleLongPressMessage,highlightedMessageId,
+  handleLongPressMessage,
+  highlightedMessageId,
   color,
-  userChat,
-  handlderHidenIcon,
+  userChat,setSizeMessage,
   setSelectedMessages,
 }) => {
   const messageRef = useRef<View>(null);
   const getPosition = () => {
- 
     if (messageRef.current) {
       messageRef.current.measureInWindow((x, y, width, height) => {
-        handleLongPressMessage({x, y}, currentMessage);
+        handleLongPressMessage({x, y} ,currentMessage);
       });
     }
   };
-
+  
+  useEffect(()=>{
+    if (messageRef.current) {
+      messageRef.current.measureInWindow((x, y, width, height) => {
+         setSizeMessage({width, height})
+        // // handleLongPressMessage({x, y},{width, height} ,currentMessage);
+      });
+    }
+  },[])
   return (
-    <View style={{flex:1}}>
-      <Pressable
-        onPress={() => {
-          console.log('nhấn presss111111s')
-          setSelectedMessages(null);
-          handlderHidenIcon(false);
-        }}
-        ref={messageRef} // Gán ref vào Pressable để đo được tọa độ
-        style={{
-          flexDirection:"row",
-          marginVertical: 1,
-        
-           alignItems:'flex-end',
-          alignSelf:'flex-end'
-        }}>
-        {isFirstMessage && currentMessage.user._id !== userChat._id && (
-          <Avatar {...props} imageStyle={{
-            left: { width: 25, height: 25 }, 
+    <Pressable
+      onPress={() => {
+        console.log('nhấn onpressble');
+        setSelectedMessages(null);
+       
+      }}
+      ref={messageRef}
+      style={{
+        flexDirection: 'row',
+        marginVertical: 1,
+        alignItems: 'flex-end',
+        alignSelf: 'flex-end',
+     
+      }}>
+      {isFirstMessage && currentMessage.user._id !== userChat._id && (
+        <Avatar
+          {...props}
+          imageStyle={{
+            left: {width: 25, height: 25},
             // right: { width: 30, height: 30 },
-          }} containerStyle={{bottom:0,position:'absolute',}}/>
-        )}
-        {currentMessage.messageType === 'text' && (
-          <Bubble
-            {...props}
-            onLongPress={getPosition}
-            wrapperStyle={{
-              left: {
-                backgroundColor: color.gray2,
-                maxWidth: '65%',
-                padding: 5,
-                borderRadius: 15,
-                borderWidth: currentMessage._id === highlightedMessageId ? 3 : 0, // Highlight viền
-                borderColor: currentMessage._id === highlightedMessageId ? 'red' : 'transparent', // Màu viền
-              },
-              right: {
-                backgroundColor: isMyMessage ? color.blue : color.gray2,
-                maxWidth: '65%',
-                padding: 5,
-                borderRadius: 15,
-                borderWidth: currentMessage._id === highlightedMessageId ? 3 : 0,
-                borderColor: currentMessage._id === highlightedMessageId ? 'red' : 'transparent',
-              },
-            }}
-            textStyle={{
-              left: {color: 'white'},
-              right: {color: 'white'},
-            }}
-          />
-        )}
-        {currentMessage.messageType === 'attachment' && (
-            <PreviewImage
-            highlightedMessageId={highlightedMessageId}
-              isMyMessage={isMyMessage}
-              currentMessage={currentMessage}
-              getPosition={getPosition}
-            />
-        )}
-        {currentMessage.messageType==="audio"&&(
-          <AudioMessage
+          }}
+          containerStyle={{bottom: 0, position: 'absolute'}}
+        />
+      )}
+      {currentMessage.messageType === 'text' && (
+        <Bubble
+          {...props}
+          delayLongPress={250}
+          onLongPress={getPosition}
+          wrapperStyle={{
+            left: {
+              backgroundColor: color.gray2,
+              maxWidth: '65%',
+              padding: 5,
+              borderRadius: 15,
+              borderWidth: currentMessage._id === highlightedMessageId ? 3 : 0, // Highlight viền
+              borderColor:
+                currentMessage._id === highlightedMessageId
+                  ? 'red'
+                  : 'transparent', // Màu viền
+            },
+            right: {
+              backgroundColor: isMyMessage ? color.blue : color.gray2,
+              maxWidth: '65%',
+              padding: 5,
+              borderRadius: 15,
+              borderWidth: currentMessage._id === highlightedMessageId ? 3 : 0,
+              borderColor:
+                currentMessage._id === highlightedMessageId
+                  ? 'red'
+                  : 'transparent',
+            },
+          }}
+          textStyle={{
+            left: {color: 'white'},
+            right: {color: 'white'},
+          }}
+        />
+      )}
+      {currentMessage.messageType === 'attachment' && (
+      <View style={{flex:1,}}>
+           <PreviewImage
+          highlightedMessageId={highlightedMessageId}
           isMyMessage={isMyMessage}
           currentMessage={currentMessage}
           getPosition={getPosition}
-          />
-        )}
-      </Pressable>
-      {currentMessage.reactions.length > 0 && (
+        
+        />
+        </View>
+      )}
+      {currentMessage.messageType === 'audio' && (
+        <AudioMessage
+          isMyMessage={isMyMessage}
+          currentMessage={currentMessage}
+          getPosition={getPosition}
+        />
+      )}
+    </Pressable>
+  );
+};
+{
+  /* {currentMessage.reactions.length > 0 && (
         <View
           style={{
             flexDirection: 'row',
@@ -142,7 +164,5 @@ export const MessageComponent: React.FC<TextMessageProps> = ({
             ) : null;
           })}
         </View>
-      )}
-    </View>
-  );
-};
+      )} */
+}

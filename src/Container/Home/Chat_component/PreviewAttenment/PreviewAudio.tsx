@@ -55,6 +55,7 @@ const AudioMessage: React.FC<PreviewMediaProps> = ({
 
   return (
     <Pressable
+    delayLongPress={200}
     onLongPress={getPosition}
       style={[
         styles.container,

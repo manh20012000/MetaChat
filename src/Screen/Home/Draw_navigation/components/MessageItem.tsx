@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
         width: 20,
         height: 20,
         borderRadius: 10,
-        marginLeft: 5, // Cách một chút với tin nhắn
+        marginLeft: 2, // Cách một chút với tin nhắn
         alignSelf: 'flex-end', // Đưa xuống cuối dòng
     },
     icon: {

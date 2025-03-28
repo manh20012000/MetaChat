@@ -73,6 +73,7 @@ const handler_chat = async () => {
 
     return (
       <Pressable
+      delayLongPress={200}
         onPress={() => {
          handler_chat()
         }}

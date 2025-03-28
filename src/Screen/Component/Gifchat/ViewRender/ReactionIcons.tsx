@@ -28,7 +28,8 @@ export const ReactionIcons: React.FC<ReactionIconsProps> = ({
     const reactionIndex = selectedMessages.reactions.findIndex(
       (reaction) => reaction.user._id === userChat._id
     );
-
+  console.log(reactionPosition,'dsdjskdskmmk')
+  
     // Nếu user đã có reaction, cập nhật lại reaction đó
     if (reactionIndex !== -1) {
       return {
@@ -68,8 +69,8 @@ export const ReactionIcons: React.FC<ReactionIconsProps> = ({
         zIndex: 1,
         width: '70%',
         height: 44,
-        bottom: '10%',
-        top: reactionPosition.y - 20, // Điều chỉnh lên trên tin nhắn một chút
+        // bottom: '10%',
+        top: reactionPosition.y+20 , // Điều chỉnh lên trên tin nhắn một chút
         alignItems: 'center',
         justifyContent: 'center',
       }}>

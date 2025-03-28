@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, FlatList, Image, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
+import { View, FlatList, Image, StyleSheet, Dimensions, TouchableOpacity, Pressable } from "react-native";
 import Video from "react-native-video";
 import { Message_type } from "../../../../type/Home/Chat_type";
 import SwipePreview from "./SwipePreview";
@@ -42,8 +42,9 @@ const PreviewMedia: React.FC<PreviewMediaProps> = ({ isMyMessage, currentMessage
       : { width: gridItemSize, height: gridItemSize };
   // console.log('highlighted',highlighted)
     return (
-      <TouchableOpacity
+      <Pressable
         onLongPress={getPosition}
+        delayLongPress={250}
         style={[styles.itemContainer, mediaStyle,highlighted?{borderWidth:3,borderColor:'white'}:{}]}
         onPress={() => {
           setSelectedIndex(index);
@@ -61,7 +62,7 @@ const PreviewMedia: React.FC<PreviewMediaProps> = ({ isMyMessage, currentMessage
             controls={true} 
           />
         ) : null}
-      </TouchableOpacity>
+      </Pressable>
     );
   };
 

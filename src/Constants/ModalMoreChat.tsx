@@ -41,6 +41,7 @@ const ModalChatMore: React.FC<modelType> = ({
           justifyContent: 'center',
           alignItems: 'center',
         }}
+        delayLongPress={200}
         onPress={toggleModal}
       >
         {notifiModalVisible ? (

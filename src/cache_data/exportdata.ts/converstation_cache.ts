@@ -317,7 +317,7 @@ const updateMessage = (message: Message_type, conversation: Conversation) => {
       existingConversation.messages.push(realm.create('Message', message));
     }
 
-    // 🔄 Cập nhật `updatedAt` của cuộc hội thoại
+    // 🔄 Cập nhật `updatedAnpnp
     existingConversation.createdAt = new Date();
   });
 };
