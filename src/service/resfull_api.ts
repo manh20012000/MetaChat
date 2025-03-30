@@ -1,6 +1,6 @@
 import {response} from '../type/response_type';
 // import { URL } from '@env';
-const API_URL = 'http://192.168.51.114:8080';
+const API_URL = 'http://192.168.51.100:8080';
 import axios from 'axios';
 import {checkAndRefreshToken} from '../util/checkingToken';
 const postData = async (
@@ -39,6 +39,7 @@ const postFormData = async (route: string, data: any, check: any) => {
   formData.append('conversation', JSON.stringify(data.conversation));
   formData.append('user', JSON.stringify(data.user));
   formData.append('filesOrder', JSON.stringify(data.filesOrder));
+  formData.append("deviceSend",JSON.stringify(data.deviceSend))
   data.message.attachments.forEach((file: any, index: number) => {
     // console.log(file.url)
     formData.append('media', {
@@ -94,7 +95,8 @@ const getData = async (route: string, query: any, param: any, check: any) => {
 };
 const getResearch = async (route: string, params: any) => {
   try {
-    const response: any = await axios.get(`${API_URL}${route}`, {
+    console.log('hajajsajs')
+    const response: any = await axios.get(`${API_URL}/${route}`, {
       params: {text: params},
       headers: {
         'Content-Type': 'application/json',

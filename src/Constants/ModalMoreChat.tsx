@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import { Modal, View, Text, Pressable, TouchableOpacity } from 'react-native';
+import React, {useState} from 'react';
+import {Modal, View, Text, Pressable, TouchableOpacity} from 'react-native';
 import userMessage from '../type/Home/useMessage_type';
 import Conversation from '../type/Home/Converstation_type';
-import { Message_type } from '../type/Home/Chat_type';
+import {Message_type} from '../type/Home/Chat_type';
 import useModalMoreChat from './hook/useModalMoreChat';
-import { useSelector } from 'react-redux';
+import {useSelector} from 'react-redux';
 
 type modelType = {
   userChat: userMessage;
   conversation: Conversation;
-  handlerDeleteMessage: (message: Message_type) => void; 
+  handlerDeleteMessage: (message: Message_type) => void;
   messageMoreAction: Message_type | null;
   setMessageMoreAction: React.Dispatch<React.SetStateAction<any>>;
 };
@@ -21,19 +21,29 @@ const ModalChatMore: React.FC<modelType> = ({
   setMessageMoreAction,
   handlerDeleteMessage,
 }) => {
-
-  const { modalVisible, toggleModal, color,handlerMoreMessage, notifiModalVisible, selectedOption, handleConfirmation } = useModalMoreChat(
+  const {
+    modalVisible,
+    toggleModal,
+    color,
+    handlerMoreMessage,
+    notifiModalVisible,
+    selectedOption,
+    handleConfirmation,
+  } = useModalMoreChat(
     userChat,
     conversation,
     messageMoreAction,
     setMessageMoreAction,
-    handlerDeleteMessage
+    handlerDeleteMessage,
   );
 
   const options = ['Edit', 'Forward', 'Bump', 'Delete', 'Report', 'Recall'];
 
   return (
-    <Modal transparent={true} visible={modalVisible} onRequestClose={toggleModal}>
+    <Modal
+      transparent={true}
+      visible={modalVisible}
+      onRequestClose={toggleModal}>
       <Pressable
         style={{
           flex: 1,
@@ -42,8 +52,7 @@ const ModalChatMore: React.FC<modelType> = ({
           alignItems: 'center',
         }}
         delayLongPress={200}
-        onPress={toggleModal}
-      >
+        onPress={toggleModal}>
         {notifiModalVisible ? (
           <View
             style={{
@@ -52,9 +61,14 @@ const ModalChatMore: React.FC<modelType> = ({
               paddingVertical: 15,
               width: '80%',
               alignItems: 'center',
-            }}
-          >
-            <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>
+            }}>
+            <Text
+              style={{
+                color: 'white',
+                fontSize: 18,
+                fontWeight: 'bold',
+                marginBottom: 10,
+              }}>
               More
             </Text>
 
@@ -68,11 +82,12 @@ const ModalChatMore: React.FC<modelType> = ({
                   borderBottomColor: '#555',
                 }}
                 onPress={() => {
-        
                   handlerMoreMessage(index);
-                }}
-              >
-                <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>{option}</Text>
+                }}>
+                <Text
+                  style={{color: 'white', fontSize: 16, fontWeight: 'bold'}}>
+                  {option}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -83,41 +98,70 @@ const ModalChatMore: React.FC<modelType> = ({
               borderRadius: 10,
               paddingVertical: 15,
               width: '80%',
-                alignItems: 'center',
-                height: 220,
-                flexDirection: "column",
-              justifyContent:"space-around"
-            }}
-          >
-            <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>
-              {selectedOption === 'Delete' ? 'Delete Message' : 'Recall Message'}
+              alignItems: 'center',
+              height: 220,
+              flexDirection: 'column',
+              justifyContent: 'space-around',
+            }}>
+            <Text
+              style={{
+                color: 'white',
+                fontSize: 20,
+                fontWeight: 'bold',
+                marginBottom: 10,
+              }}>
+              {selectedOption === 'Delete'
+                ? 'Delete Message'
+                : 'Recall Message'}
             </Text>
-              <Text style={{ color: 'white', fontSize: 16, marginBottom: 20, textAlign:'center',width:'80%' }}>
-              Are you sure you want to {selectedOption === 'Delete' ? 'delete' : 'recall'} this message? Message này bạn sẻ không thể thấy message này nữa
+            <Text
+              style={{
+                color: 'white',
+                fontSize: 16,
+                marginBottom: 20,
+                textAlign: 'center',
+                width: '80%',
+              }}>
+              Are you sure you want to{' '}
+              {selectedOption === 'Delete' ? 'delete' : 'recall'} this message?
+              Message này bạn sẻ không thể thấy message này nữa
             </Text>
 
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-end' ,alignSelf:'flex-end', }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+                alignSelf: 'flex-end',
+              }}>
               <TouchableOpacity
                 style={{
-                    alignItems: 'center',
-                  justifyContent:'center',
-                    padding: 15,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: 15,
                 }}
-                onPress={() => handleConfirmation(false)}
-              >
-                  <Text style={{ color: color.white, textAlign:'center', fontSize: 18 ,fontWeight:'bold'}}>Cancel</Text>
+                onPress={() => handleConfirmation(false)}>
+                <Text
+                  style={{
+                    color: color.white,
+                    textAlign: 'center',
+                    fontSize: 18,
+                    fontWeight: 'bold',
+                  }}>
+                  Cancel
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={{
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   padding: 15,
-                
+
                   borderRadius: 5,
                 }}
-                onPress={() => handleConfirmation(true)}
-              >
-                  <Text style={{ color: 'red', fontSize: 18, fontWeight: 'bold' }}>Confirm</Text>
+                onPress={() => handleConfirmation(true)}>
+                <Text style={{color: 'red', fontSize: 18, fontWeight: 'bold'}}>
+                  Confirm
+                </Text>
               </TouchableOpacity>
             </View>
           </View>

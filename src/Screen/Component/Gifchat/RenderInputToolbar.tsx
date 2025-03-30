@@ -38,6 +38,9 @@ type TCusttomTypeInput = {
 };
 const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
   const {width, height} = useWindowDimensions();
+  const deviceInfo = useSelector(
+    (value: {deviceInfor: {value: any}}) => value.deviceInfor.value,
+  );
   const {
     handlePresentModalPress,
     userChat,

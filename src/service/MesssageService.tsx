@@ -11,6 +11,7 @@ export const updateMessageReaction = async (
   message: Message_type,
   conversation: Conversation,
   userChat: userMessage,
+  deviceInfo:string,
   Checking: any,
 ) => {
   try {
@@ -21,6 +22,7 @@ export const updateMessageReaction = async (
         conversation: conversation,
         send_id: userChat.user_id,
         message: message,
+        deviceSend:deviceInfo
       },
       {dispatch, user},
       message._id,
@@ -28,13 +30,13 @@ export const updateMessageReaction = async (
 
     if (response.status === 200) {
       const failedMessage: Message_type = {...message, statusSendding: true};
-      await updateMessage(failedMessage, conversation);
+       updateMessage(failedMessage, conversation);
     } else {
       throw new Error('Cập nhật phản ứng thất bại');
     }
   } catch (error) {
     console.log('câp nhât thất baik');
     const failedMessage: Message_type = {...message, statusSendding: false};
-    await updateMessage(failedMessage, conversation);
+     updateMessage(failedMessage, conversation);
   }
 };

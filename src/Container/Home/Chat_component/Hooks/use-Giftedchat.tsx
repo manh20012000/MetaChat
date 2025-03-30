@@ -20,20 +20,24 @@ import Conversation from '../../../../type/Home/Converstation_type';
 import {Message_type} from '../../../../type/Home/Chat_type';
 import {
   Converstation_Message,
+  deleteMessage,
   deleteMessageError,
   MessageError,
+  recallMessage,
   update_Converstation,
 } from '../../../../cache_data/exportdata.ts/converstation_cache';
 import {Vibration} from 'react-native';
 import {converstationsend} from '../../../../util/util_chat/converstationSend';
 import {updateMessageReaction} from '../../../../service/MesssageService';
 import userMessage from '../../../../type/Home/useMessage_type';
-import {User} from '@react-native-google-signin/google-signin';
 
 export const useGiftedChatLogic = (conversation: Conversation) => {
   const {width, height} = useWindowDimensions();
   const color = useSelector(
     (value: {colorApp: {value: any}}) => value.colorApp.value,
+  );
+  const deviceInfo = useSelector(
+    (value: {deviceInfor: {value: any}}) => value.deviceInfor.value,
   );
   const {user, dispatch} = useCheckingService();
   const giftedChatRef = useRef<any>(null);
@@ -58,7 +62,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   );
   const [markMessage, SetMarkMessage] = useState(conversation.isRead);
   const [typingUsers, setTypingUsers] = useState<{
-    user: userMessage;
+    userChat: userMessage;
     isTyping: boolean;
   }>();
   const [messageMoreAction, setMessageMoreAction] =
@@ -167,8 +171,10 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   //   }
   // }, []);
   useEffect(() => {
-    socket?.on('userTyping', ({user, isTyping}) => {
-      setTypingUsers({user, isTyping});
+    socket?.on('userTyping', ({userChat, isTyping, deviceSend}) => {
+      if (userChat._id === user._id && deviceSend !== deviceInfo) {
+        setTypingUsers({userChat, isTyping});
+      }
     });
     // socket?.emit("message_seen", { messageId:messages[messages.length]._id, userChat, roomId:conversation._id  });
     return () => {
@@ -189,6 +195,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
         message,
         filesOrder,
         userChat,
+        deviceInfo,
         conversation,
       );
 
@@ -276,35 +283,44 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
       }
       return GiftedChat.append(previousMessages, [message]);
     });
-    await updateMessageReaction(message, conversation, userChat, {
+    await updateMessageReaction(message, conversation, userChat, deviceInfo, {
       user,
       dispatch,
     });
   }, []);
 
   useEffect(() => {
-    socket?.on('update_message', ({message, send_id}) => {
-      if (send_id !== userChat.user_id) {
-        setMessages(previousMessages => {
-          for (let i = previousMessages.length - 1; i >= 0; i--) {
-            if (previousMessages[i]._id === message._id) {
-              const updatedMessages = [...previousMessages];
-              updatedMessages[i] = {...message};
-              return updatedMessages;
-            }
-          }
-          return GiftedChat.append(previousMessages, [message]);
-        });
-      }
-    });
-
     socket?.on('new_message', messages => {
-      const {message, send_id} = messages;
-
-      if (send_id !== userChat._id) {
-        setMessages(previousMessages =>
-          GiftedChat.append(previousMessages, message),
-        );
+      const {message, send_id, type, deviceSend} = messages;
+      const typeNumber = Number(type);
+      if (typeNumber === 1) {
+        if (deviceSend !== deviceInfo) {
+          setMessages(previousMessages =>
+            GiftedChat.append(previousMessages, message),
+          );
+        }
+      } else if (typeNumber === 2) {
+        if (deviceSend !== deviceInfo) {
+          setMessages(previousMessages => {
+            for (let i = previousMessages.length - 1; i >= 0; i--) {
+              if (previousMessages[i]._id === message._id) {
+                const updatedMessages = [...previousMessages];
+                updatedMessages[i] = {...message};
+                return updatedMessages;
+              }
+            }
+            return GiftedChat.append(previousMessages, [message]);
+          });
+        }
+      } else if (typeNumber === 3) {
+        if (deviceSend !== deviceInfo) {
+          console.log('hpidnsdnsjdnsndsk recall mesage');
+          handlerDeleteMessage(message);
+        }
+      } else if (typeNumber === 4) {
+        if (send_id === userChat.user_id && deviceSend !== deviceInfo) {
+          handlerDeleteMessage(message);
+        }
       }
     });
   }, []);

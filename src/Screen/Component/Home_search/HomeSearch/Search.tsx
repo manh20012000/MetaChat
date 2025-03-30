@@ -72,11 +72,11 @@ const SearchScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 //     user.name.toLowerCase().includes(keysearch.toLowerCase())
                 // );
                 // setUserSearch(filteredData)
-                let data = null;
+                
                 // setTimeout(async () => {
-                data = await getResearch(API_ROUTE.GET_USER_BY_SEARCH, keysearch);
-
-                setUserSearch(data.data);
+               const response = await getResearch(API_ROUTE.GET_USER_BY_SEARCH, keysearch);
+                console.log(response.data)
+                setUserSearch(response.data);
                 // }, 500)
             } else {
                 handler_getuser_search_localdata()

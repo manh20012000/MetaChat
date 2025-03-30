@@ -20,67 +20,85 @@ export const handlerDelete = async (
   user: userMessage | null,
   conversation: Conversation | null,
   checking: any,
+  deviceSend:string
 ) => {
   if (message && user && conversation) {
-    if (
-      conversation.messages.length === 1 &&
-      conversation.messageError.length === 0
-    ) {
-   
-      delete_converStation(conversation, checking);
-    } else {
-   
-      if (message.statusSendding === null || message.statusSendding === false) {
-        deleteMessageError(conversation._id, message._id);
-        return null;
-      } else {
-        deleteMessage(conversation._id, message._id);
-        try {
-          const response = await putData(
-            API_ROUTE.DELATE_MESSAGE,
-            {message, conversation},
-            checking,
-            message._id,
-          );
-          if (response.code) {
-          }
-        } catch (err) {
-          console.log(err);
-          return {
-            status: false,
-            message: ' nhắn thất bại',
-            data: null,
-            code: 0,
-          };
-        }
+    // if (
+    //   conversation.messages.length === 1 &&
+    //   conversation.messageError.length === 0
+    // ) {
+    //   delete_converStation(conversation, checking);
+    // } else {
+    // if (message.statusSendding === null || message.statusSendding === false) {
+    //   deleteMessageError(conversation._id, message._id);
+    //   return null;
+    // } else {
+    // deleteMessage(conversation._id, message._id);
+    try {
+      const response = await putData(
+        API_ROUTE.DELATE_MESSAGE,
+        {message, conversation,deviceSend},
+        checking,
+        message._id,
+      );
+      if (response.code) {
+        return {
+          status: true,
+          message: ' nhắn tin thành công',
+          data: null,
+          code: 0,
+        };
       }
+    } catch (err) {
+      console.log(err);
+      return {
+        status: false,
+        message: ' nhắn thất bại',
+        data: null,
+        code: 0,
+      };
     }
   }
 };
+// };
+// };
 export const handlerRecall = async (
   message: any | null,
   user: userMessage | null,
   conversation: Conversation | null,
   checking: any,
+  deviceInfo:string
 ) => {
   if (message && user && conversation) {
     try {
-      if (message.statusSendding === null || message.statusSendding === false) {
-        deleteMessageError(conversation._id, message._id);
-        return null;
-      } else {
-        deleteMessage(conversation._id, message._id);
-        recallMessage(conversation._id, message._id);
-        putData(
-          API_ROUTE.RECALL_MESSAGE,
-          {message, conversation},
-          checking,
-          message._id,
-        );
+      // if (message.statusSendding === null || message.statusSendding === false) {
+      //   deleteMessageError(conversation._id, message._id);
+      //   return null;
+      // } else {
+      //   deleteMessage(conversation._id, message._id);
+      //   recallMessage(conversation._id, message._id);
+      const response = await putData(
+        API_ROUTE.RECALL_MESSAGE,
+        {message, conversation,deviceSend:deviceInfo},
+        checking,
+        message._id,
+      );
+      if (response.code) {
+        return {
+          status: true,
+          message: ' nhắn tin thành công',
+          data: null,
+          code: 0,
+        };
       }
     } catch (err) {
       console.log(err);
-      return;
+      return {
+        status: false,
+        message: ' nhắn thất bại',
+        data: null,
+        code: 0,
+      };
     }
   }
 };

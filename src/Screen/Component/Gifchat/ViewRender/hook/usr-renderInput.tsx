@@ -23,6 +23,9 @@ import { eventEmitter } from '../../../../../eventEmitter/EventEmitter';
 import { useSocket } from '../../../../../util/socket.io';
 type NavigationProps = NavigationProp<RootStackParamList>;
 const useRenderInput = (props: any) => {
+  const deviceInfo = useSelector(
+    (value: {deviceInfor: {value: any}}) => value.deviceInfor.value,
+  );
   const {onSend, userChat, replyMessage, setReplyMessage} = props;
 
   const color = useSelector(
@@ -132,13 +135,13 @@ const useRenderInput = (props: any) => {
  // Hàm throttle để gửi sự kiện typing trong quá trình nhập liệu
   const throttledTyping = throttle((isTyping) => {
     if (!conversation || !socket) return;
-    socket.emit("typing", { user: userChat, roomId: conversation._id, isTyping });
+    socket.emit("typing", {deviceInfo,  userChat, roomId: conversation._id, isTyping });
   }, 1000); // Throttle mỗi 1 giây
 
   // Hàm debounce để gửi sự kiện "dừng nhập"
   const debouncedStopTyping = debounce(() => {
     if (!conversation || !socket) return;
-    socket.emit("typing", { user: userChat, roomId: conversation._id, isTyping: false });
+    socket.emit("typing", {deviceInfo,userChat, roomId: conversation._id, isTyping: false });
   }, 300); // Debounce 300ms
 
   const handleTyping = () => {

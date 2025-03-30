@@ -19,10 +19,12 @@ import Adttenment from '../Screen/Home/Draw_navigation/Adttenment.tsx';
 import Private_Converstation from '../Screen/Home/Draw_navigation/Private_Converstation.tsx';
 import NetInfo from '@react-native-community/netinfo';
 import { check } from '../Redux_Toolkit/Reducer/network_connect.ts';
+import { DeviceSlice, getInfo } from '../Redux_Toolkit/Reducer/deviceInfor.ts';
 import CameraChat from '../Container/Home/Chat_component/CameraChat/CamaraView.tsx';
 import SettingComponent from '../Screen/User/UseComponent/Setting.tsx';
 import { useSocket } from '../util/socket.io.tsx';
 import { Status } from '../Redux_Toolkit/Reducer/status.User.ts';
+import DeviceInfo from 'react-native-device-info';
 const Stack = createNativeStackNavigator();
 const screens = [
   { name: 'Login', component: Login },
@@ -39,7 +41,6 @@ const screens = [
   fallback:any
  }
 const Navigation: React.FC = () => {
-  const dispatch = useDispatch();
   const dispath = useDispatch();
   const user = useSelector((state: any) => state.auth.value);
   const [loading, setLoading] = useState<boolean>(false);
@@ -48,6 +49,8 @@ const Navigation: React.FC = () => {
   const socket = useSocket();
   useEffect(() => {
     const checkLoginStatus = async () => {
+      const deviceId =await DeviceInfo.getUniqueId();
+      dispath(getInfo(deviceId))
       try {
         const user_String: any = await AsyncStorage.getItem('user');
         const userObject = JSON.parse(user_String);

@@ -7,7 +7,9 @@ export const converstationsend = async (
   message: Message_type,
   filesOrder: any,
   userChat: any,
+  deviceSend:string,
   conversation: Conversation,
+
 ) => {
   return  {
     user: {
@@ -31,6 +33,7 @@ export const converstationsend = async (
       permission: conversation.permission,
       isDeleted: conversation.isDeleted,
     },
+    deviceSend,
     message,
     filesOrder,
   };

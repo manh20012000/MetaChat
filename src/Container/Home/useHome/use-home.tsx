@@ -13,6 +13,9 @@ import {
   delete_converStation,
   Converstation_Message,
   updateMessage,
+  recallMessage,
+  deleteMessageError,
+  deleteMessage,
 } from '../../../cache_data/exportdata.ts/converstation_cache.ts';
 import {
   getListfriend,
@@ -27,6 +30,10 @@ dayjs.extend(relativeTime);
 export const useHomeLogic = (navigation: any) => {
   const {width, height} = useWindowDimensions();
   const color = useSelector((state: any) => state.colorApp.value);
+  const deviceInfo = useSelector(
+    (value: {deviceInfor: {value: any}}) => value.deviceInfor.value,
+  );
+
   const user = useSelector((state: any) => state.auth.value);
   const dispatch = useDispatch();
   const user_Status = useSelector((state: any) => state.statusUser.value);
@@ -36,7 +43,7 @@ export const useHomeLogic = (navigation: any) => {
   const insets = useSafeAreaInsets();
   const socket = useSocket();
   const [typingUsers, setTypingUsers] = useState<{
-    user: userMessage;
+    userchat: userMessage;
     isTyping: boolean;
   } | null>();
   const [data_convertstation, setData_convertStation] = useState<
@@ -105,13 +112,13 @@ export const useHomeLogic = (navigation: any) => {
       skip,
       {dispatch, user},
     );
-
+    console.log(data_converstation.data.length);
     if (data_converstation.data.length > 0) {
       try {
         setSkiped(data_converstation.data.length);
         data_converstation.data.forEach(async (element: Conversation) => {
           // console.log(element.participants);
-           await createConversation(element);
+          await createConversation(element);
         });
       } catch (err) {
         console.log(err, 'lỗi thêm cuộc thoại vào local');
@@ -190,26 +197,39 @@ export const useHomeLogic = (navigation: any) => {
     };
 
     const handleNewMessage = async (messages: any) => {
-      
-      const {message, conversation, send_id} = messages;
-      await Converstation_Message(message, conversation, send_id);
-    };
-
-    const handlerUpdateMessage = async (messages: any) => {
-      const {message, conversation, send_id} = messages;
-      if (send_id !== user._id) {
-        updateMessage(message, conversation);
+      const {message, conversation, send_id, type, deviceSend} = messages;
+      const typeNumber = Number(type);
+      if (typeNumber === 1) {
+        console.log(deviceInfo,send_id)
+        // await Converstation_Message(message, conversation, send_id);
+      } else if (typeNumber === 2) {
+        if (send_id !== user._id) {
+          updateMessage(message, conversation);
+        }
+      } else if (typeNumber === 3) {
+        //xóa tin nhắn
+        if (deviceSend !== deviceInfo) {
+          recallMessage(conversation._id, message._id);
+        }
+      } else if (typeNumber === 4) {
+        if (send_id === user._id && deviceSend !== deviceInfo) {
+          deleteMessage(conversation._id, message._id);
+        }
       }
     };
+
     if (socket.connected) {
       handleConnect();
     } else {
       socket.on('connect', handleConnect);
     }
-    socket?.on('userTyping', ({user, isTyping}) => {
-      setTypingUsers({user, isTyping});
+    socket?.on('userTyping', ({userchat, isTyping,deviceSend}) => {
+      if (userchat._id === user._id && deviceSend !== deviceInfo){
+
+      }
+      setTypingUsers({userchat, isTyping});
     });
-    socket.on('update_message', handlerUpdateMessage);
+
     socket.on('new_message', handleNewMessage);
     const conversationObjects = realm.objects('Conversation');
     const updateConversations = async () => {
@@ -228,7 +248,6 @@ export const useHomeLogic = (navigation: any) => {
     conversationObjects.addListener(updateConversations);
     return () => {
       socket.off('new_message', handleNewMessage);
-      socket.off('update_message', handlerUpdateMessage);
       socket.off('connect', handleConnect);
       conversationObjects.removeListener(updateConversations);
       socket?.off('userTyping');

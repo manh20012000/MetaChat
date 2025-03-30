@@ -345,6 +345,8 @@ const recallMessage = (conversation_id: string, message_id: string) => {
     conversation.createdAt = new Date();
     conversation.otherContent = 'tin nhắn đã được gỡ';
     conversation.lastSync= new Date().toISOString();
+    
+  
   });
 };
 
@@ -376,7 +378,6 @@ const deleteMessageError = (conversation_id: string, message_id: string) => {
       return;
     }
     const messageError = conversation.messageError as unknown as Message_type[];
-    
     const messageIndex = messageError.findIndex(msg => msg._id === message_id);
     if (messageIndex === -1) {
       return;

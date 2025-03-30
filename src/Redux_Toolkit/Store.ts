@@ -3,11 +3,13 @@ import authSlice from './Reducer/auth.slice.ts';
 import Color_app from './Reducer/color_App.ts';
 import statusUser from './Reducer/status.User.ts';
 import networkSplice  from './Reducer/network_connect.ts';
+import DeviceSlice from './Reducer/deviceInfor.ts';
 export const store = configureStore({
   reducer: {
     auth: authSlice,
     colorApp: Color_app,
     statusUser: statusUser,
-    network: networkSplice
+    network: networkSplice,
+    deviceInfor:DeviceSlice
   },
 });
