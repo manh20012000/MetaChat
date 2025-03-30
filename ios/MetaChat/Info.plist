@@ -75,5 +75,12 @@
 		<string>Fredoka_SemiExpanded-Regular.ttf</string>
 		<string>Fredoka_SemiExpanded-SemiBold.ttf</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+   <string>App cần truy cập camera</string>
+    <key>NSMicrophoneUsageDescription</key>
+     <string>App cần truy cập microphone để quay video</string>
+	 <key>NSLocationWhenInUseUsageDescription</key>
+<string>Ứng dụng cần truy cập vị trí để gửi vị trí hiện tại của bạn.</string>
+
 </dict>
 </plist>

@@ -8,73 +8,25 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
-import {UseDispatch, UseSelector, useSelector} from 'react-redux';
+import {useDispatch, UseDispatch, UseSelector, useSelector} from 'react-redux';
 import {Search} from '../../../assets/svg/svgfile';
-const HeaderHome: React.FC<{navigation: any}> = ({navigation}) => {
+import {useSocket} from '../../../util/socket.io';
+import {findAndconvertConversation} from '../../../cache_data/exportdata.ts/converstation_cache';
+const HeaderHome: React.FC<{navigation: any; data_friend: any}> = ({
+  navigation,
+  data_friend,
+}) => {
   const user = useSelector((state: any) => state.auth.value);
   const {width, height} = useWindowDimensions();
-
+  const socket = useSocket();
   const isPortrait = height > width;
+  const dispatch = useDispatch();
   const color = useSelector((state: any) => state.colorApp.value);
-  const [user_data, setUser_Data] = useState([
-    {
-      _id: '1',
-      account: 'User 1',
-      avatar:
-        'https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png',
-    },
-    {
-      _id: '2',
-      account: 'User 2',
-      avatar:
-        'https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png',
-    },
-    {
-      _id: '3',
-      account: 'User 2',
-      avatar:
-        'https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png',
-    },
-    {
-      _id: '4',
-      account: 'User 2',
-      avatar:
-        'https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png',
-    },
-    {
-      _id: '5',
-      account: 'User 2',
-      avatar:
-        'https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png',
-    },
-    {
-      _id: '6',
-      account: 'User 6',
-      avatar:
-        'https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png',
-    },
-    {
-      _id: '7',
-      account: 'User 7',
-      avatar:
-        'https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png',
-    },
-    {
-      _id: '8',
-      account: 'User 8',
-      avatar:
-        'https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png',
-    },
-    {
-      _id: '9',
-      account: 'User 9',
-      avatar:
-        'https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png',
-    },
-  ]);
-  useEffect(() => {
-    // Fetch user data
-  }, [user]);
+  // const [user_data, setUser_Data] = useState(data_friend);
+      const user_Status = useSelector((state: any) => state.statusUser.value);
+  // useEffect(() => {
+  //   // Fetch user data
+  // }, [user]);
 
   const HeaderTop_Chat = () => {
     return (
@@ -84,9 +36,12 @@ const HeaderHome: React.FC<{navigation: any}> = ({navigation}) => {
           justifyContent: 'center',
           alignItems: 'center',
           flex: 1,
-          paddingLeft: '5%',
+          marginHorizontal: 10,
         }}>
-        <Pressable
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('User');
+          }}
           style={{
             alignItems: 'center',
             justifyContent: 'center',
@@ -102,14 +57,21 @@ const HeaderHome: React.FC<{navigation: any}> = ({navigation}) => {
             }}
             source={{uri: user.avatar}}
           />
-          <Text style={{color: color.light}}>{user.account}</Text>
-        </Pressable>
+          <Text style={{color: color.light, fontWeight: 'bold'}}>
+            {user.name}
+          </Text>
+        </TouchableOpacity>
       </View>
     );
   };
   return (
     <View
-      style={{flex: 1, justifyContent: 'space-around', alignItems: 'center'}}>
+      style={{
+        flex: 1,
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        borderStartColor: 'pink',
+      }}>
       <Pressable
         onPress={() => {
           navigation.navigate('SearchScreen');
@@ -131,39 +93,114 @@ const HeaderHome: React.FC<{navigation: any}> = ({navigation}) => {
           </Text>
         </View>
       </Pressable>
+      <View style={{flex: 1, width: width, marginTop: 5}}>
+        <FlatList
+          ListHeaderComponent={<HeaderTop_Chat />}
+          horizontal={true}
+          keyExtractor={item => item._id}
+          data={data_friend}
+          showsHorizontalScrollIndicator={false} // Ẩn thanh cuộn ngang
+          renderItem={({item}) => {
+            const statusUser = user_Status.find(
+              (user: any) => user._id === item._id,
+            );
+            return (
+              <View
+                style={{
+                  paddingHorizontal: '1%',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                {statusUser && (
+                  <View
+                    style={{
+                      backgroundColor: 'green',
+                      width: 15,
+                      height: 15,
+                      borderRadius: 100,
+                      position: 'absolute',
+                      zIndex: 1,
+                      bottom: 28,
+                      right: 1,
+                    }}></View>
+                )}
+                <TouchableOpacity
+                  style={{}}
+                  onPress={async () => {
+                    try {
+                      // Tìm hoặc chuyển cuộc hội thoại với user lên đầu danh sách
+                      const participantIds = [item._id, user._id];
+                      const participants = [
+                        {
+                          _id: user._id.toString(),
+                          name: user.name,
+                          avatar: user.avatar,
+                          role: 'admin',
+                          action_notifi: true,
+                          status_read: true,
 
-      <FlatList
-        ListHeaderComponent={HeaderTop_Chat}
-        horizontal={true}
-        keyExtractor={item => item._id}
-        data={user_data}
-        showsHorizontalScrollIndicator={false} // Ẩn thanh cuộn ngang
-        renderItem={({item}) => {
-          return (
-            <View
-              style={{
-                paddingHorizontal: '1%',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}>
-              <TouchableOpacity style={{}}>
-                <Image
-                  style={{
-                    width: 60,
-                    height: 60,
-                    borderRadius: 100,
-                    backgroundColor: 'gray',
-                  }}
-                  source={{uri: item.avatar}}
-                />
-                <Text style={{color: color.white, alignSelf: 'center'}}>
-                  {item.account}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          );
-        }}
-      />
+                        },
+                        {
+                          _id: item._id.toString(),
+                          name: item.name,
+                          avatar: item.avatar,
+                          role: 'member',
+                          action_notifi: true,
+                          status_read: true,
+
+                        },
+                      ];
+                      const conversation = await findAndconvertConversation(
+                     
+                        participants,
+                        participantIds,
+                       
+                        {dispatch,user}
+                      );
+                      if (conversation) {
+                        const recipientIds = participantIds.filter((id: string) => id !== user._id);
+                        socket?.emit('invite_to_room', {
+                          conversationId: conversation._id,
+                          recipientId: recipientIds
+                        });
+                      }
+                      // Chuyển đến màn hình chat cá nhân với thông tin người dùng
+                      navigation.navigate('HomeChatPersion', {conversation});
+                    } catch (error) {
+                      console.error('Lỗi trong handler_chat:', error);
+                    }
+                  }}>
+                  {/* {statusUser && (
+                    <View
+                      style={{
+                        backgroundColor: 'green',
+                        width: 15,
+                        height: 15,
+                        borderRadius: 100,
+                        position: 'absolute',
+                        zIndex: 1,
+                        bottom: '5%',
+                        right: '12%',
+                      }}></View>
+                  )} */}
+                  <Image
+                    style={{
+                      width: 60,
+                      height: 60,
+                      borderRadius: 100,
+                      backgroundColor: 'gray',
+                    }}
+                    source={{uri: item.avatar}}
+                  />
+                  <Text style={{color: color.white, alignSelf: 'center'}}>
+                    {item.name}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            );
+          }}
+        />
+      </View>
     </View>
   );
 };

@@ -47,7 +47,7 @@ GoogleSignin.configure({
 //   webClientId: '',
 // } as any);
 import FlashMessage, { showMessage } from 'react-native-flash-message';
-import Statusbar from '../Component/StatusBar.tsx';
+import Statusbar from '../../Constants/StatusBar.tsx';
 const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
   const color = useSelector((state: any) => state.colorApp.value);
   const insets = useSafeAreaInsets();
@@ -75,7 +75,7 @@ const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
       setLoading(true);
  
       const { data } = await axios.post(
-        `${API_URL}/api/user/login`,
+        `${API_URL}/api/nodeserver/user/login`,
         {
           email: emailphone,
           password: matkhau,
@@ -141,7 +141,7 @@ const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
   };
   const [eye, setEys] = useState(false);
   const anhien = () => {
-    console.log('anhien');
+
     setHienthi(!hienthi);
   };
   const SiginWithGg = async () => {
@@ -152,18 +152,18 @@ const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
       });
       await GoogleSignin.hasPlayServices();
       const userInfor: any = await GoogleSignin.signIn();
-      console.log(userInfor, 'userInfor');
+    
       const gguser = userInfor.data.user;
-      console.log(gguser, 'gguser');
+
       // thực hiện lấy ra fcm token cho chức năng thông báo 
       const authStatus = await messaging().requestPermission();
-      console.log(authStatus, 'authStatus');
+ 
       if (
         authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
         authStatus === messaging.AuthorizationStatus.PROVISIONAL
       ) {
         const fcmtoken = await AsyncStorage.getItem('fcmtoken');
-        console.log(fcmtoken, 'fcmtoken');
+       
         if (!fcmtoken) {
           const token = await messaging().getToken();
           let avatar = gguser.photo;
@@ -335,7 +335,7 @@ const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
               Bạn chưa có tài khoản
               <Text
                 onMagicTap={() => {
-                  console.log('sjndscnjsdn');
+                
                 }}
                 onPress={() => {
 

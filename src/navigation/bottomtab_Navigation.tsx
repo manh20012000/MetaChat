@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import React from 'react';
 import Notification_screen from '../Screen/Notification/Notification_screen.tsx';
-import Home_screen from '../Screen/Home/Home.tsx';
+
 import User_profile from '../Screen/User/User_profile.tsx';
 import Media_screen from '../Screen/Add_Media/Media_screen.tsx';
 import Watch from '../Screen/Video_Watch/Watch.tsx';
@@ -17,26 +17,27 @@ import changeNavigationBarColor, {
   hideNavigationBar,
   showNavigationBar,
 } from 'react-native-navigation-bar-color';
+import DrawerNavigation from './DrawerNavigation.tsx';
 
 const Tab = createBottomTabNavigator();
 
 const Bottomtab_Navigation: React.FC<{ navigation: any }> = ({ navigation }) => {
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
+      screenOptions={({route}) => ({
         animation: 'fade',
+        tabBarHideOnKeyboard: true, // Ẩn Bottom Tab khi bàn phím hiển thị
         tabBarActiveTintColor: 'red', // Màu icon/text khi được chọn
         tabBarInactiveTintColor: 'white', // Màu icon/text khi không được chọn
         headerShown: false,
-        tabBarStyle: { backgroundColor: 'black' },
-        tabBarIcon: ({ focused, color, size }) => {
+        tabBarStyle: {backgroundColor: 'black'},
+        tabBarIcon: ({focused, color, size}) => {
           let iconComponent;
           if (route.name === 'Home') {
             iconComponent = (
               <Home_icon
                 width={30}
                 height={30}
-
                 size={focused ? 32 : 28}
                 stroke={focused ? 'white' : '#888888'}
                 fill={focused ? 'white' : '#888888'}
@@ -52,8 +53,7 @@ const Bottomtab_Navigation: React.FC<{ navigation: any }> = ({ navigation }) => 
                 fill={focused ? 'white' : '#888888'}
               />
             );
-          }
-          else if (route.name === '  ') {
+          } else if (route.name === '  ') {
             iconComponent = (
               <Add_icon
                 name=" "
@@ -61,7 +61,7 @@ const Bottomtab_Navigation: React.FC<{ navigation: any }> = ({ navigation }) => 
                 height={36}
                 stroke={focused ? 'white' : '#888888'}
                 fill={focused ? 'white' : '#888888'}
-                style={{ marginTop: '25%' }}
+                style={{marginTop: '25%'}}
               />
             );
           } else if (route.name === 'Notifi') {
@@ -91,13 +91,13 @@ const Bottomtab_Navigation: React.FC<{ navigation: any }> = ({ navigation }) => 
           return iconComponent;
         },
       })}>
-      <Tab.Screen name="Home" component={Home_screen} />
+      <Tab.Screen name="Home" component={DrawerNavigation} />
+      {/* <Tab.Screen name="Home" component={Home_screen} /> */}
       <Tab.Screen name="Watch" component={Watch} />
       <Tab.Screen
         name="  "
         component={Media_screen}
-
-        listeners={({ navigation }) => ({
+        listeners={({navigation}) => ({
           blur: () => navigation.setParams({}), // Reset params hoặc thực hiện unmount.
         })}
       />

@@ -4,13 +4,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { login } from '../Redux_Toolkit/Reducer/auth.slice';
 import { API_URL } from '../service/resfull_api';
 import { useDispatch } from 'react-redux';
-import User_interface from '../interface/user.Interface';
+import User_type from '../type/Home/user_type';
 import { API_ROUTE } from '../service/api_enpoint';
-export const checkAndRefreshToken = async (dispatch: any, user:User_interface) => {
+export const checkAndRefreshToken = async (dispatch: any, user:User_type) => {
   // Lấy token từ AsyncStorage
 
   try {
     if (!user) {
+      
       // Nếu không có token, trả về false
       return false;
     }
@@ -23,7 +24,7 @@ export const checkAndRefreshToken = async (dispatch: any, user:User_interface) =
       // Token hết hạn, cần làm mới token
       try {
         const response = await axios.post(
-          `${API_URL}${API_ROUTE}`,
+          `${API_URL}${API_ROUTE.REFRESH_TOKEN}`,
           {refreshtoken: user.refresh_token},
           {
             headers: {
@@ -35,14 +36,11 @@ export const checkAndRefreshToken = async (dispatch: any, user:User_interface) =
         const data = response.data;
 
         if (response.status === 200 && data) {
-          // Lưu token mới vào AsyncStorage
-          const userDataString = JSON.stringify(data.data);
-          const accessTokenNew = data.data.accessToken;
-          const refreshTokenNew = data.data.refreshToken;
-
-          await AsyncStorage.setItem('user', userDataString);
-          await AsyncStorage.setItem('access_token', accessTokenNew);
-          await AsyncStorage.setItem('refresh_token', refreshTokenNew);
+          
+          const userDataString = data.data;
+          await AsyncStorage.setItem('user', JSON.stringify(userDataString));
+          await AsyncStorage.setItem('access_token', JSON.stringify(data.data.access_token));
+          await AsyncStorage.setItem('refresh_token', JSON.stringify(data.data.refresh_token));
 
           // Cập nhật Redux
           dispatch(login(data.data));
