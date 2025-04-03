@@ -3,7 +3,7 @@ import { View, Image, Text, Animated, Easing } from "react-native";
 
 interface TypingIndicatorProps {
   typingUsers: {
-    user: { _id: string; avatar: string },
+    userChat: { _id: string; avatar: string },
     isTyping:boolean
   };
   size?: number; // Kích thước avatar
@@ -57,8 +57,8 @@ const TypingIndicator: React.FC<TypingIndicatorProps> = ({
     <View style={{ flexDirection: "row", alignItems: "center", padding: 5,}}>
       {/* Avatar */}
       <Image
-        key={typingUsers.user._id}
-        source={{ uri: typingUsers.user.avatar }}
+        key={typingUsers.userChat._id}
+        source={{ uri: typingUsers.userChat.avatar }}
         style={{
           width: size,
           height: size,

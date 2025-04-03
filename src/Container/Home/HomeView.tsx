@@ -22,7 +22,7 @@ import Statusbar from '../../Constants/StatusBar.tsx';
 import BottonsheetHome from '../../Screen/Home/homeComponent/BottomsheetHome.tsx';
 import dayjs from 'dayjs';
 import Conversation from '../../type/Home/Converstation_type.ts';
-import MessageItem from './component/ItemConversation.tsx';
+import MessageItem from './ConverstationItem/ItemConversation.tsx';
 
 export const HomeView = ({navigation}: {navigation: any}) => {
   
@@ -49,12 +49,12 @@ export const HomeView = ({navigation}: {navigation: any}) => {
  
   return (
     <BottomSheetModalProvider>
-      <View style={{flex: 1, backgroundColor: color.white}}>
-        <Statusbar
+      <View style={{flex: 1, backgroundColor: color.dark}}>
+        {/* <Statusbar
           bgrstatus={color.dark}
           bgrcolor={color.light}
           translucent={true}
-        />
+        /> */}
         {onloading === true ? (
           <ActivityIndicator size="large" color="#00ff00" />
         ) : (

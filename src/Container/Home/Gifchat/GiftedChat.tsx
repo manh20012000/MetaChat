@@ -6,19 +6,19 @@ import {
   BottomSheetModal,
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
-import {useGiftedChatLogic} from './Hooks/use-Giftedchat';
-import CustomInputToolbar from '../../../Screen/Component/Gifchat/RenderInputToolbar';
-import {renderSend} from './GiftedchatComponent';
-import MessageItem from '../../../Screen/Component/Gifchat/RenderMessage';
+import {useGiftedChatLogic} from './useGiftedchat/use-Giftedchat';
+import CustomInputToolbar from './RenderInputToolbar';
+import {renderSend} from '../Chat_component/GiftedchatComponent';
+import MessageItem from './RenderMessage';
 import GetAllMedia_Bottomsheet from '../../../Screen/Home/homeComponent/GetAllMedia';
-import RenderOptionMessage from '../../../Screen/Component/Gifchat/RenderOptionMessage';
+import RenderOptionMessage from './RenderOptionMessage';
 import Conversation from '../../../type/Home/Converstation_type';
 import MediaGrid from '../../../Constants/GirdMedia';
-import {ReactionIcons} from '../../../Screen/Component/Gifchat/ViewRender/ReactionIcons';
+import {ReactionIcons} from './ViewRender/ReactionIcons';
 import {Message_type} from '../../../type/Home/Chat_type';
 import ModalChatMore from '../../../Constants/ModalMoreChat';
 import {NavigationProp, RouteProp} from '@react-navigation/native'; // Import các type cần thiết
-import ButtonSelection from './EditMediaChat/ButtonSelect';
+import ButtonSelection from '../Chat_component/EditMediaChat/ButtonSelect';
 import TypingIndicator from '../../../Constants/TypingInput';
 
 export const GiftedChatView = ({
@@ -136,7 +136,7 @@ export const GiftedChatView = ({
             // isTyping={typingUsers?.isTyping}
             renderFooter={() =>
               typingUsers?.isTyping ? (
-             <TypingIndicator typingUsers={typingUsers} size={25} dotSize={26} />
+             <TypingIndicator typingUsers={typingUsers}  size={25} dotSize={26} />
               ) : null
             }
           />

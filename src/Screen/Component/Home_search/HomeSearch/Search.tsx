@@ -98,7 +98,7 @@ const SearchScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
 
         <View style={{ width: width, height: height, backgroundColor: color.dark }}>
-            <Statusbar bgrstatus="transparent" bgrcolor={color.light} translucent={true} />
+            {/* <Statusbar bgrstatus="transparent" bgrcolor={color.light} translucent={true} /> */}
             <View style={{ backgroundColor: color.dark, flex: 1, paddingTop: insets.top, }}>
                 <View style={{ paddingHorizontal: '2%', backgroundColor: color.dark, width: '100%', height: isPortrait ? '10%' : '20%', flexDirection: 'row', justifyContent: "space-between", alignContent: 'center', alignSelf: 'center', alignItems: 'center' }}>
                     <TouchableOpacity onPress={() => {

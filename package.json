@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@gorhom/bottom-sheet": "^5.0.6",
+    "@notifee/react-native": "^9.1.8",
     "@react-native-async-storage/async-storage": "^2.1.0",
     "@react-native-camera-roll/camera-roll": "^7.10.0",
     "@react-native-community/geolocation": "^3.4.0",
@@ -40,6 +41,7 @@
     "react": "18.3.1",
     "react-native": "0.76.0",
     "react-native-audio-recorder-player": "^3.6.12",
+    "react-native-callkeep": "^4.3.16",
     "react-native-device-info": "^14.0.4",
     "react-native-dotenv": "^3.4.11",
     "react-native-elements": "^3.4.3",
@@ -63,6 +65,7 @@
     "react-native-video": "^6.9.0",
     "react-native-video-player": "^0.15.0",
     "react-native-vision-camera": "^4.6.4",
+    "react-native-webrtc": "^124.0.5",
     "react-redux": "^9.1.2",
     "realm": "^20.1.0",
     "socket.io-client": "^4.8.1",

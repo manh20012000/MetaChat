@@ -4,6 +4,7 @@ import { Backsvg } from "../../assets/svg/svgfile";
 import { useSelector, } from "react-redux";
 import Conversation from "../../type/Home/Converstation_type";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Statusbar from "../../Constants/StatusBar";
 const ChatScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, route }) => {
     const color = useSelector((status: any) => status.colorApp.value)
     const user = useSelector((status: any) => status.auth.value)
@@ -13,7 +14,8 @@ const ChatScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, rou
     const { item } = route.params
 
     return (
-        <View style={{ flex: 1, backgroundColor: color.dark, paddingTop: insert.top }}>
+        <View style={{ flex: 1, backgroundColor: color.dark}}>
+             <Statusbar bgrstatus="#000000" bgrcolor={color.light} translucent={true}/>
             <View style={{ flex: 0.07, backgroundColor: color.white, flexDirection: 'row', alignItems: 'center' }}>
                 <View style={{ flexDirection: 'row', alignSelf: 'center', justifyContent: 'space-around' }}>
                     <TouchableOpacity style={{ alignSelf: 'center' }}
