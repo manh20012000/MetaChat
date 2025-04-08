@@ -2,37 +2,59 @@ import {useEffect} from 'react';
 import messaging from '@react-native-firebase/messaging';
 import notifee, {AndroidImportance, EventType} from '@notifee/react-native';
 import RNCallKeep from 'react-native-callkeep';
-import {PermissionsAndroid, Platform} from 'react-native';
+import {Permission, PermissionsAndroid, Platform} from 'react-native';
 import {navigationRef} from './src/navigation/navigation';
 import {userSchema} from './src/cache_data/Schema/chat_convertstation_schema';
 
+import { AppState } from 'react-native';
+
 const requestPermissions = async () => {
   if (Platform.OS === 'android') {
-    const granted = await PermissionsAndroid.requestMultiple([
-      PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE,
-      PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-      PermissionsAndroid.PERMISSIONS.CAMERA,
-      PermissionsAndroid.PERMISSIONS.CALL_PHONE,
-    ]);
-    const allGranted =
-      granted[PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE] ===
-        PermissionsAndroid.RESULTS.GRANTED &&
-      granted[PermissionsAndroid.PERMISSIONS.RECORD_AUDIO] ===
-        PermissionsAndroid.RESULTS.GRANTED &&
-      granted[PermissionsAndroid.PERMISSIONS.CAMERA] ===
-        PermissionsAndroid.RESULTS.GRANTED &&
-      granted[PermissionsAndroid.PERMISSIONS.CALL_PHONE] ===
-        PermissionsAndroid.RESULTS.GRANTED;
-    console.log('Permissions granted:', allGranted);
-    return allGranted;
+    try {
+      const permissions: Permission[] = [
+        PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE,
+        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        PermissionsAndroid.PERMISSIONS.CALL_PHONE,
+      ];
+
+      const permissionsToRequest: Permission[] = [];
+      for (const permission of permissions) {
+        const status = await PermissionsAndroid.check(permission);
+        if (!status) {
+          // Nếu quyền chưa được cấp
+          permissionsToRequest.push(permission);
+        }
+      }
+
+      if (permissionsToRequest.length > 0) {
+        const results = await PermissionsAndroid.requestMultiple(
+          permissionsToRequest,
+        );
+
+        // Kiểm tra lại tất cả quyền sau khi yêu cầu
+        const allGranted = permissions.every(permission => {
+          return results[permission] === PermissionsAndroid.RESULTS.GRANTED;
+        });
+
+        console.log('All permissions granted:', allGranted);
+        return allGranted;
+      }
+
+      // Nếu tất cả quyền đã được cấp
+      return true;
+    } catch (err) {
+      console.error('Error requesting permissions:', err);
+      return false;
+    }
   }
-  return true;
+  return true; // iOS không cần xử lý
 };
 
 const setupCallKeep = async () => {
   const hasPermissions = await requestPermissions();
   if (!hasPermissions) {
-    console.log('Permissions not granted, CallKeep setup aborted');
+    console.log('Permissions not granted, showing explanation');
     return;
   }
   const phoneAccountOptions = {
@@ -87,6 +109,7 @@ const AppDeep = () => {
     console.log('AppDeep useEffect started');
 
     const handleNotificationPress = async ({type, detail}: any) => {
+ 
       // Xử lý các sự kiện PRESS (1) và ACTION_PRESS (2 hoặc 3 tùy phiên bản)
       if (
         type === EventType.PRESS ||
@@ -104,31 +127,20 @@ const AppDeep = () => {
           data?.type === 'video_call'
         ) {
           if (navigationRef.isReady()) {
-            console.log('thực hiện việc chuyển màn ');
-            
             try {
               const navigationData = {
-              caller: data.callerId,
-              userCall: {
-                _id: data.callerId,
-                name: data.callerName,
-                avatar: data.callerAvatar,
-              },
-              roomId: data.roomId,
-              nameCall: data.callerName,
-              conversation: data.conversation?
-                data.conversation
-                : null,
-              isFromNotification: true,
-            };
+                caller: JSON.parse(data.caller),
+                roomId: data.roomId,
+                participants: JSON.parse(data.participants),
+                isOnpenCamera: false,
+                isCaller: false,
+                status: 'accept_call',
+              };
+
               navigationRef.navigate('CommingVideoCall', navigationData);
             } catch (err) {
               console.log('lỗi điều hướng', err);
             }
-
-            console.log('Navigated to CommingVideoCall with data:');
-          } else {
-            console.log('Navigation not ready yet, cannot navigate');
           }
 
           // Hủy thông báo sau khi xử lý
@@ -141,12 +153,23 @@ const AppDeep = () => {
           (type === 2 || type === EventType.ACTION_PRESS) &&
           pressAction?.id === 'reject_call'
         ) {
-          console.log('Call rejected from notification');
           if (detail.notification?.id) {
             await notifee.cancelNotification(detail.notification.id);
           }
-        } else {
-          console.log('Unhandled notification event:', {type, pressAction});
+          try {
+            const navigationData = {
+              caller: JSON.parse(data.caller),
+              roomId: data.roomId,
+              nameCall: data.callerName,
+              isOnpenCamera: false,
+              participants: JSON.parse(data.participants),
+              isCaller: false,
+              status: 'reject',
+            };
+            navigationRef.navigate('CommingVideoCall', navigationData);
+          } catch (err) {
+            console.log('lỗi điều hướng', err);
+          }
         }
       } else if (type === EventType.DELIVERED) {
         console.log('Notification delivered, no action required:', type);
@@ -160,8 +183,8 @@ const AppDeep = () => {
         const {data} = remoteMessage;
         if (!data) throw new Error('No data in message');
 
-        const {roomId, callerId, callerName} = data;
-        if (!roomId || !callerId || !callerName) {
+        const {roomId, callerName} = data;
+        if (!roomId) {
           throw new Error('Missing required fields');
         }
 
@@ -214,7 +237,7 @@ const AppDeep = () => {
     };
 
     const initialize = async () => {
-      await setupCallKeep();
+       await setupCallKeep();
 
       // Tạo notification channel
       await notifee.createChannel({
@@ -240,16 +263,16 @@ const AppDeep = () => {
       const unsubscribeForegroundEvent = notifee.onForegroundEvent(
         handleNotificationPress,
       );
-      const unsubscribeBackgroundEvent = notifee.onBackgroundEvent(
-        handleNotificationPress,
-      );
+      notifee.onBackgroundEvent(handleNotificationPress);
       const unsubscribeForegroundMessage =
         messaging().onMessage(handleIncomingCall);
       messaging().setBackgroundMessageHandler(handleIncomingCall);
-
+      const unsubscribeBackgroundEvent = () => {
+        console.log('Unsubscribed from background events');
+      };
       return () => {
         unsubscribeForegroundEvent();
-        // unsubscribeBackgroundEvent();
+        unsubscribeBackgroundEvent();
         unsubscribeForegroundMessage();
         RNCallKeep.removeEventListener('answerCall');
         RNCallKeep.removeEventListener('endCall');

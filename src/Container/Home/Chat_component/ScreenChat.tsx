@@ -40,40 +40,56 @@ const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
   const isPortrait = height > width;
   const {conversation}=route.params
   const socket = useSocket();
-  const userChat:userMessage = conversation.participants.find(
-    (user:userMessage) => user._id === user._id,
+ 
+  const [userChat] = useState<any>(
+    conversation.participants.find(
+      (participant: any) => participant.user_id === user._id,
+    ),
   );
-
   const sendConnectCall = async () => {
     try {
-      console.log('gọi connect ', networkConnect, userChat.name);
-      if (networkConnect) {
-        socket?.emit('startCall', {
-          caller: {},
-          roomId:conversation._id,
-          userCall:userChat,
-          nameCall:conversation.roomName?conversation.roomName: userChat.name,
-          conversationId: conversation._id,
-          conversation,
-          paticipantId:conversation.participantIds.filter((id:string)=>id!==userChat.user_id),
-        });
-        navigation.navigate('VideoCallHome', {
-          caller: {},
-          roomId:conversation._id,
-          userCall:userChat,
-          nameCall:conversation.roomName?conversation.roomName: userChat.name,
-          conversationId: conversation._id,
-          paticipantId:conversation.participantIds.filter((id:string)=>id!==userChat.user_id),
-          camera: false,
-          conversation,
-        });
-      } else {
-        Alert.alert('kết nối mạng không ổn định');
+  
+      if (!networkConnect) {
+        Alert.alert('Kết nối mạng không ổn định');
+        return;
       }
+  
+      // 👉 Xác định người nhận (participant) là những người khác user hiện tại
+      const participantIds = conversation.participantIds.filter(
+        (id: string) => id !== user.user_id
+      );
+
+      // 👉 Thông tin người gọi (caller)
+      const callerData = {
+        _id: userChat._id, // đây là ID MongoDB của user hiện tại
+        user_id: userChat.user_id, // user_id chính là định danh trong hệ thống
+        name: conversation.roomName || userChat.name,
+        avatar: userChat.avatar,
+        socketId: socket?.id, // sẽ được server điền khi cần
+      };
+       socket?.emit('startCall', {
+        caller: callerData,
+        roomId: conversation._id,
+        participants:conversation.participants,
+        isCaller: true,
+        participantIds, 
+      });// gửi mảng user_id người nhận
+  
+     // 👉 Điều hướng sang màn hình cuộc gọi
+      navigation.navigate('VideoCallHome', {
+        caller: callerData,
+        roomId: conversation._id,
+        participants:conversation.participants,
+        participantIds,
+        isOnpenCamera: false,
+        conversation,
+        isCaller: true,
+      });
     } catch (error) {
-      console.log('nhấn gọi bị lỗi ', error);
+      console.error('📛 Lỗi khi nhấn nút gọi:', error);
     }
   };
+  
   return (
     <View style={{backgroundColor: color.dark, flex: 1}}>
       <Statusbar

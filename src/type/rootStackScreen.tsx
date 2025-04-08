@@ -1,16 +1,18 @@
 import Conversation from "./Home/Converstation_type";
 
 export type RootStackParamList = {
+  ChatScreen:{
+    item: Conversation;
+  };
   CameraChat: undefined;
   VideoCallHome:any,
   CommingVideoCall: {
     data?: any;
-    caller: any;
-    userCall: any;
+    caller:any;
     roomId: string;
-    camera?: boolean;
-    nameCall:string,
-    conversation:Conversation,
-    isFromNotification:boolean
+    isOnpenCamera: boolean;
+    participants:any,
+    isCaller:boolean,
+    status:string,
   };
 };

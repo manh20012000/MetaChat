@@ -1,36 +1,42 @@
-import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
-import { RTCView } from 'react-native-webrtc';
+import React from 'react';
+import { View, Text, Image, StyleSheet, Dimensions } from 'react-native';
+import { RTCView, MediaStream } from 'react-native-webrtc';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
+import { useSelector } from 'react-redux';
+import { useSocket } from '../../../util/socket.io';
 
 const { width, height } = Dimensions.get('window');
 
-interface Participant {
-  id: string;
-  name: string;
-  avatar: string;
-  stream?: MediaStream;
-  isCameraOn: boolean;
-}
-
 interface PreviewVideoCallProps {
-  participants: Participant[];
-  myStream: MediaStream | null;
+  participants: any[];
+  isCameraOn: boolean;
+  localVideoRef: any; // Không cần thiết, có thể xóa
+  remoteStreams: Map<string, MediaStream>;
+  localStream: MediaStream | null;
 }
 
-const PreviewVideoCall: React.FC<PreviewVideoCallProps> = ({ participants, myStream }) => {
-  const [focusedParticipant, setFocusedParticipant] = useState<string | null>(null);
-  const [smallViewPosition, setSmallViewPosition] = useState({ x: width - 120, y: 20 });
+const VideoCallPreview: React.FC<PreviewVideoCallProps> = ({
+  participants,
+  isCameraOn,
+  localStream,
+  remoteStreams,
+}) => {
+  const user = useSelector((state: any) => state.auth.value);
+  const socket = useSocket();
+  const [smallViewPosition, setSmallViewPosition] = React.useState({
+    x: width - 120,
+    y: 20,
+  });
 
-  const me: Participant = {
-    id: 'me',
-    name: 'Me',
-    avatar: 'https://example.com/my-avatar.jpg',
-    stream: myStream || undefined,
-    isCameraOn: !!myStream,
-  };
-
-  const allParticipants = [me, ...participants];
+  // // Log khi component được render
+  // React.useEffect(() => {
+  //   console.log('🎥 [VideoCallPreview] Component mounted');
+  //   console.log('🎥 [VideoCallPreview] Participants:', participants);
+  //   console.log('🎥 [VideoCallPreview] Remote streams:', Array.from(remoteStreams.entries()));
+  //   console.log('🎥 [VideoCallPreview] Local stream:', localStream?.id);
+  //   console.log('🎥 [VideoCallPreview] Is camera on:', isCameraOn);
+  //   console.log('🎥 [VideoCallPreview] Current user socket ID:', socket?.id);
+  // }, []);
 
   const onGestureEvent = (event: any) => {
     const { translationX, translationY } = event.nativeEvent;
@@ -42,54 +48,106 @@ const PreviewVideoCall: React.FC<PreviewVideoCallProps> = ({ participants, myStr
 
   const onHandlerStateChange = (event: any) => {
     if (event.nativeEvent.state === State.END) {
-      // Có thể thêm logic khi kết thúc kéo thả nếu cần
+      console.log('👆 [VideoCallPreview] Small view position updated:', smallViewPosition);
     }
   };
 
-  const handleFocusParticipant = (id: string) => {
-    setFocusedParticipant(id === focusedParticipant ? null : id);
-  };
-
   const renderMainView = () => {
-    const focused = allParticipants.find((p) => p.id === focusedParticipant) || me;
-    return (
-      <TouchableOpacity
-        style={styles.mainView}
-        onPress={() => handleFocusParticipant(focused.id)}
-      >
-        {focused.isCameraOn && focused.stream ? (
-          <RTCView stream={focused.stream} style={styles.fullScreen} /> // Sửa ở đây
-        ) : (
-          <View style={styles.avatarContainer}>
-            <Image source={{ uri: focused.avatar }} style={styles.avatarLarge} />
-            <Text style={styles.userName}>{focused.name}</Text>
+    if (remoteStreams.size > 0) {
+      // console.log('🎥 [VideoCallPreview] Rendering remote streams');
+      return (
+        <View style={styles.mainView}>
+          {Array.from(remoteStreams.entries())
+            .filter(([socketId]) => {
+              const isLocal = socketId === socket?.id;
+              // console.log(
+              //   `🎥 [VideoCallPreview] Filtering remote stream - Socket ID: ${socketId}, Is local: ${isLocal}`
+              // );
+              return !isLocal;
+            })
+            .map(([socketId, stream]) => {
+              const participant = participants.find(p => {
+                const participantSocketId = Array.isArray(p.socketId)
+                  ? p.socketId[0]
+                  : p.socketId;
+                return participantSocketId === socketId;
+              });
+              // console.log(
+              //   `🎥 [VideoCallPreview] Rendering remote stream for ${socketId}, Participant:`,
+              //   participant
+              // );
+              return (
+                <View key={socketId} style={styles.remoteVideoContainer}>
+                  <RTCView
+                    key={socketId}
+                    objectFit="cover"
+                    mirror={false}
+                    streamURL={stream.toURL()}
+                    style={styles.fullScreen}
+                  />
+                  <Text style={styles.userName}>{participant?.name || socketId}</Text>
+                </View>
+              );
+            })}
+        </View>
+      );
+    } else {
+      // console.log('🎥 [VideoCallPreview] No remote streams, rendering avatar');
+      const remoteUser = participants.find(p => {
+        const participantSocketId = Array.isArray(p.socketId) ? p.socketId[0] : p.socketId;
+        const isLocal = participantSocketId === socket?.id;
+        // console.log(
+        //   `🎥 [VideoCallPreview] Finding remote user - Socket ID: ${participantSocketId}, Is local: ${isLocal}`
+        // );
+        return !isLocal;
+      });
+
+      if (!remoteUser) {
+        // console.log('🎥 [VideoCallPreview] No remote user found');
+        return (
+          <View style={styles.mainView}>
+            <View style={styles.avatarContainer}>
+              <Text style={styles.userName}>Không có người tham gia</Text>
+            </View>
           </View>
-        )}
-      </TouchableOpacity>
-    );
+        );
+      }
+
+      // console.log('🎥 [VideoCallPreview] Rendering remote user avatar:', remoteUser);
+      return (
+        <View style={styles.mainView}>
+          <View style={styles.avatarContainer}>
+            <Image
+              source={{ uri: remoteUser?.avatar || 'default_avatar_url' }}
+              style={styles.avatarLarge}
+              onError={() => console.log('🎥 [VideoCallPreview] Failed to load remote user avatar')}
+            />
+            <Text style={styles.userName}>{remoteUser?.name || 'Unknown'}</Text>
+          </View>
+        </View>
+      );
+    }
   };
 
   const renderSmallView = () => {
-    const others = allParticipants.filter((p) => p.id !== focusedParticipant);
+    // console.log('🎥 [VideoCallPreview] Rendering small view');
+    // console.log('🎥 [VideoCallPreview] Is camera on:', isCameraOn);
+    // console.log('🎥 [VideoCallPreview] Local stream:', localStream?.id);
     return (
       <PanGestureHandler onGestureEvent={onGestureEvent} onHandlerStateChange={onHandlerStateChange}>
         <View style={[styles.smallView, { top: smallViewPosition.y, left: smallViewPosition.x }]}>
-          {others.map((user) => (
-            <TouchableOpacity
-              key={user.id}
-              style={styles.smallParticipant}
-              onPress={() => handleFocusParticipant(user.id)}
-            >
-              {user.isCameraOn && user.stream ? (
-                <RTCView stream={user.stream} style={styles.smallScreen} /> // Sửa ở đây
-              ) : (
-                <View style={styles.avatarContainerSmall}>
-                  <Image source={{ uri: user.avatar }} style={styles.avatarSmall} />
-                  <Text style={styles.userNameSmall}>{user.name}</Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          ))}
+          {isCameraOn && localStream ? (
+            <RTCView streamURL={localStream.toURL()} style={styles.smallScreen} mirror={true} />
+          ) : (
+            <View style={styles.avatarContainerSmall}>
+              <Image
+                source={{ uri: user?.avatar || 'default_avatar_url' }}
+                style={styles.avatarSmall}
+                onError={() => console.log('🎥 [VideoCallPreview] Failed to load local user avatar')}
+              />
+              <Text style={styles.userNameSmall}>{user?.name || 'You'}</Text>
+            </View>
+          )}
         </View>
       </PanGestureHandler>
     );
@@ -103,8 +161,6 @@ const PreviewVideoCall: React.FC<PreviewVideoCallProps> = ({ participants, myStr
   );
 };
 
-export default PreviewVideoCall;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -113,24 +169,33 @@ const styles = StyleSheet.create({
   mainView: {
     width: '100%',
     height: '100%',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+  },
+  remoteVideoContainer: {
+    flex: 1,
+    position: 'relative',
+    margin: 5,
+    width: '45%',
+    height: '45%',
   },
   fullScreen: {
     width: '100%',
     height: '100%',
+    borderRadius: 10,
   },
   smallView: {
     position: 'absolute',
     width: 100,
+    height: 150,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
     borderRadius: 10,
     padding: 5,
   },
-  smallParticipant: {
-    marginBottom: 5,
-  },
   smallScreen: {
     width: 90,
-    height: 60,
+    height: 120,
     borderRadius: 5,
   },
   avatarContainer: {
@@ -139,12 +204,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#222',
     width: '100%',
     height: '100%',
+    borderRadius: 10,
+    padding: 10,
   },
   avatarContainerSmall: {
     justifyContent: 'center',
     alignItems: 'center',
     width: 90,
-    height: 60,
+    height: 120,
   },
   avatarLarge: {
     width: 120,
@@ -153,16 +220,25 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   avatarSmall: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginBottom: 5,
   },
   userName: {
     color: 'white',
     fontSize: 18,
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    padding: 5,
+    borderRadius: 5,
   },
   userNameSmall: {
     color: 'white',
     fontSize: 12,
   },
 });
+
+export default VideoCallPreview;

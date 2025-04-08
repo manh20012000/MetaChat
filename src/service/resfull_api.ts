@@ -1,6 +1,6 @@
 import {response} from '../type/response_type';
 // import { URL } from '@env';
-const API_URL = 'http://192.168.51.100:8080';
+const API_URL = 'http://192.168.51.105:8080';
 import axios from 'axios';
 import {checkAndRefreshToken} from '../util/checkingToken';
 const postData = async (
