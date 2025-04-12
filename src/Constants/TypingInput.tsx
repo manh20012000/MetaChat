@@ -6,8 +6,8 @@ interface TypingIndicatorProps {
     userChat: { _id: string; avatar: string },
     isTyping:boolean
   };
-  size?: number; // Kích thước avatar
-  dotSize?: number; // Kích thước dấu chấm
+  size?: number;
+  dotSize?: number;
 }
 
 const TypingIndicator: React.FC<TypingIndicatorProps> = ({

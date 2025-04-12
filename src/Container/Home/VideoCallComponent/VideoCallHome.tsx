@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import Statusbar from '../../../Constants/StatusBar';
 import {useSelector} from 'react-redux';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -37,108 +37,147 @@ const VideoCallHome: React.FC<VideoCallHomeProps> = ({ navigation, route }) => {
   // State management
   const [isMicOn, setIsMicOn] = useState(true);
   const [isSpeakerOn, setIsSpeakerOn] = useState(false);
-  const [statusCamera, setStatusCamera] = useState(isOnpenCamera ?? true); // Mặc định bật camera
+  const [statusCamera, setStatusCamera] = useState(isOnpenCamera ?? true);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStreams, setRemoteStreams] = useState<Map<string, MediaStream>>(new Map());
   const [participants, setParticipants] = useState(initialParticipants);
-  const [activePeerIds, setActivePeerIds] = useState<Set<string>>(new Set());
-  const [permissionsGranted, setPermissionsGranted] = useState(true)
-
+  const [callActive, setCallActive] = useState(false);
+    
   // Refs
   const localVideoRef = useRef<any>(null);
   const peerConnections = useRef<Record<string, RTCPeerConnection>>({});
   const iceCandidatesSent = useRef<Set<string>>(new Set());
   const isCreatingOffer = useRef<Record<string, boolean>>({});
-  const pendingSignals = useRef<any[]>([]); // Lưu trữ tín hiệu nếu localStream chưa sẵn sàng
+  const pendingSignals = useRef<any[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+  const isMounted = useRef(false);
 
-  // Kiểm tra và yêu cầu quyền
- 
-  const setupMedia = async () => {
-    if (!permissionsGranted) {
-      console.log('Permissions not granted, cannot setup media');
-      return;
-    }
-
+  // Initialize media stream
+  const setupMedia = useCallback(async () => {
     try {
-      console.log('Initializing media stream...');
+      console.log('🎥 [Media] Initializing media stream...');
       const constraints = {
         audio: true,
         video: { width: 640, height: 480, frameRate: 30 },
       };
       const stream = await mediaDevices.getUserMedia(constraints);
 
+      if (!stream.active) {
+        throw new Error('Stream not active');
+      }
+
       stream.getVideoTracks().forEach(track => {
         track.enabled = statusCamera;
-        console.log(`Video track: ${track.enabled ? 'ENABLED' : 'DISABLED'}`);
+        console.log(`🎥 [Media] Video track: ${track.enabled ? 'ENABLED' : 'DISABLED'}`);
       });
 
       stream.getAudioTracks().forEach(track => {
         track.enabled = isMicOn;
-        console.log(`Audio track: ${track.enabled ? 'ENABLED' : 'DISABLED'}`);
+        console.log(`🎙️ [Media] Audio track: ${track.enabled ? 'ENABLED' : 'DISABLED'}`);
       });
 
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
       }
+      
+      streamRef.current = stream;
       setLocalStream(stream);
+      setCallActive(true);
+      
+      console.log('🎥 [Media] Local stream initialized successfully');
+      return true;
     } catch (err) {
-      console.error('Media initialization failed:', err);
-      endCall();
+      console.error('❌ [Media] Initialization failed:', err);
+      return false;
     }
-  };
+  }, [statusCamera, isMicOn]);
 
   // Cleanup function
-  const endCall = () => {
-    console.log('Performing call cleanup...');
+  const endCall = useCallback(() => {
+    if (!callActive) {
+      console.log('🛑 [EndCall] Call not active, skipping cleanup');
+      navigation.goBack();
+      return;
+    }
 
-    localStream?.getTracks().forEach(track => track.stop());
+    console.log('🛑 [EndCall] Performing call cleanup...');
 
-    Object.values(peerConnections.current).forEach(peer => {
+    // Stop local stream
+    streamRef.current?.getTracks().forEach(track => {
+      console.log(`🛑 [EndCall] Stopping track: ${track.kind}`);
+      track.stop();
+    });
+    streamRef.current = null;
+    setLocalStream(null);
+
+    // Close all peer connections
+    Object.entries(peerConnections.current).forEach(([id, peer]) => {
       try {
+        console.log(`🛑 [EndCall] Closing peer connection: ${id}`);
         peer.close();
       } catch (err) {
-        console.error('Error closing peer:', err);
+        console.error(`🛑 [EndCall] Error closing peer ${id}:`, err);
       }
     });
     peerConnections.current = {};
     iceCandidatesSent.current.clear();
     isCreatingOffer.current = {};
 
-    socket?.emit('endCall', { conversationId: roomId });
-    navigation.goBack();
-  };
+    // Clear remote streams
+    setRemoteStreams(new Map());
 
-  // Peer Connection Management
-  const setupPeerConnection = (targetSocketId: string, stream: MediaStream): RTCPeerConnection => {
-    if (peerConnections.current[targetSocketId]) {
-      console.log(`Connection to ${targetSocketId} already exists`);
-      return peerConnections.current[targetSocketId];
+    // Notify server
+    if (socket?.connected) {
+      socket.emit('endCall', { conversationId: roomId });
+      console.log('🛑 [EndCall] Emitted endCall to server');
     }
 
-    console.log(`Creating new peer connection for ${targetSocketId}`);
+    setCallActive(false);
+    navigation.goBack();
+    console.log('🛑 [EndCall] Call ended successfully');
+  }, [socket, roomId, navigation, callActive]);
+
+  // Peer Connection Management
+  const setupPeerConnection = useCallback((targetSocketId: string, stream: MediaStream): RTCPeerConnection | null => {
+    if (peerConnections.current[targetSocketId]) {
+      if (peerConnections.current[targetSocketId].connectionState === 'closed') {
+        console.log(`🔗 [Peer] Existing connection to ${targetSocketId} is closed, creating new one`);
+      } else {
+        console.log(`🔗 [Peer] Connection to ${targetSocketId} already exists`);
+        return peerConnections.current[targetSocketId];
+      }
+    }
+
+    console.log(`🔗 [Peer] Creating new peer connection for ${targetSocketId}`);
     const peer = new RTCPeerConnection({
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'turn:your-turn-server.com:3478', username: 'user', credential: 'pass' },
+        {
+          urls: 'turn:openrelay.metered.ca:80',
+          username: 'openrelayproject',
+          credential: 'openrelayproject',
+        },
       ],
       iceTransportPolicy: 'all',
     });
 
+    // Add track event handlers
     stream.getTracks().forEach(track => {
       try {
         peer.addTrack(track, stream);
-        console.log(`Added ${track.kind} track`);
+        console.log(`🔗 [Peer] Added ${track.kind} track to ${targetSocketId}`);
       } catch (err) {
-        console.error(`Failed to add ${track.kind} track:`, err);
+        console.error(`🔗 [Peer] Failed to add ${track.kind} track:`, err);
       }
     });
 
+    // ICE candidate handler
     (peer as any).onicecandidate = ({ candidate }) => {
-      if (candidate) {
+      if (candidate && isMounted.current) {
         const candidateKey = `${candidate.sdpMid}-${candidate.sdpMLineIndex}-${candidate.candidate}`;
         if (!iceCandidatesSent.current.has(candidateKey)) {
           iceCandidatesSent.current.add(candidateKey);
-          console.log(`Sending ICE candidate to ${targetSocketId}`);
+          console.log(`📡 [ICE] Sending candidate to ${targetSocketId}`);
           socket?.emit('sendSignal', {
             signal: { candidate },
             targetSocketId,
@@ -149,114 +188,155 @@ const VideoCallHome: React.FC<VideoCallHomeProps> = ({ navigation, route }) => {
       }
     };
 
+    // Track handler
     (peer as any).ontrack = (event) => {
+      if (!isMounted.current) return;
+      console.log(`📺 [Peer] Received stream from ${targetSocketId}`);
       const remoteStream = event.streams[0];
-      console.log('Received remote stream:', remoteStream.getTracks());
-    
-      // Xác minh track video có tồn tại không
-      remoteStream.getVideoTracks().forEach(track => {
-        console.log('Remote video track enabled:', track.enabled);
-      });
-    
       setRemoteStreams(prev => {
+        if (prev.get(targetSocketId) === remoteStream) return prev;
         const newMap = new Map(prev);
         newMap.set(targetSocketId, remoteStream);
         return newMap;
       });
     };
 
+    // ICE connection state handler
     (peer as any).oniceconnectionstatechange = () => {
-      console.log(`ICE state for ${targetSocketId}:`, peer.iceConnectionState);
-      if (['disconnected', 'failed', 'closed'].includes(peer.iceConnectionState)) {
+      if (!isMounted.current) return;
+      const state = peer.iceConnectionState;
+      console.log(`📡 [ICE] ${targetSocketId} state: ${state}`);
+      
+      if (state === 'connected') {
+        console.log(`✅ [Peer] Connected to ${targetSocketId}`);
+      } else if (['disconnected', 'failed', 'closed'].includes(state)) {
+        console.log(`❌ [Peer] Disconnected from ${targetSocketId}`);
         removePeerConnection(targetSocketId);
       }
     };
 
-    peerConnections.current[targetSocketId] = peer;
+    // Negotiation needed handler
+    (peer as any).onnegotiationneeded = async () => {
+      if (!isMounted.current || peer.signalingState === 'closed') {
+        console.log(`🔄 [Peer] Skipping negotiation for closed connection: ${targetSocketId}`);
+        return;
+      }
+      
+      console.log(`🔄 [Peer] Negotiation needed for ${targetSocketId}`);
+      if (isCaller || peer.signalingState === 'stable') {
+        createOffer(peer, targetSocketId);
+      }
+    };
 
-    if (isCaller) {
-      createOffer(peer, targetSocketId);
+    peerConnections.current[targetSocketId] = peer;
+    return peer;
+  }, [socket, roomId, isCaller]);
+
+  // Create offer function
+  const createOffer = useCallback(async (peer: RTCPeerConnection, targetSocketId: string) => {
+    if (!isMounted.current) return;
+    
+    if (isCreatingOffer.current[targetSocketId]) {
+      console.log(`⏳ [Offer] Already creating offer for ${targetSocketId}, skipping`);
+      return;
     }
 
-    return peer;
-  };
-
-  const createOffer = async (peer: RTCPeerConnection, targetSocketId: string) => {
-    if (isCreatingOffer.current[targetSocketId]) {
-      console.log(`Already creating offer for ${targetSocketId}, skipping`);
+    if (peer.signalingState === 'closed') {
+      console.log(`❌ [Offer] Peer connection closed, skipping offer for ${targetSocketId}`);
       return;
     }
 
     isCreatingOffer.current[targetSocketId] = true;
+    console.log(`📤 [Offer] Creating offer for ${targetSocketId}`);
+
     try {
-      console.log(`Creating offer for ${targetSocketId}`);
       const offer = await peer.createOffer({
         offerToReceiveAudio: true,
         offerToReceiveVideo: true,
       });
 
+      if ( (peer as any).signalingState === 'closed') {
+        console.log(`❌ [Offer] Peer closed after createOffer for ${targetSocketId}`);
+        return;
+      }
+
       await peer.setLocalDescription(offer);
-      console.log('Offer created successfully');
+      console.log(`📤 [Offer] Offer created for ${targetSocketId}`);
 
       socket?.emit('sendSignal', {
         signal: { ...offer, type: 'offer' },
         targetSocketId,
         roomId,
-        type: 'offer', // Đảm bảo type được gửi đúng
+        type: 'offer',
       });
     } catch (err) {
-      console.error('Offer creation failed:', err);
+      console.error(`❌ [Offer] Failed to create offer for ${targetSocketId}:`, err);
       removePeerConnection(targetSocketId);
     } finally {
       isCreatingOffer.current[targetSocketId] = false;
     }
-  };
+  }, [socket, roomId]);
 
-  const removePeerConnection = (socketId: string) => {
-    console.log(`Removing peer connection ${socketId}`);
-    if (peerConnections.current[socketId]) {
-      peerConnections.current[socketId].close();
+  // Remove peer connection
+  const removePeerConnection = useCallback((socketId: string) => {
+    if (!isMounted.current) return;
+    
+    console.log(`🗑️ [Peer] Removing connection: ${socketId}`);
+    const peer = peerConnections.current[socketId];
+    
+    if (peer) {
+      try {
+        if (peer.signalingState !== 'closed') {
+          peer.close();
+        }
+      } catch (err) {
+        console.error(`❌ [Peer] Error closing peer ${socketId}:`, err);
+      }
+      
       delete peerConnections.current[socketId];
+      delete isCreatingOffer.current[socketId];
 
       setRemoteStreams(prev => {
+        if (!prev.has(socketId)) return prev;
         const newMap = new Map(prev);
         newMap.delete(socketId);
         return newMap;
       });
-
-      setActivePeerIds(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(socketId);
-        return newSet;
-      });
-
-      delete isCreatingOffer.current[socketId];
     }
-  };
+  }, []);
 
-  // Handle signaling
-  const handleSignal = async ({ signal, senderId, type }: any) => {
+  // Handle incoming signals
+  const handleSignal = useCallback(async ({ signal, senderId, type }: {
+    signal: any;
+    senderId: string;
+    type: string;
+  }) => {
+    if (!isMounted.current || !streamRef.current) return;
+    
     try {
-      console.log(`Processing ${type} signal from ${senderId}`);
-
-      if (!localStream) {
-        console.log('Local stream not ready, queuing signal');
-        pendingSignals.current.push({ signal, senderId, type });
-        return;
-      }
+      console.log(`📨 [Signal] Received ${type} from ${senderId}`);
 
       let peer = peerConnections.current[senderId];
       if (!peer) {
-        peer = setupPeerConnection(senderId, localStream);
+        console.log(`🔗 [Peer] Creating new connection for signal from ${senderId}`);
+        peer = setupPeerConnection(senderId, streamRef.current) as any;
+        if (!peer) return;
+      }
+
+      if (peer.signalingState === 'closed') {
+        console.log(`❌ [Signal] Peer closed, skipping ${type} from ${senderId}`);
+        return;
       }
 
       switch (type) {
         case 'offer':
-          console.log(`Setting remote offer from ${senderId}`);
+          console.log(`📨 [Signal] Setting offer from ${senderId}`);
           await peer.setRemoteDescription(new RTCSessionDescription(signal));
+          
           const answer = await peer.createAnswer();
           await peer.setLocalDescription(answer);
-          console.log(`Sending answer to ${senderId}`);
+          
+          console.log(`📨 [Signal] Sending answer to ${senderId}`);
           socket?.emit('sendSignal', {
             signal: answer,
             targetSocketId: senderId,
@@ -266,129 +346,134 @@ const VideoCallHome: React.FC<VideoCallHomeProps> = ({ navigation, route }) => {
           break;
 
         case 'answer':
-          console.log(`Setting remote answer from ${senderId}`);
+          console.log(`📨 [Signal] Setting answer from ${senderId}`);
           await peer.setRemoteDescription(new RTCSessionDescription(signal));
           break;
 
         case 'iceCandidate':
           if (signal.candidate) {
-            console.log(`Adding ICE candidate from ${senderId}`);
+            console.log(`📨 [Signal] Adding ICE candidate from ${senderId}`);
             await peer.addIceCandidate(new RTCIceCandidate(signal.candidate));
           }
           break;
 
         default:
-          console.error(`Unknown signal type: ${type}`);
+          console.warn(`⚠️ [Signal] Unknown type: ${type}`);
       }
     } catch (err) {
-      console.error('Signal handling failed:', err);
+      console.error(`❌ [Signal] Error handling ${type} from ${senderId}:`, err);
     }
-  };
+  }, [socket, roomId, setupPeerConnection]);
 
-  // Handle participant updates
-  const handleCallUpdate = (data: {
+  // Handle call updates
+  const handleCallUpdate = useCallback((data: {
     type: string;
     participant: any;
     allParticipants: any[];
   }) => {
-    console.log('Processing call update:', data.type);
-
+    if (!isMounted.current) return;
+    
+    console.log(`📞 [Call] Update: ${data.type}`);
     setParticipants(data.allParticipants);
 
-    if (data.type === 'participant_joined' && localStream) {
+    if (data.type === 'participant_joined' && streamRef.current) {
       if (data.participant.socketId && data.participant.socketId !== socket?.id) {
-        const peer = setupPeerConnection(data.participant.socketId, localStream);
-        if (isCaller) createOffer(peer, data.participant.socketId);
+        console.log(`👤 [Call] New participant: ${data.participant.socketId}`);
+        const peer = setupPeerConnection(data.participant.socketId, streamRef.current);
+        if (peer && isCaller) {
+          createOffer(peer, data.participant.socketId);
+        }
       }
     }
-  };
+  }, [socket?.id, isCaller, setupPeerConnection, createOffer]);
 
-  
-  useEffect(() => {
-    if (permissionsGranted) {
-      setupMedia();
+  // Handle user leaving
+  const handleUserLeft = useCallback(({ userId }: { userId: string }) => {
+    if (!isMounted.current) return;
+    
+    console.log(`👤 [Call] User left: ${userId}`);
+    const participant = participants.find(p => p.user_id === userId);
+    if (participant?.socketId) {
+      removePeerConnection(participant.socketId);
     }
-    return () => endCall();
-  }, [permissionsGranted]);
+  }, [participants, removePeerConnection]);
 
+  // Setup media and connections
   useEffect(() => {
-    if (!localStream) return;
+    isMounted.current = true;
+    
+    const initCall = async () => {
+      const success = await setupMedia();
+      if (!success) {
+        console.log('❌ [Init] Failed to setup media, ending call');
+        endCall();
+        return;
+      }
 
-    // Xử lý các tín hiệu bị pending
-    if (pendingSignals.current.length > 0) {
-      console.log('Processing pending signals:', pendingSignals.current);
-      pendingSignals.current.forEach(signal => handleSignal(signal));
-      pendingSignals.current = [];
-    }
+      // Process any pending signals
+      if (pendingSignals.current.length > 0) {
+        console.log('📨 [Signal] Processing pending signals');
+        pendingSignals.current.forEach(signal => handleSignal(signal));
+        pendingSignals.current = [];
+      }
+    };
 
-    const newActivePeers = new Set(activePeerIds);
-    let hasChanges = false;
+    initCall();
 
-    participants.forEach(participant => {
-      if (!participant.socketId || participant.socketId === socket?.id) return;
+    return () => {
+      isMounted.current = false;
+      if (callActive) {
+        endCall();
+      }
+    };
+  }, [setupMedia, endCall, callActive, handleSignal]);
 
-      if (!activePeerIds.has(participant.socketId)) {
-        console.log(`Setting up new connection for ${participant.socketId}`);
-        setupPeerConnection(participant.socketId, localStream);
-        newActivePeers.add(participant.socketId);
-        hasChanges = true;
+  // Update media tracks when settings change
+  useEffect(() => {
+    if (!streamRef.current) return;
+
+    const videoTracks = streamRef.current.getVideoTracks();
+    const audioTracks = streamRef.current.getAudioTracks();
+
+    videoTracks.forEach(track => {
+      if (track.enabled !== statusCamera) {
+        track.enabled = statusCamera;
+        console.log(`🎚️ [Media] Video track ${statusCamera ? 'ENABLED' : 'DISABLED'}`);
       }
     });
 
-    if (hasChanges) {
-      setActivePeerIds(newActivePeers);
-    }
-  }, [participants, localStream]);
-
-  useEffect(() => {
-    if (!localStream) return;
-
-    localStream.getVideoTracks().forEach(track => {
-      track.enabled = statusCamera;
-      console.log(`Video track updated: ${track.enabled ? 'ENABLED' : 'DISABLED'}`);
-      if (track.enabled) {
-        Object.entries(peerConnections.current).forEach(([socketId, peer]) => {
-          if (peer.iceConnectionState === 'connected' || (peer as any).iceConnectionState === 'connecting') {
-            createOffer(peer, socketId);
-          }
-        });
+    audioTracks.forEach(track => {
+      if (track.enabled !== isMicOn) {
+        track.enabled = isMicOn;
+        console.log(`🎚️ [Media] Audio track ${isMicOn ? 'ENABLED' : 'DISABLED'}`);
       }
     });
-    localStream.getAudioTracks().forEach(track => {
-      track.enabled = isMicOn;
-      console.log(`Audio track updated: ${track.enabled ? 'ENABLED' : 'DISABLED'}`);
-    });
-  }, [statusCamera, isMicOn, localStream]);
+  }, [statusCamera, isMicOn]);
 
+  // Setup socket listeners
   useEffect(() => {
     if (!socket) return;
 
-    const handlers = {
-      call_update: handleCallUpdate,
-      userLeftCall: ({ userId }: any) => {
-        const participant = participants.find(p => p.user_id === userId);
-        if (participant?.socketId) {
-          removePeerConnection(participant.socketId);
-        }
-      },
-      call_ended: () => {
-        console.log('Call ended by server');
-        endCall();
-      },
-      receiveSignal: handleSignal,
+    const signalHandler = (data: any) => handleSignal(data);
+    const callUpdateHandler = (data: any) => handleCallUpdate(data);
+    const userLeftHandler = (data: any) => handleUserLeft(data);
+    const callEndedHandler = () => {
+      console.log('📞 [Call] Ended by server');
+      endCall();
     };
 
-    Object.entries(handlers).forEach(([event, handler]) => {
-      socket.on(event, handler);
-    });
+    socket.on('receiveSignal', signalHandler);
+    socket.on('call_update', callUpdateHandler);
+    socket.on('userLeftCall', userLeftHandler);
+    socket.on('call_ended', callEndedHandler);
 
     return () => {
-      Object.entries(handlers).forEach(([event, handler]) => {
-        socket.off(event, handler);
-      });
+      socket.off('receiveSignal', signalHandler);
+      socket.off('call_update', callUpdateHandler);
+      socket.off('userLeftCall', userLeftHandler);
+      socket.off('call_ended', callEndedHandler);
     };
-  }, [localStream, participants]);
-
+  }, [socket, handleSignal, handleCallUpdate, handleUserLeft, endCall]);
   return (
     <View style={styles.container}>
       <View style={styles.previewContainer}>

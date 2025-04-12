@@ -25,7 +25,7 @@ const userActionButton = (
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   
   const handleToggleMute = () => {
-    console.log('Toggling mute:', isMicOn,localStream);
+
     if (localStream) {
       localStream.getAudioTracks().forEach(track => {
         track.enabled = !isMicOn;

@@ -19,7 +19,7 @@ const VideoCallPreview: React.FC<PreviewVideoCallProps> = ({
   participants,
   isCameraOn,
   localStream,
-  remoteStreams,
+  remoteStreams,localVideoRef
 }) => {
   const user = useSelector((state: any) => state.auth.value);
   const socket = useSocket();
@@ -130,20 +130,20 @@ const VideoCallPreview: React.FC<PreviewVideoCallProps> = ({
   };
 
   const renderSmallView = () => {
-    // console.log('🎥 [VideoCallPreview] Rendering small view');
-    // console.log('🎥 [VideoCallPreview] Is camera on:', isCameraOn);
-    // console.log('🎥 [VideoCallPreview] Local stream:', localStream?.id);
     return (
       <PanGestureHandler onGestureEvent={onGestureEvent} onHandlerStateChange={onHandlerStateChange}>
         <View style={[styles.smallView, { top: smallViewPosition.y, left: smallViewPosition.x }]}>
           {isCameraOn && localStream ? (
-            <RTCView streamURL={localStream.toURL()} style={styles.smallScreen} mirror={true} />
+            <RTCView
+              streamURL={localStream.toURL()}
+              style={styles.smallScreen}
+              mirror={true}
+            />
           ) : (
             <View style={styles.avatarContainerSmall}>
               <Image
                 source={{ uri: user?.avatar || 'default_avatar_url' }}
                 style={styles.avatarSmall}
-                onError={() => console.log('🎥 [VideoCallPreview] Failed to load local user avatar')}
               />
               <Text style={styles.userNameSmall}>{user?.name || 'You'}</Text>
             </View>

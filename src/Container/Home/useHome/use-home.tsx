@@ -112,7 +112,6 @@ export const useHomeLogic = (navigation: any) => {
       skip,
       {dispatch, user},
     );
-    console.log(data_converstation.data.length);
     if (data_converstation.data.length > 0) {
       try {
         setSkiped(data_converstation.data.length);

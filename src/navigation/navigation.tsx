@@ -46,12 +46,10 @@ export const navigationRef = createNavigationContainerRef<RootStackParamList>();
 const Navigation: React.FC = () => {
 
   const dispath = useDispatch();
-  const user = useSelector((state: any) => state.auth.value);
   const [loading, setLoading] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
 
-  const socket = useSocket();
   useEffect(() => {
     const checkLoginStatus = async () => {
       const deviceId =await DeviceInfo.getUniqueId();
@@ -59,7 +57,7 @@ const Navigation: React.FC = () => {
       try {
         const user_String: any = await AsyncStorage.getItem('user');
         const userObject = JSON.parse(user_String);
-
+        // console.log(userObject, 'userObject');
         if (userObject !== null) {
           const decoded: JwtPayload = jwtDecode(userObject.refresh_token);
           const isTokenExpired = decoded.exp

@@ -37,7 +37,6 @@ const requestPermissions = async () => {
           return results[permission] === PermissionsAndroid.RESULTS.GRANTED;
         });
 
-        console.log('All permissions granted:', allGranted);
         return allGranted;
       }
 
@@ -106,8 +105,6 @@ const setupCallKeep = async () => {
 
 const AppDeep = () => {
   useEffect(() => {
-    console.log('AppDeep useEffect started');
-
     const handleNotificationPress = async ({type, detail}: any) => {
  
       // Xử lý các sự kiện PRESS (1) và ACTION_PRESS (2 hoặc 3 tùy phiên bản)
