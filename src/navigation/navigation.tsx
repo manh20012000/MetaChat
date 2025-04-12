@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View, Modal, Alert } from 'react-native';
 import React, { useCallback, useEffect, useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { createNavigationContainerRef, NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Login from '../Screen/User_Auth/login.tsx';
 import Register from '../Screen/User_Auth/register.tsx';
@@ -25,7 +25,11 @@ import SettingComponent from '../Screen/User/UseComponent/Setting.tsx';
 import { useSocket } from '../util/socket.io.tsx';
 import { Status } from '../Redux_Toolkit/Reducer/status.User.ts';
 import DeviceInfo from 'react-native-device-info';
+import VideoCallHome from '../Container/Home/VideoCallComponent/VideoCallHome.tsx';
+import IncomingVideoCallScreen from '../Container/Home/VideoCallComponent/IncomingVideoCallScreen.tsx';
+import { RootStackParamList } from '../type/rootStackScreen.tsx';
 const Stack = createNativeStackNavigator();
+
 const screens = [
   { name: 'Login', component: Login },
   { name: 'Register', component: Register },
@@ -34,19 +38,18 @@ const screens = [
   { name: 'SearchScreen', component: SearchScreen },
   { name: 'HomeChatPersion', component: HomeChatPersion },
    {name:'CameraChat',  component:CameraChat},
-   {name:"Setting",component:SettingComponent}
+   {name:"Setting",component:SettingComponent},
+   {name:"VideoCallHome",component:VideoCallHome},
+   {name:"CommingVideoCall",component:IncomingVideoCallScreen}
 ];
- type propNavigation={
-  linking:any,
-  fallback:any
- }
+export const navigationRef = createNavigationContainerRef<RootStackParamList>();
 const Navigation: React.FC = () => {
+
   const dispath = useDispatch();
-  const user = useSelector((state: any) => state.auth.value);
   const [loading, setLoading] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
-  const socket = useSocket();
+
   useEffect(() => {
     const checkLoginStatus = async () => {
       const deviceId =await DeviceInfo.getUniqueId();
@@ -54,7 +57,7 @@ const Navigation: React.FC = () => {
       try {
         const user_String: any = await AsyncStorage.getItem('user');
         const userObject = JSON.parse(user_String);
-
+        // console.log(userObject, 'userObject');
         if (userObject !== null) {
           const decoded: JwtPayload = jwtDecode(userObject.refresh_token);
           const isTokenExpired = decoded.exp
@@ -109,9 +112,10 @@ const Navigation: React.FC = () => {
     return () => unsubscribe();
   }, [checkNetworkStatus]);
 
+  
   return (
     loading && (
-      <NavigationContainer>
+      <NavigationContainer ref={navigationRef}>
         <Stack.Navigator
           initialRouteName={isLoggedIn ? 'Bottomtab_Navigation' : 'Login'}
           screenOptions={{ headerShown: false }}>

@@ -21,6 +21,7 @@ export const SocketProvider: React.FC<HomeProviderProps> = ({ children }) => {
 
   const [socket, setSocket] = useState<Socket | null>(null);
   const user = useSelector((state: any) => state.auth.value);
+
   const api_socket = API_URL
 
   useEffect(() => {
@@ -30,9 +31,8 @@ export const SocketProvider: React.FC<HomeProviderProps> = ({ children }) => {
           const userToken: string | null = await AsyncStorage.getItem('user');
 
           const parsedToken = userToken ? JSON.parse(userToken) : null;
-          const accessToken = parsedToken?.refresh_token;
+          const accessToken = parsedToken?.access_token;
           const iduser = parsedToken?._id;
-
           if (!accessToken) {
             throw new Error('JWT token not found');
           }

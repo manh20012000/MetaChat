@@ -27,7 +27,7 @@ const AskToAI = () => {
   } = UseAskAI();
 
   return (
-    <View style={{flex: 1, backgroundColor: '#DF0029'}}>
+    <View style={{flex: 1, backgroundColor: 'white'}}>
       <View style={{flex: 1}}>
         <FlashList
           data={messages}

@@ -170,7 +170,6 @@ export default DrawerNavigation;
 const styles = StyleSheet.create({
   drawerContainer: {
         flex: 1,
-         backgroundColor:'pink'
   },
   drawerHeader: {
     alignItems: 'center',

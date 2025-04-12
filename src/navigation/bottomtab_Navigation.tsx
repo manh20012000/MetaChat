@@ -3,7 +3,7 @@ import React from 'react';
 import Notification_screen from '../Screen/Notification/Notification_screen.tsx';
 
 import User_profile from '../Screen/User/User_profile.tsx';
-import Media_screen from '../Screen/Add_Media/Media_screen.tsx';
+import Media_screen from '../Container/Add_Media/Media_screen.tsx';
 import Watch from '../Screen/Video_Watch/Watch.tsx';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {

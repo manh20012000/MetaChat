@@ -154,11 +154,11 @@ const CameraChat: React.FC = () => {
   };
   return (
     <View style={styles.container}>
-      <Statusbar
+      {/* <Statusbar
         bgrstatus={color.dark}
         bgrcolor={color.light}
         translucent={true}
-      />
+      /> */}
       {isRecording && (
         <View style={styles.timerContainer}>
           <Text style={styles.timerText}>{formatSeconds(recordingTime)}</Text>

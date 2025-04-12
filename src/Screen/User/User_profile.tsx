@@ -72,11 +72,11 @@ const User_profile: React.FC<{ navigation: any }> = ({ navigation }) => {
         styles.container,
         {backgroundColor: color.white, paddingTop: insets.top},
       ]}>
-      <Statusbar
+      {/* <Statusbar
         bgrstatus={color.black}
         bgrcolor={color.light}
         translucent={true}
-      />
+      /> */}
       {/* <StatusBar
         translucent={true}
         // hidden={false}

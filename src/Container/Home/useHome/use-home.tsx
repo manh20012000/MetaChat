@@ -112,7 +112,6 @@ export const useHomeLogic = (navigation: any) => {
       skip,
       {dispatch, user},
     );
-    console.log(data_converstation.data.length);
     if (data_converstation.data.length > 0) {
       try {
         setSkiped(data_converstation.data.length);
@@ -198,10 +197,12 @@ export const useHomeLogic = (navigation: any) => {
 
     const handleNewMessage = async (messages: any) => {
       const {message, conversation, send_id, type, deviceSend} = messages;
-      const typeNumber = Number(type);
+   
+      const typeNumber = Number(type); 
+   
       if (typeNumber === 1) {
         console.log(deviceInfo,send_id)
-        // await Converstation_Message(message, conversation, send_id);
+        await Converstation_Message(message, conversation, send_id);
       } else if (typeNumber === 2) {
         if (send_id !== user._id) {
           updateMessage(message, conversation);
@@ -229,7 +230,7 @@ export const useHomeLogic = (navigation: any) => {
       }
       setTypingUsers({userchat, isTyping});
     });
-
+   
     socket.on('new_message', handleNewMessage);
     const conversationObjects = realm.objects('Conversation');
     const updateConversations = async () => {

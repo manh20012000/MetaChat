@@ -16,13 +16,14 @@ import {SocketProvider} from './src/util/socket.io.tsx';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
 import {color} from './src/assets/color/color.js';
+import UseApp from './AppDeep.tsx';
 function App(): React.JSX.Element {
 
 
  
   changeNavigationBarColor('#000000', true);
-    // const {isDarkMode}=UseApp()
-  
+   UseApp()
+ 
   return (
     <Provider store={store}>
       <GestureHandlerRootView style={{backgroundColor: color.black, flex: 1}}>
@@ -36,7 +37,5 @@ function App(): React.JSX.Element {
   );
 }
 export default App;
-function UseApp() {
-  throw new Error('Function not implemented.');
-}
+
 

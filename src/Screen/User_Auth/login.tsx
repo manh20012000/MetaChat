@@ -48,6 +48,7 @@ GoogleSignin.configure({
 // } as any);
 import FlashMessage, { showMessage } from 'react-native-flash-message';
 import Statusbar from '../../Constants/StatusBar.tsx';
+import { response } from '../../type/response_type.ts';
 const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
   const color = useSelector((state: any) => state.colorApp.value);
   const insets = useSafeAreaInsets();
@@ -165,6 +166,7 @@ const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
         const fcmtoken = await AsyncStorage.getItem('fcmtoken');
        
         if (!fcmtoken) {
+          setLoading(true);
           const token = await messaging().getToken();
           let avatar = gguser.photo;
           if (gguser.photo == null) {
@@ -183,33 +185,63 @@ const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
             gender: gguser.gender ?? '',
             phone: gguser.phoneNumber ?? '',
           };
-          console.log(gguser, token, 'hahahh');
-          const { data } = await axios.post(
-            `${API_URL}/api/user/siginGoogle`,
+
+          const response:response = await axios.post(
+            `${API_URL}/api/nodeserver/api/user/siginGoogle`,
             user,
             {
               headers: {
                 'Content-Type': 'application/json',
               },
             },
-          );
-          const users = data.data;
+          ); 
+       
+          if (response.data.success) {
+        
+          const users = response.data.data;
           dispatch(login(users));
-          await AsyncStorage.setItem('user', JSON.stringify(users));
+          await HandlerNotification.checknotificationPemision(users);
+          // await AsyncStorage.setItem('user', JSON.stringify(users));
           await AsyncStorage.setItem(
             'accessToken',
-            JSON.stringify(users.accessToken),
+            JSON.stringify(users?.access_token),
           );
           await AsyncStorage.setItem(
             'refreshToken',
-            JSON.stringify(data.refreshToken),
+            JSON.stringify(users?.refresh_token),
           );
-          // await setData(JSON.stringify(data));
+          setLoading(false);
+          showMessage({
+            message: 'Đăng nhập thành công!',
+            description: 'Đăng nhập thành công!',
+            type: 'success',
+            icon: 'success',
+            duration: 3000, // Thời gian hiển thị thông báo (3 giây)
+          });
           navigation.navigate('Bottomtab_Navigation');
         }
+        else if (response.data.success === false) {
+          setLoading(false);
+          showMessage({
+            message: 'Đăng nhập không thành công!',
+            description: 'Đăng nhập không thành công!',
+            type: 'danger',
+            icon: 'danger',
+            duration: 3000, // Thời gian hiển thị thông báo (3 giây)
+          });
+        }
       }
+    }
     } catch (error: any) {
+      setLoading(false);
       console.log('Error with Google Sign-In:', error);
+      showMessage({
+        message: 'Đăng nhập không thành công!',
+        description: 'Đăng nhập không thành công!',
+        type: 'danger',
+        icon: 'danger',
+        duration: 3000, // Thời gian hiển thị thông báo (3 giây)
+      });
     }
   };
 

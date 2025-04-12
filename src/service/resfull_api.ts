@@ -1,6 +1,6 @@
 import {response} from '../type/response_type';
-// import { URL } from '@env';
-const API_URL = 'http://192.168.51.100:8080';
+const API_URL = process.env.URL;
+
 import axios from 'axios';
 import {checkAndRefreshToken} from '../util/checkingToken';
 const postData = async (
@@ -15,7 +15,7 @@ const postData = async (
       data: null,
       code: 404,
       message: 'Token is invalid or expired',
-      status: false,
+      success: false,
     };
   } else {
     try {
@@ -75,18 +75,21 @@ const postFormData = async (route: string, data: any, check: any) => {
 // Hàm GET
 const getData = async (route: string, query: any, param: any, check: any) => {
   const checking = await checkAndRefreshToken(check.dispatch, check.user);
+ 
   if (checking === null) {
     return null;
   }
   try {
-    const response = await axios.get(`${API_URL}/${route}/${param}`, {
+    
+    const response:response = await axios.get(`${API_URL}/${route}/${param}`, {
       params: query ?? null,
       headers: {
         'Content-Type': 'application/json',
         authorization: `Bearer ${checking.access_token} `,
       },
-      // Tham số truyền qua query
+      
     });
+
     return response.data;
   } catch (error) {
     console.error('GET Error:', error);
@@ -95,14 +98,13 @@ const getData = async (route: string, query: any, param: any, check: any) => {
 };
 const getResearch = async (route: string, params: any) => {
   try {
-    console.log('hajajsajs')
-    const response: any = await axios.get(`${API_URL}/${route}`, {
+    
+    const response: response = await axios.get(`${API_URL}/${route}`, {
       params: {text: params},
       headers: {
         'Content-Type': 'application/json',
       },
     });
-
     return response.data;
   } catch (error) {
     console.error('GET Error:', error);

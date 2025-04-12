@@ -5,8 +5,8 @@ import userMessage from '../../../../type/Home/useMessage_type';
 import {messageIcon} from '../../../../type/react-type';
 import {Message_type} from '../../../../type/Home/Chat_type';
 import {TouchableOpacity} from 'react-native';
-import PreviewImage from '../../../../Container/Home/Chat_component/PreviewAttenment/ImagePreview';
-import AudioMessage from '../../../../Container/Home/Chat_component/PreviewAttenment/PreviewAudio';
+import PreviewImage from '../../Chat_component/PreviewAttenment/ImagePreview';
+import AudioMessage from '../../Chat_component/PreviewAttenment/PreviewAudio';
 type TextMessageProps = {
   isFirstMessage: boolean;
   isMyMessage: boolean;
