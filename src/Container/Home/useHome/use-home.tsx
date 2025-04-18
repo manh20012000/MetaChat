@@ -35,6 +35,7 @@ export const useHomeLogic = (navigation: any) => {
   );
 
   const user = useSelector((state: any) => state.auth.value);
+
   const dispatch = useDispatch();
   const user_Status = useSelector((state: any) => state.statusUser.value);
   const checkConnect = useSelector((state: any) => state.network.value);
@@ -196,26 +197,30 @@ export const useHomeLogic = (navigation: any) => {
     };
 
     const handleNewMessage = async (messages: any) => {
-      const {message, conversation, send_id, type, deviceSend} = messages;
-   
-      const typeNumber = Number(type); 
-   
-      if (typeNumber === 1) {
-        console.log(deviceInfo,send_id)
-        await Converstation_Message(message, conversation, send_id);
-      } else if (typeNumber === 2) {
-        if (send_id !== user._id) {
-          updateMessage(message, conversation);
+      try {
+        const {message, conversation, send_id, type, deviceSend, userSend} =
+          messages;
+
+        const typeNumber = Number(type);
+
+        if (typeNumber === 1) {
+          await Converstation_Message(message, conversation, send_id);
+        } else if (typeNumber === 2) {
+          if (send_id !== user._id) {
+            updateMessage(message, conversation);
+          }
+        } else if (typeNumber === 3) {
+          //xóa tin nhắn
+          if (deviceSend !== deviceInfo) {
+            recallMessage(conversation._id, message._id);
+          }
+        } else if (typeNumber === 4) {
+          if (send_id === user._id && deviceSend !== deviceInfo) {
+            deleteMessage(conversation._id, message._id);
+          }
         }
-      } else if (typeNumber === 3) {
-        //xóa tin nhắn
-        if (deviceSend !== deviceInfo) {
-          recallMessage(conversation._id, message._id);
-        }
-      } else if (typeNumber === 4) {
-        if (send_id === user._id && deviceSend !== deviceInfo) {
-          deleteMessage(conversation._id, message._id);
-        }
+      } catch (error) {
+        console.log('lỗi khi chèn message', error);
       }
     };
 
@@ -224,13 +229,12 @@ export const useHomeLogic = (navigation: any) => {
     } else {
       socket.on('connect', handleConnect);
     }
-    socket?.on('userTyping', ({userchat, isTyping,deviceSend}) => {
-      if (userchat._id === user._id && deviceSend !== deviceInfo){
-
+    socket?.on('userTyping', ({userchat, isTyping, deviceSend}) => {
+      if (userchat._id === user._id && deviceSend !== deviceInfo) {
       }
       setTypingUsers({userchat, isTyping});
     });
-   
+
     socket.on('new_message', handleNewMessage);
     const conversationObjects = realm.objects('Conversation');
     const updateConversations = async () => {

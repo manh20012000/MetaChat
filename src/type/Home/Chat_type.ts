@@ -29,14 +29,12 @@ export type Message_type = {
       name: string;
       avatar: string;
       user_id: string;
-    };
+    },
     reaction:number,
   }[];
   receiver: string[];
   recall: boolean;
-  isRead: [
-  {_id: string; avatar: string; name: string},
-  ]|[];
+  
   replyTo: {
     _id: string;
     text: string; // Nội dung của tin nhắn reply

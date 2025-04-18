@@ -28,7 +28,6 @@ export const ReactionIcons: React.FC<ReactionIconsProps> = ({
     const reactionIndex = selectedMessages.reactions.findIndex(
       (reaction) => reaction.user._id === userChat._id
     );
-  console.log(reactionPosition,'dsdjskdskmmk')
   
     // Nếu user đã có reaction, cập nhật lại reaction đó
     if (reactionIndex !== -1) {
@@ -63,14 +62,14 @@ export const ReactionIcons: React.FC<ReactionIconsProps> = ({
         backgroundColor: 'rgb(189, 8, 53)',
         flexDirection: 'row',
         borderRadius: 20,
-        right: isMyMessage ? 30 : undefined,
-        left: isMyMessage ? undefined : 30,
+        right: isMyMessage ? 10 : undefined,
+        left: isMyMessage ? undefined : 10,
         alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
         zIndex: 1,
-        width: '70%',
+        width: '60%',
         height: 44,
         // bottom: '10%',
-        top: reactionPosition.y+20 , // Điều chỉnh lên trên tin nhắn một chút
+        top: reactionPosition.y-50 , // Điều chỉnh lên trên tin nhắn một chút
         alignItems: 'center',
         justifyContent: 'center',
       }}>
@@ -83,9 +82,9 @@ export const ReactionIcons: React.FC<ReactionIconsProps> = ({
           <Text style={{fontSize: 30, marginHorizontal: 5}}>{item.icon}</Text>
         </TouchableOpacity>
       ))}
-      <TouchableOpacity>
+      {/* <TouchableOpacity>
         <Ionicons name="add" size={24} color="white" />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 };

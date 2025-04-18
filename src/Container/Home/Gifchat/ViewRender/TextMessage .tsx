@@ -7,6 +7,7 @@ import {Message_type} from '../../../../type/Home/Chat_type';
 import {TouchableOpacity} from 'react-native';
 import PreviewImage from '../../Chat_component/PreviewAttenment/ImagePreview';
 import AudioMessage from '../../Chat_component/PreviewAttenment/PreviewAudio';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 type TextMessageProps = {
   isFirstMessage: boolean;
   isMyMessage: boolean;
@@ -19,7 +20,7 @@ type TextMessageProps = {
   ) => void;
   color: any;
   userChat: userMessage;
-  setSizeMessage:React.Dispatch<React.SetStateAction<any>>;
+  setSizeMessage: React.Dispatch<React.SetStateAction<any>>;
   setSelectedMessages: React.Dispatch<React.SetStateAction<any>>;
 };
 
@@ -31,32 +32,32 @@ export const MessageComponent: React.FC<TextMessageProps> = ({
   handleLongPressMessage,
   highlightedMessageId,
   color,
-  userChat,setSizeMessage,
+  userChat,
+  setSizeMessage,
   setSelectedMessages,
 }) => {
   const messageRef = useRef<View>(null);
   const getPosition = () => {
     if (messageRef.current) {
       messageRef.current.measureInWindow((x, y, width, height) => {
-        handleLongPressMessage({x, y} ,currentMessage);
+        handleLongPressMessage({x, y}, currentMessage);
       });
     }
   };
-  
-  useEffect(()=>{
+
+  useEffect(() => {
     if (messageRef.current) {
       messageRef.current.measureInWindow((x, y, width, height) => {
-         setSizeMessage({width, height})
+        setSizeMessage({width, height});
         // // handleLongPressMessage({x, y},{width, height} ,currentMessage);
       });
     }
-  },[])
+  }, []);
   return (
     <Pressable
       onPress={() => {
         console.log('nhấn onpressble');
         setSelectedMessages(null);
-       
       }}
       ref={messageRef}
       style={{
@@ -64,8 +65,8 @@ export const MessageComponent: React.FC<TextMessageProps> = ({
         marginVertical: 1,
         alignItems: 'flex-end',
         alignSelf: 'flex-end',
-     
       }}>
+      
       {isFirstMessage && currentMessage.user._id !== userChat._id && (
         <Avatar
           {...props}
@@ -112,14 +113,13 @@ export const MessageComponent: React.FC<TextMessageProps> = ({
         />
       )}
       {currentMessage.messageType === 'attachment' && (
-      <View style={{flex:1,}}>
-           <PreviewImage
-          highlightedMessageId={highlightedMessageId}
-          isMyMessage={isMyMessage}
-          currentMessage={currentMessage}
-          getPosition={getPosition}
-        
-        />
+        <View style={{flex: 1}}>
+          <PreviewImage
+            highlightedMessageId={highlightedMessageId}
+            isMyMessage={isMyMessage}
+            currentMessage={currentMessage}
+            getPosition={getPosition}
+          />
         </View>
       )}
       {currentMessage.messageType === 'audio' && (

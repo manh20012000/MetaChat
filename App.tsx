@@ -16,7 +16,7 @@ import {SocketProvider} from './src/util/socket.io.tsx';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
 import {color} from './src/assets/color/color.js';
-import UseApp from './AppDeep.tsx';
+import UseApp from './src/global/UseApp.tsx';
 function App(): React.JSX.Element {
 
 
@@ -29,7 +29,6 @@ function App(): React.JSX.Element {
       <GestureHandlerRootView style={{backgroundColor: color.black, flex: 1}}>
         <SocketProvider>
           <Navigation 
-       
            />
         </SocketProvider>
       </GestureHandlerRootView>

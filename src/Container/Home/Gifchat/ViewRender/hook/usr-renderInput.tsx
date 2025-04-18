@@ -55,7 +55,7 @@ const useRenderInput = (props: any) => {
       createdAt: newdate,
       reactions: [],
       receiver: conversation.participantIds,
-      isRead: [],
+    
       replyTo:
         replyMessage === null
           ? null
@@ -103,7 +103,7 @@ const useRenderInput = (props: any) => {
           createdAt: newdate,
           reactions: [],
           receiver: conversation.participantIds,
-          isRead: [],
+      
           replyTo: null,
           recall: false,
         };

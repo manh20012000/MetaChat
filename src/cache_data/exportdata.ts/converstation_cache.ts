@@ -21,6 +21,7 @@ const createConversation = async (Conversation: Conversation) => {
     }
 
     // Nếu không tồn tại, thêm vào Realm
+    if(Conversation.participants.length>0){
     realm.write(() => {
       realm.create('Conversation', {
         _id: Conversation._id, // Sử dụng ID của cuộc hội thoại
@@ -38,6 +39,7 @@ const createConversation = async (Conversation: Conversation) => {
         lastSync:Conversation.lastSync,
       });
     });
+  }
   } catch (error) {
     console.error('Lỗi khi tạo cuộc hội thoại:', error);
   }
@@ -210,8 +212,10 @@ const Converstation_Message = async (
   message: Message_type,
   conversation: Conversation,
   send_id: string,
-) => {
+) => { 
+
   try {
+   
     const conditions = conversation.participantIds
       .map((id: any, index: any) => `participantIds CONTAINS $${index}`)
       .join(' AND ');
@@ -222,22 +226,30 @@ const Converstation_Message = async (
         `participantIds.@size == ${conversation.participantIds.length} AND ${conditions}`,
         ...conversation.participantIds,
       );
-
+ 
     let existingConversation = conversations[0] || null;
+    if(existingConversation){
 
     realm.write(() => {
       if (existingConversation) {
+  
         (existingConversation.messages as Message_type[]).unshift(message);
         existingConversation.updatedAt = message.createdAt;
         existingConversation.lastSync=message.createdAt;
       } else {
+        console.log('không có cuộc hội thoại nào');
         realm.create('Conversation', converstation(conversation, message));
       }
     });
+    }else{
+      console.log('không có cuộc hội thoại nào');
+    }
+  
   } catch (error) {
-    console.log(error);
+    console.log('lỗi khi add message',error);
   }
 };
+
 const MessageError = async (
   message: Message_type,
   conversation: Conversation,
@@ -295,7 +307,7 @@ const updateMessage = (message: Message_type, conversation: Conversation) => {
       if (message.reactions !== undefined)
         existingMessage.reactions = message.reactions;
       if (message.recall !== undefined) existingMessage.recall = message.recall;
-      if (message.isRead !== undefined) existingMessage.isRead = message.isRead;
+
       if (message.replyTo !== undefined)
         existingMessage.replyTo = message.replyTo;
       if (message.statusSendding !== undefined)
@@ -321,7 +333,7 @@ const updateMessage = (message: Message_type, conversation: Conversation) => {
     existingConversation.createdAt = new Date();
   });
 };
-const recallMessage = (conversation_id: string, message_id: string) => {
+const recallMessage = (conversation_id: string, message_readed_id: string) => {
   realm.write(() => {
     const conversation = realm
       .objects<Conversation>('Conversation')
@@ -332,7 +344,7 @@ const recallMessage = (conversation_id: string, message_id: string) => {
     }
     const messages = conversation.messages as unknown as Message_type[];
 
-    const messageIndex = messages.findIndex(msg => msg._id === message_id);
+    const messageIndex = messages.findIndex(msg => msg._id === message_readed_id);
     if (messageIndex === -1) {
       return;
     }
@@ -340,7 +352,6 @@ const recallMessage = (conversation_id: string, message_id: string) => {
     messages[messageIndex].messageType = 'recall';
     (messages[messageIndex].attachments = []),
       (messages[messageIndex].text = null),
-      (messages[messageIndex].isRead = []);
     messages[messageIndex].receiver = [];
     conversation.createdAt = new Date();
     conversation.otherContent = 'tin nhắn đã được gỡ';
@@ -350,7 +361,7 @@ const recallMessage = (conversation_id: string, message_id: string) => {
   });
 };
 
-const deleteMessage = (conversation_id: string, message_id: string) => {
+const deleteMessage = (conversation_id: string, message_readed_id: string) => {
   realm.write(() => {
     const conversation = realm
       .objects<Conversation>('Conversation')
@@ -361,14 +372,14 @@ const deleteMessage = (conversation_id: string, message_id: string) => {
     }
     const messages = conversation.messages as unknown as Message_type[];
 
-    const messageIndex = messages.findIndex(msg => msg._id === message_id);
+    const messageIndex = messages.findIndex(msg => msg._id === message_readed_id);
     if (messageIndex === -1) {
       return;
     }
     messages.splice(messageIndex, 1);
   });
 };
-const deleteMessageError = (conversation_id: string, message_id: string) => {
+const deleteMessageError = (conversation_id: string, message_readed_id: string) => {
   realm.write(() => {
     const conversation = realm
       .objects<Conversation>('Conversation')
@@ -378,7 +389,7 @@ const deleteMessageError = (conversation_id: string, message_id: string) => {
       return;
     }
     const messageError = conversation.messageError as unknown as Message_type[];
-    const messageIndex = messageError.findIndex(msg => msg._id === message_id);
+    const messageIndex = messageError.findIndex(msg => msg._id === message_readed_id);
     if (messageIndex === -1) {
       return;
     }

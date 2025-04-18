@@ -75,7 +75,7 @@ const postFormData = async (route: string, data: any, check: any) => {
 // Hàm GET
 const getData = async (route: string, query: any, param: any, check: any) => {
   const checking = await checkAndRefreshToken(check.dispatch, check.user);
- 
+  //  console.log(checking.access_token, 'checking');
   if (checking === null) {
     return null;
   }

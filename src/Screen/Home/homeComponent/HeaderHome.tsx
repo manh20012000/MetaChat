@@ -12,18 +12,21 @@ import {useDispatch, UseDispatch, UseSelector, useSelector} from 'react-redux';
 import {Search} from '../../../assets/svg/svgfile';
 import {useSocket} from '../../../util/socket.io';
 import {findAndconvertConversation} from '../../../cache_data/exportdata.ts/converstation_cache';
-const HeaderHome: React.FC<{navigation: any; data_friend: any}> = ({
+import userMessage from '../../../type/Home/useMessage_type';
+import {participants} from '../../../type/Home/Converstation_type';
+const HeaderHome: React.FC<{navigation: any; data_friend: userMessage[]}> = ({
   navigation,
   data_friend,
 }) => {
   const user = useSelector((state: any) => state.auth.value);
+  // console.log(typeof user)
   const {width, height} = useWindowDimensions();
   const socket = useSocket();
   const isPortrait = height > width;
   const dispatch = useDispatch();
   const color = useSelector((state: any) => state.colorApp.value);
   // const [user_data, setUser_Data] = useState(data_friend);
-      const user_Status = useSelector((state: any) => state.statusUser.value);
+  const user_Status = useSelector((state: any) => state.statusUser.value);
   // useEffect(() => {
   //   // Fetch user data
   // }, [user]);
@@ -88,8 +91,7 @@ const HeaderHome: React.FC<{navigation: any; data_friend: any}> = ({
         <View style={{alignItems: 'center', flexDirection: 'row'}}>
           <Search width={30} color={'pink'} stroke={'white'} />
           <Text style={{color: color.light, fontSize: 15, fontWeight: '500'}}>
-            {' '}
-            Tìm kiếm{' '}
+            Tìm kiếm
           </Text>
         </View>
       </Pressable>
@@ -97,7 +99,7 @@ const HeaderHome: React.FC<{navigation: any; data_friend: any}> = ({
         <FlatList
           ListHeaderComponent={<HeaderTop_Chat />}
           horizontal={true}
-          keyExtractor={item => item._id}
+          keyExtractor={item => item._id.toString()}
           data={data_friend}
           showsHorizontalScrollIndicator={false} // Ẩn thanh cuộn ngang
           renderItem={({item}) => {
@@ -125,7 +127,7 @@ const HeaderHome: React.FC<{navigation: any; data_friend: any}> = ({
                     }}></View>
                 )}
                 <TouchableOpacity
-                  style={{}}
+                  style={{justifyContent: 'center', alignItems: 'center',alignSelf: 'center'}}
                   onPress={async () => {
                     try {
                       // Tìm hoặc chuyển cuộc hội thoại với user lên đầu danh sách
@@ -138,7 +140,6 @@ const HeaderHome: React.FC<{navigation: any; data_friend: any}> = ({
                           role: 'admin',
                           action_notifi: true,
                           status_read: true,
-
                         },
                         {
                           _id: item._id.toString(),
@@ -147,21 +148,21 @@ const HeaderHome: React.FC<{navigation: any; data_friend: any}> = ({
                           role: 'member',
                           action_notifi: true,
                           status_read: true,
-
                         },
                       ];
                       const conversation = await findAndconvertConversation(
-                     
                         participants,
                         participantIds,
-                       
-                        {dispatch,user}
+
+                        {dispatch, user},
                       );
                       if (conversation) {
-                        const recipientIds = participantIds.filter((id: string) => id !== user._id);
+                        const recipientIds = participantIds.filter(
+                          (user: userMessage) => user._id !== user._id,
+                        );
                         socket?.emit('invite_to_room', {
                           conversationId: conversation._id,
-                          recipientId: recipientIds
+                          recipientId: recipientIds,
                         });
                       }
                       // Chuyển đến màn hình chat cá nhân với thông tin người dùng
@@ -192,7 +193,14 @@ const HeaderHome: React.FC<{navigation: any; data_friend: any}> = ({
                     }}
                     source={{uri: item.avatar}}
                   />
-                  <Text style={{color: color.white, alignSelf: 'center'}}>
+                  <Text
+                    ellipsizeMode="tail"
+                    numberOfLines={1}
+                    style={{
+                      color: color.white,
+                      alignSelf: 'center',
+                      width: 70,
+                    }}>
                     {item.name}
                   </Text>
                 </TouchableOpacity>
