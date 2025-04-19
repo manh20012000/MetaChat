@@ -27,6 +27,7 @@ import MicroChat from '../../../Container/Home/Chat_component/Microphone/MicroCh
 import MicrophonePermission from '../../../util/Permision/MicrophonePermision';
 import ModalMap from '../../../Container/Home/Chat_component/Mapshare/ShareMap';
 import MapLocaltedPermission from '../../../util/Permision/MapPermission';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 type NavigationProps = NavigationProp<RootStackParamList>;
 type TCusttomTypeInput = {
   onSend: any;
@@ -71,18 +72,19 @@ const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
     onClose,
   } = useRenderInput(props);
   return (
-    <>
+    <View style={{}}>
       {replyMessage && (
         <View
           style={{
             width: width,
-            marginBottom: 70,
+            marginBottom: 30+inputHeight,
             alignContent: 'center',
             paddingHorizontal: 10,
             borderTopWidth: 2,
             borderTopColor: 'gray',
             justifyContent: 'center',
             alignSelf: 'center',
+            
           }}>
           <Text style={{color: 'white', fontWeight: 'bold'}}>
             Replying to{' '}
@@ -110,15 +112,12 @@ const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
               alignSelf: 'center',
               justifyContent: 'center',
             }}>
-            <Text
-              style={{
-                color: 'white',
-                fontWeight: 'bold',
-                fontSize: 25,
-                textAlign: 'center',
-              }}>
-              x
-            </Text>
+           <MaterialIcons
+              name="cancel"
+              size={20}
+              color="white"
+              style={{alignSelf: 'center'}}
+            />
           </TouchableOpacity>
         </View>
       )}
@@ -130,9 +129,11 @@ const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
             alignItems: 'center',
             justifyContent: 'space-around',
             position: 'absolute',
-            bottom: 0,
+            bottom: 5,
             paddingVertical: 10,
             zIndex: 1,
+            height: inputHeight+10,
+
           }}>
           {changeIcon ? (
             <View
@@ -276,7 +277,7 @@ const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
           conversation={conversation}
         />
       )}
-    </>
+    </View>
   );
 };
 

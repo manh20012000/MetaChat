@@ -173,6 +173,7 @@ const Login: React.FC<{ navigation: any }> = ({ navigation }) => {
             avatar =
               'https://ss-images.saostar.vn/wwebp1200/pc/1613810558698/Facebook-Avatar_2.png';
           }
+          console.log(gguser)
           const user = {
             email: gguser.email,
             password: gguser.id,

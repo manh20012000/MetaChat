@@ -1,34 +1,4 @@
 // Định nghĩa `Participant` Model
-const ParticipantSchema = {
-  name: 'Participant',
-  properties: {
-    _id: 'string?',
-    name: 'string?',
-    user_id: 'string?',
-    avatar: 'string?',
-    role: 'string?',
-    action_notifi: 'bool?', // Cho phép null
-    status_read: 'bool?', // Cho phép null
-  },
-};
-const ReplyToSchema = {
-  name: 'ReplyTo',
-  properties: {
-    _id: 'string?', // ID tin nhắn gốc
-    user: 'user?', // Người gửi tin nhắn gốc
-    messageType: 'string?', // Loại tin nhắn
-    text: 'string?', // Nội dung tin nhắn gốc
-  },
-};
-const IsReadSchema = {
-  name: 'IsRead',
-  properties: {
-    user: 'user?', // Người gửi tin nhắn gốc
-    messageId:'string?',
-    readAt:'string'
-  },
-};
-
 const userSchema = {
   name: 'user',
   properties: {
@@ -42,6 +12,23 @@ const userSchema = {
   },
 };
 
+const ParticipantSchema = {
+  name: 'Participant',
+  properties: {
+    user: 'user?', // Người đọc tin nhắn 
+    message_readed_id:'string?',
+    readAt: 'string?'
+  },
+};
+const ReplyToSchema = {
+  name: 'ReplyTo',
+  properties: {
+    _id: 'string?', // ID tin nhắn gốc
+    user: 'user?', // Người gửi tin nhắn gốc
+    messageType: 'string?', // Loại tin nhắn
+    text: 'string?', // Nội dung tin nhắn gốc
+  },
+};
 
 
 const MessageSchema = {
@@ -108,7 +95,6 @@ const ConversationSchema = {
     isDeleted: 'string[]',
     messageError: 'Message[]',
     otherContent:'string?',
-    isRead:'IsRead[]',
     lastSync:'string?'
 
   },
@@ -117,12 +103,11 @@ const ConversationSchema = {
 export {
   ParticipantSchema,
   MessageSchema,
-
   ConversationSchema,
   AttachmentSchema,
   CallDetailSchema,
   ReactionSchema,
   userSchema,
   ReplyToSchema,
-  IsReadSchema,
+ 
 };

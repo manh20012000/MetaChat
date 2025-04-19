@@ -20,7 +20,7 @@ const renderInputToolbar = (props:any) => {
 const renderSend = (props:any) => {
   return (
     <Send {...props}>
-      <View style={{marginRight: 10, marginBottom: 5}}>
+      <View style={{marginRight: 10}}>
         <MaterialCommunityIcons name="send-circle" size={32} color="#007AFF" />
       </View>
     </Send>

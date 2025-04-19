@@ -38,7 +38,7 @@ const UseButtonMessage = ({
         createdAt: new Date(),
         reactions: [],
         receiver: conversation.participantIds,
-        isRead: [],
+   
         replyTo: null,
         recall: false,
       };

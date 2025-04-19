@@ -10,13 +10,11 @@ export const renderCreateMessage= (message:Message_type,conversation:Conversatio
         user: userChat,
         messageType:message.messageType,
         text: message.text,
-
         attachments: [],
         callDetails:null,
         createdAt: message.createdAt,
         reactions: [],
         receiver: conversation.participantIds,
-        isRead: [],
         replyTo:{},
         recall:false
       };

@@ -12,12 +12,11 @@ const handlerMessage = (
     messageType: messageCurrent.messageType || 'text',
     text: messageCurrent.text || '',
     createdAt: messageCurrent.createdAt || new Date().toISOString(),
-    isRead: messageCurrent.isRead || [],
     replyTo: messageCurrent.replyTo || null,
     statusSendding: false, // ✅ Giữ nguyên
     callDetails: messageCurrent.callDetails || null,
     attachments: messageCurrent.attachments || [],
-    reactions: reaction.length > 0 ? reaction:messageCurrent.reactions ,
+    reactions: reaction.length > 0 ? reaction:messageCurrent.reactions || [], // ✅ Sử dụng reaction nếu có, nếu không thì sử dụng reactions hiện tại
     other: messageCurrent.other || 'bày tỏ cảm xúc', // ✅ Thêm vào thuộc tính mới nếu cần
     recall: messageCurrent.recall,
     receiver:messageCurrent.receiver,

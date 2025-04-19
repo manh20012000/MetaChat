@@ -26,6 +26,7 @@ import {GiftedChat, InputToolbar} from 'react-native-gifted-chat';
 import Conversation from '../../../type/Home/Converstation_type';
 import {useSocket} from '../../../util/socket.io';
 import userMessage from '../../../type/Home/useMessage_type';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
   route,
@@ -43,7 +44,7 @@ const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
  
   const [userChat] = useState<any>(
     conversation.participants.find(
-      (participant: any) => participant.user_id === user._id,
+      (participant: any) => participant.user.user_id === user._id,
     ),
   );
   const sendConnectCall = async () => {
@@ -114,12 +115,13 @@ const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
           <TouchableOpacity
             style={{alignItems: 'center', justifyContent: 'center'}}
             onPress={() => navigation.goBack()}>
-            <Icon
+             <Ionicons name="arrow-back" size={35} color={color.blue}/>
+            {/* <Icon
               color={color.white}
               name="back"
               size={34}
               wiewbox={'0 0 1024 1024'}
-            />
+            /> */}
           </TouchableOpacity>
         </View>
 
@@ -128,7 +130,7 @@ const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
             flexDirection: 'row',
             alignItems: 'center',
             width: '50%',
-            gap: 10,
+            gap: 2,
           }}>
           {conversation.avatar ? (
             <Image
@@ -156,7 +158,7 @@ const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
                 // Lọc ra những người tham gia khác currentUser
                 const filteredParticipants = conversation.participants.filter(
                   (participant: any) =>
-                    participant._id !== conversation.participants[0]._id,
+                    participant.user._id !== conversation.participants[0].user._id,
                 );
 
                 // Số lượng người tham gia khác currentUser
@@ -171,7 +173,7 @@ const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
                         borderRadius: 25,
                         backgroundColor: color.gray,
                       }}
-                      source={{uri: filteredParticipants[0].avatar}}
+                      source={{uri: filteredParticipants[0].user.avatar}}
                     />
                   );
                 } else if (count === 2) {
@@ -190,7 +192,7 @@ const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
                           borderColor: 'white',
                           backgroundColor: color.gray,
                         }}
-                        source={{uri: filteredParticipants[0]?.avatar}}
+                        source={{uri: filteredParticipants[0]?.user.avatar}}
                       />
                       <Image
                         style={{
@@ -204,7 +206,7 @@ const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
                           borderColor: 'white',
                           backgroundColor: color.gray,
                         }}
-                        source={{uri: filteredParticipants[1]?.avatar}}
+                        source={{uri: filteredParticipants[1]?.user.avatar}}
                       />
                     </>
                   );
@@ -221,7 +223,7 @@ const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
                       ];
                       return (
                         <Image
-                          key={participant._id}
+                          key={participant.user._id}
                           style={{
                             width: 20,
                             height: 20,
@@ -232,7 +234,7 @@ const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
                             borderColor: 'white',
                             backgroundColor: color.gray,
                           }}
-                          source={{uri: participant.avatar}}
+                          source={{uri: participant.user.avatar}}
                         />
                       );
                     });
@@ -243,16 +245,17 @@ const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
           <Text
             style={{
               fontWeight: 'bold',
-              fontSize: 25,
+              fontSize: 18,
               color: color.white,
+              width: 100,
             }}
             numberOfLines={1}
             ellipsizeMode="tail">
             {conversation.roomName
               ? conversation.roomName
               : conversation.participants
-                  .filter(participant => participant.name !== user.name) // Lọc bỏ tên của currentUser
-                  .map(participant => participant.name) // Lấy tên còn lại
+                  .filter(participant => participant.user.name !== user.name) // Lọc bỏ tên của currentUser
+                  .map(participant => participant.user.name) // Lấy tên còn lại
                   .join(', ')}{' '}
           </Text>
         </TouchableOpacity>
@@ -266,19 +269,19 @@ const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
           }}>
           <TouchableOpacity
             style={{
-              width: 40,
-              height: 40,
+              // width: 40,
+              // height: 40,
               borderRadius: 100,
               alignItems: 'center',
               justifyContent: 'center',
             }}
             onPress={sendConnectCall}>
-            <Call />
+        <Ionicons name="call-sharp" size={25} color={color.blue}/>
           </TouchableOpacity>
           <TouchableOpacity
             style={{
-              width: 40,
-              height: 40,
+              // width: 40,
+              // height: 40,
               borderRadius: 100,
               alignItems: 'center',
               justifyContent: 'center',
@@ -286,17 +289,17 @@ const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
             onPress={() => {
               navigation.navigate('VideoCallHome', {type: 'videocall'});
             }}>
-            <VideoCall fill={'#000'} />
+            <Ionicons name="videocam" size={25} color={color.blue}/>
           </TouchableOpacity>
           <TouchableOpacity
             style={{
-              width: 40,
-              height: 40,
+              // width: 40,
+              // height: 40,
               borderRadius: 100,
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <Infor />
+              <Ionicons name="information-circle" size={30} color={color.blue}/>
           </TouchableOpacity>
         </View>
       </View>

@@ -36,6 +36,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   const color = useSelector(
     (value: {colorApp: {value: any}}) => value.colorApp.value,
   );
+
   const deviceInfo = useSelector(
     (value: {deviceInfor: {value: any}}) => value.deviceInfor.value,
   );
@@ -49,7 +50,9 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   const [messages, setMessages] = useState<any[]>(
     Array.from([...conversation.messageError, ...conversation.messages]),
   );
-
+  const[textMessgaeMarkRead,setTextMessageMarkRead]=useState(null)
+  const[IsReadMessage,setIsReadMessage]=useState(null)
+  const[showUserRead,setShowUserRead]=useState(conversation.participants)
   const [highlightedMessageId, setHighlightedMessageId] = useState<
     string | null
   >(null);
@@ -60,7 +63,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   const [selectedMessages, setSelectedMessages] = useState<Message_type | null>(
     null,
   );
-  const [markMessage, SetMarkMessage] = useState(conversation.isRead);
+  const [markMessage, SetMarkMessage] = useState(conversation.participants);
   const [typingUsers, setTypingUsers] = useState<{
     userChat: userMessage;
     isTyping: boolean;
@@ -70,9 +73,11 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   const [reactionPosition, setReactionPosition] = useState({x: 0, y: 0});
   const [userChat] = useState<any>(
     conversation.participants.find(
-      (participant: any) => participant.user_id === user._id,
-    ),
+      (participant: any) => participant.user.user_id === user._id
+    )?.user || null
   );
+  
+ 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['40%', '90%'], []);
 
@@ -151,25 +156,18 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     },
     [selectedItemsMedia],
   );
-  const markMessageAsSeen = (messageId: string) => {
-    socket?.emit('message_seen', {
-      readingUser: conversation.isRead.filter(value => {
-        value.user._id === userChat._id;
-        return value;
-      }),
-      roomId: conversation._id,
-    });
-  };
+  
 
   // useEffect(() => {
   //   console.log('có connect ', conversation.messageError);
-  //   if (conversation.messageError.length > 0) {
+  //   if (conversation.messageError.length > 0 && networkConnect) {
   //     console.log('connect lại');
   //     conversation.messageError.forEach((message: Message_type) => {
   //       onSend(message, [], false);
   //     });
   //   }
-  // }, []);
+  // }, [networkConnect]);
+
   useEffect(() => {
     socket?.on('userTyping', ({userChat, isTyping, deviceSend}) => {
       if (userChat._id === user._id && deviceSend !== deviceInfo) {
@@ -181,14 +179,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
       socket?.off('userTyping');
     };
   }, []);
-  // const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-  //   const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
-  //   const isAtBottom = contentOffset.y + layoutMeasurement.height >= contentSize.height - 20;
 
-  //   if (isAtBottom) {
-  //     socket?.emit("message_seen", { messageId:messages[messages.length]._id, userChat, roomId:conversation._id });
-  //   }
-  // };
   const onSend = useCallback(
     async (message: Message_type, filesOrder: [], statusMessage: boolean) => {
       const dataSaveSend = await converstationsend(
@@ -295,6 +286,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
       const typeNumber = Number(type);
       if (typeNumber === 1) {
         if (deviceSend !== deviceInfo) {
+          
           setMessages(previousMessages =>
             GiftedChat.append(previousMessages, message),
           );
@@ -333,7 +325,95 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   const handleLongPress = useCallback((message: any) => {
     Vibration.vibrate(50);
     setSelectedMessages(message);
-  }, []);
+  }, []); 
+
+  const handlerSendMarkReadMessge = useCallback((message:Message_type)=>{
+    socket?.emit('send_message_seen', {
+       message: message,
+       user:userChat,
+       conversation: conversation,
+       deviceInfo: deviceInfo,
+    });
+  },[])
+  const handlerReciverMarklReadMessage=useCallback((messageRead: any)=>{
+            const userRead=showUserRead.findIndex((value: any) => value.user._id === messageRead?.user._id );
+           if(userRead>-1){
+            const updatedUserRead = [...showUserRead];
+            updatedUserRead[userRead] = messageRead;
+           
+            setShowUserRead(messageRead);
+           }
+  }
+  ,[])
+  useEffect(()=>{
+    const handlerMarkMessage=()=>{
+      if(messages.length > 0){
+        //đánh dấu mình đax đọc tin nhắn ở vị trí nào 
+        const markMessageRead=conversation.participants.find((value: any) => value.user._id === userChat._id);
+        // setIsReadMessage(markMessage?:markMessage:null);
+        const lastMessage = messages[messages.length - 1];
+        if (lastMessage.user._id !== userChat._id) {
+          handlerSendMarkReadMessge(lastMessage);
+        }
+      }
+    }
+    socket?.on('reciver_message_seen', (messageRead: any) => {
+      console.log('nhận được tin nhắn đã đọc',messageRead);
+      handlerReciverMarklReadMessage(messageRead);
+    })
+    return 
+  },[])
+  return {
+    color,
+    userChat,
+    messages,
+    selectedItemsMedia,
+    buttonScale,
+    maginTextInput,
+    replyMessage,
+    selectedMessages,
+    bottomSheetModalRef,
+    maginViewGiftedchat,
+    snapPoints,
+    onPressPhoneNumber,
+    setSelectedMessages,
+    handlePresentModalPress,
+    handleSheetChanges,
+    setSelectedItemsMedia,
+    scrollToMessage,
+    handlerSelectMedia,
+    onSend,
+    handlerReaction,
+    handlerreplyTo,
+    handleLongPress,
+    setMessageMoreAction,
+    setReplyMessage,
+    flatListRef,
+    setReactionPosition,
+    reactionPosition,
+    messageMoreAction,
+    handlerDeleteMessage,
+    highlightedMessageId,
+    typingUsers,
+  };
+};
+//const markMessageAsSeen = (messageId: string) => {
+  //   socket?.emit('message_seen', {
+  //     readingUser: conversation.isRead.filter(value => {
+  //       value.user._id === userChat._id;
+  //       return value;
+  //     }),
+  //     roomId: conversation._id,
+  //   });
+  // };
+  //  const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+  //   const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+  //   const isAtBottom = contentOffset.y + layoutMeasurement.height >= contentSize.height - 20;
+
+  //   if (isAtBottom) {
+  //     socket?.emit("message_seen", { messageId:messages[messages.length]._id, userChat, roomId:conversation._id });
+  //   }
+  // };
   // useEffect(() => {
   //   // 📌 Lọc ra tin nhắn cuối cùng mà người khác gửi
   //   const lastMessage = messages
@@ -378,38 +458,3 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   //   // );
   //   // setSelectedMessages(null);
   // }, []);
-
-  return {
-    color,
-    userChat,
-    messages,
-    selectedItemsMedia,
-    buttonScale,
-    maginTextInput,
-    replyMessage,
-    selectedMessages,
-    bottomSheetModalRef,
-    maginViewGiftedchat,
-    snapPoints,
-    onPressPhoneNumber,
-    setSelectedMessages,
-    handlePresentModalPress,
-    handleSheetChanges,
-    setSelectedItemsMedia,
-    scrollToMessage,
-    handlerSelectMedia,
-    onSend,
-    handlerReaction,
-    handlerreplyTo,
-    handleLongPress,
-    setMessageMoreAction,
-    setReplyMessage,
-    flatListRef,
-    setReactionPosition,
-    reactionPosition,
-    messageMoreAction,
-    handlerDeleteMessage,
-    highlightedMessageId,
-    typingUsers,
-  };
-};

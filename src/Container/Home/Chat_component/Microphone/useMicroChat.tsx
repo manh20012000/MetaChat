@@ -63,7 +63,7 @@ export const useAudioRecorder = ({
       stopTimer();
       const result = await ref.current?.stopRecord();
       if (result ) {
-        console.log(result)
+      
         setRecordingPath(result); // Lưu dữ liệu âm thanh thô hoặc base64
       }
     } else if(!isRecording){
@@ -94,7 +94,6 @@ export const useAudioRecorder = ({
     const result = await ref.current?.stopRecord();
     try{
       
-      console.log(result)
       if (result) {
         let filesOrder = [
              {
@@ -117,7 +116,7 @@ export const useAudioRecorder = ({
           createdAt:new Date().toISOString(),
           reactions: [],
           receiver: conversation.participantIds,
-          isRead: [],
+   
           replyTo:
             replyMessage === null
               ? null

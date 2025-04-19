@@ -157,7 +157,7 @@ export const GiftedChatView = ({
           </BottomSheetView>
         </BottomSheetModal>
       </BottomSheetModalProvider>
-      {selectedMessages && (
+      {selectedMessages &&!replyMessage && (
         <>
           <ReactionIcons
             isMyMessage={true}
