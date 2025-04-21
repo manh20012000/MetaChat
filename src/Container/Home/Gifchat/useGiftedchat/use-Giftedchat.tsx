@@ -1,5 +1,5 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {useSelector} from 'react-redux';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 import {
   Animated,
   FlatList,
@@ -10,14 +10,16 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from 'react-native';
-import {GiftedChat} from 'react-native-gifted-chat';
-import {API_ROUTE} from '../../../../service/api_enpoint';
-import {useSocket} from '../../../../util/socket.io';
-import {BottomSheetModal} from '@gorhom/bottom-sheet';
-import {postFormData} from '../../../../service/resfull_api';
+import { GiftedChat } from 'react-native-gifted-chat';
+import { API_ROUTE } from '../../../../service/api_enpoint';
+import { useSocket } from '../../../../util/socket.io';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import { postFormData } from '../../../../service/resfull_api';
 import useCheckingService from '../../../../service/Checking_service';
-import Conversation from '../../../../type/Home/Converstation_type';
-import {Message_type} from '../../../../type/Home/Chat_type';
+import Conversation, {
+  participants,
+} from '../../../../type/Home/Converstation_type';
+import { Message_type } from '../../../../type/Home/Chat_type';
 import {
   Converstation_Message,
   deleteMessage,
@@ -26,21 +28,21 @@ import {
   recallMessage,
   update_Converstation,
 } from '../../../../cache_data/exportdata.ts/converstation_cache';
-import {Vibration} from 'react-native';
-import {converstationsend} from '../../../../util/util_chat/converstationSend';
-import {updateMessageReaction} from '../../../../service/MesssageService';
+import { Vibration } from 'react-native';
+import { converstationsend } from '../../../../util/util_chat/converstationSend';
+import { updateMessageReaction } from '../../../../service/MesssageService';
 import userMessage from '../../../../type/Home/useMessage_type';
 
 export const useGiftedChatLogic = (conversation: Conversation) => {
-  const {width, height} = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const color = useSelector(
-    (value: {colorApp: {value: any}}) => value.colorApp.value,
+    (value: { colorApp: { value: any } }) => value.colorApp.value,
   );
 
   const deviceInfo = useSelector(
-    (value: {deviceInfor: {value: any}}) => value.deviceInfor.value,
+    (value: { deviceInfor: { value: any } }) => value.deviceInfor.value,
   );
-  const {user, dispatch} = useCheckingService();
+  const { user, dispatch } = useCheckingService();
   const giftedChatRef = useRef<any>(null);
   const socket = useSocket();
   const networkConnect = useSelector((value: any) => value.network.value);
@@ -50,12 +52,17 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   const [messages, setMessages] = useState<any[]>(
     Array.from([...conversation.messageError, ...conversation.messages]),
   );
-  const[textMessgaeMarkRead,setTextMessageMarkRead]=useState(null)
-  const[IsReadMessage,setIsReadMessage]=useState(null)
-  const[showUserRead,setShowUserRead]=useState(conversation.participants)
+
+  const [markPaticipantReadMessage, SetMarkPaticipantReadMessage] = useState<
+    participants[]
+  >(conversation.participants);
+  const [checkReadMessage, setCheckReadMessage] = useState<string | null>(null);
+  // console.log(conversation.participants)
+  const [showUserRead, setShowUserRead] = useState(conversation.participants);
   const [highlightedMessageId, setHighlightedMessageId] = useState<
     string | null
   >(null);
+
   const [selectedItemsMedia, setSelectedItemsMedia] = useState<any[]>([]);
   const [buttonScale] = useState(new Animated.Value(1));
   const [maginTextInput, setMaginTextInput] = useState<boolean>(false);
@@ -63,21 +70,22 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   const [selectedMessages, setSelectedMessages] = useState<Message_type | null>(
     null,
   );
-  const [markMessage, SetMarkMessage] = useState(conversation.participants);
+
   const [typingUsers, setTypingUsers] = useState<{
     userChat: userMessage;
     isTyping: boolean;
+    deviceSend: string;
+    roomId: string;
   }>();
   const [messageMoreAction, setMessageMoreAction] =
     useState<Message_type | null>(null);
-  const [reactionPosition, setReactionPosition] = useState({x: 0, y: 0});
+  const [reactionPosition, setReactionPosition] = useState({ x: 0, y: 0 });
   const [userChat] = useState<any>(
     conversation.participants.find(
-      (participant: any) => participant.user.user_id === user._id
-    )?.user || null
+      (participant: any) => participant.user.user_id === user._id,
+    )?.user || null,
   );
-  
- 
+
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['40%', '90%'], []);
 
@@ -133,7 +141,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     const index = messages.findIndex(msg => msg._id === messageId);
     if (index !== -1 && flatListRef.current) {
       setHighlightedMessageId(messageId); // Đánh dấu tin nhắn đang highlight
-      flatListRef.current.scrollToIndex({index, animated: true});
+      flatListRef.current.scrollToIndex({ index, animated: true });
       setTimeout(() => setHighlightedMessageId(null), 2000);
     }
   };
@@ -156,7 +164,6 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     },
     [selectedItemsMedia],
   );
-  
 
   // useEffect(() => {
   //   console.log('có connect ', conversation.messageError);
@@ -167,18 +174,20 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   //     });
   //   }
   // }, [networkConnect]);
+  const typingTimeoutRef = useRef<any>(null);
 
-  useEffect(() => {
-    socket?.on('userTyping', ({userChat, isTyping, deviceSend}) => {
-      if (userChat._id === user._id && deviceSend !== deviceInfo) {
-        setTypingUsers({userChat, isTyping});
+  const handlerEndReciverTyping = useCallback(
+    (userChat, isTyping, deviceSend, roomId) => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current); // Clear timeout cũ nếu có
       }
-    });
-    // socket?.emit("message_seen", { messageId:messages[messages.length]._id, userChat, roomId:conversation._id  });
-    return () => {
-      socket?.off('userTyping');
-    };
-  }, []);
+
+      typingTimeoutRef.current = setTimeout(() => {
+        setTypingUsers({ userChat, isTyping, deviceSend, roomId });
+      }, 3000);
+    },
+    [],
+  );
 
   const onSend = useCallback(
     async (message: Message_type, filesOrder: [], statusMessage: boolean) => {
@@ -220,7 +229,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
           setMessages(previousMessages =>
             previousMessages.map(msg =>
               msg._id === newMessage._id
-                ? {...msg, status: 'sent', statusSendding: true}
+                ? { ...msg, status: 'sent', statusSendding: true }
                 : msg,
             ),
           );
@@ -231,7 +240,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
           throw new Error('Message sending failed');
         }
       } catch (error) {
-        const failedMessage: Message_type = {...message, statusSendding: false};
+        const failedMessage: Message_type = { ...message, statusSendding: false };
         if (!statusMessage) {
         } else {
           await MessageError(failedMessage, conversation, userChat);
@@ -239,7 +248,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
         setMessages((previousMessages: Message_type[]) =>
           previousMessages.map((msg: Message_type) =>
             msg._id === newMessage._id
-              ? {...msg, status: 'failed', statusSendding: false}
+              ? { ...msg, status: 'failed', statusSendding: false }
               : msg,
           ),
         );
@@ -255,7 +264,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
       for (let i = previousMessages.length - 1; i >= 0; i--) {
         if (previousMessages[i]._id === message._id) {
           const updatedMessages = [...previousMessages];
-          updatedMessages[i] = {...message};
+          updatedMessages[i] = { ...message };
           return updatedMessages;
         }
       }
@@ -268,7 +277,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
       for (let i = previousMessages.length - 1; i >= 0; i--) {
         if (previousMessages[i]._id === message._id) {
           const updatedMessages = [...previousMessages];
-          updatedMessages[i] = {...message};
+          updatedMessages[i] = { ...message };
           return updatedMessages;
         }
       }
@@ -280,43 +289,6 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     });
   }, []);
 
-  useEffect(() => {
-    socket?.on('new_message', messages => {
-      const {message, send_id, type, deviceSend} = messages;
-      const typeNumber = Number(type);
-      if (typeNumber === 1) {
-        if (deviceSend !== deviceInfo) {
-          
-          setMessages(previousMessages =>
-            GiftedChat.append(previousMessages, message),
-          );
-        }
-      } else if (typeNumber === 2) {
-        if (deviceSend !== deviceInfo) {
-          setMessages(previousMessages => {
-            for (let i = previousMessages.length - 1; i >= 0; i--) {
-              if (previousMessages[i]._id === message._id) {
-                const updatedMessages = [...previousMessages];
-                updatedMessages[i] = {...message};
-                return updatedMessages;
-              }
-            }
-            return GiftedChat.append(previousMessages, [message]);
-          });
-        }
-      } else if (typeNumber === 3) {
-        if (deviceSend !== deviceInfo) {
-          console.log('hpidnsdnsjdnsndsk recall mesage');
-          handlerDeleteMessage(message);
-        }
-      } else if (typeNumber === 4) {
-        if (send_id === userChat.user_id && deviceSend !== deviceInfo) {
-          handlerDeleteMessage(message);
-        }
-      }
-    });
-  }, []);
-
   const handlerreplyTo = useCallback((props: Message_type) => {
     Vibration.vibrate(50);
     setReplyMessage(props);
@@ -325,44 +297,142 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   const handleLongPress = useCallback((message: any) => {
     Vibration.vibrate(50);
     setSelectedMessages(message);
-  }, []); 
-
-  const handlerSendMarkReadMessge = useCallback((message:Message_type)=>{
+  }, []);
+  // const checkAndMarkReadMessages =()=>{
+  //   if (!messages || messages.length === 0) return;
+  // }
+  const handlerSendMarkReadMessge = useCallback((message: Message_type) => {
     socket?.emit('send_message_seen', {
-       message: message,
-       user:userChat,
-       conversation: conversation,
-       deviceInfo: deviceInfo,
+      message: message, // mesage lấy id để đánh dấu là xem
+      user: userChat, //người xem
+      conversation: conversation,
+      deviceInfo: deviceInfo,
     });
-  },[])
-  const handlerReciverMarklReadMessage=useCallback((messageRead: any)=>{
-            const userRead=showUserRead.findIndex((value: any) => value.user._id === messageRead?.user._id );
-           if(userRead>-1){
-            const updatedUserRead = [...showUserRead];
-            updatedUserRead[userRead] = messageRead;
-           
-            setShowUserRead(messageRead);
-           }
-  }
-  ,[])
-  useEffect(()=>{
-    const handlerMarkMessage=()=>{
-      if(messages.length > 0){
-        //đánh dấu mình đax đọc tin nhắn ở vị trí nào 
-        const markMessageRead=conversation.participants.find((value: any) => value.user._id === userChat._id);
-        // setIsReadMessage(markMessage?:markMessage:null);
-        const lastMessage = messages[messages.length - 1];
-        if (lastMessage.user._id !== userChat._id) {
-          handlerSendMarkReadMessge(lastMessage);
+  }, []);
+
+  const handlerMarkMessage = () => {
+    if (!conversation.messages || conversation.messages.length === 0 || !conversation || !userChat)
+      return;
+    // tin nhắn mới nhất đã được sắp sếp lên đầu 
+    const lastMessage = [...conversation.messages]
+      .find(msg => msg.user._id !== userChat._id); // tìm tin nhắn cuối cùng KHÔNG phải của mình
+
+    // lấy ra vị trí mình đoc trước đó 
+    const currentUserParticipant = conversation.participants.find(
+      (value: participants) => value.user._id === userChat._id,
+    );
+
+    if (!currentUserParticipant || !lastMessage) return;
+
+    const lastReadMessageId = currentUserParticipant.message_readed_id;
+    // console.log(lastReadMessageId)
+    // Nếu tin nhắn cuối cùng chưa được đánh dấu là đã đọc
+    if (lastReadMessageId !== lastMessage._id) {
+      // Gửi sự kiện đã đọc cho người khác biết
+      handlerSendMarkReadMessge(lastMessage);
+      // setIsReadMessage(lastMessage); // lưu lại tin đã đọc
+    }
+
+    // === Xác định vị trí đánh dấu là "bắt đầu tin nhắn chưa đọc" ===
+
+    const indexLastRead = conversation.messages.findIndex(
+      msg => msg._id === lastReadMessageId,
+    );
+    // console.log(indexLastRead)
+    // Tìm message tiếp theo sau tin đã đọc trước đó
+    const nextUnreadMessage = conversation.messages
+      .slice(indexLastRead + 1)
+      .find(msg => msg.user._id !== userChat._id); // bỏ qua tin của mình
+
+    if (nextUnreadMessage) {
+      setCheckReadMessage(nextUnreadMessage._id);
+    } else {
+      setCheckReadMessage(null);
+    }
+  };
+
+
+  const HandlerUpdateReadMessage = useCallback((message: Message_type, user: userMessage) => {
+    const updatedParticipants = markPaticipantReadMessage.map(
+      (participant: participants) => {
+        if (user._id === participant.user._id) {
+          return {
+            ...participant,
+            user: {
+              ...user,
+              message_readed_id: message._id, // Cập nhật ID tin nhắn đã đọc
+              readAt: new Date().toISOString(),
+            },
+          };
+        }
+        return participant;
+      },
+    );
+    if (!updatedParticipants) return;
+    SetMarkPaticipantReadMessage(updatedParticipants);
+  }, []);
+  useEffect(() => {
+    handlerMarkMessage();
+    socket?.on('new_message', messages => {
+      const { message, send_id, type, deviceSend, conversation } = messages;
+      const typeNumber = Number(type);
+      if (typeNumber === 1) {
+        //sự kiện cho tin nhắn mới
+        if (deviceSend !== deviceInfo) {
+          handlerEndReciverTyping(userChat, false, deviceSend, null);
+          setMessages(previousMessages =>
+            GiftedChat.append(previousMessages, message),
+          );
+          handlerSendMarkReadMessge(message);
+        }
+      } else if (typeNumber === 2) {
+        if (deviceSend !== deviceInfo) {
+          //sự kiện cập nhật tin nhắn
+          setMessages(previousMessages => {
+            for (let i = previousMessages.length - 1; i >= 0; i--) {
+              if (previousMessages[i]._id === message._id) {
+                const updatedMessages = [...previousMessages];
+                updatedMessages[i] = { ...message };
+                return updatedMessages;
+              }
+            }
+            return GiftedChat.append(previousMessages, [message]);
+          });
+        }
+      } else if (typeNumber === 3) {
+        if (deviceSend !== deviceInfo) {
+          //sự kiện xóa tin nhắ
+          console.log('hpidnsdnsjdnsndsk recall mesage');
+          handlerDeleteMessage(message);
+        }
+      } else if (typeNumber === 4) {
+        //sự kiện thu hồi tin nhắn
+        if (send_id === userChat.user_id && deviceSend !== deviceInfo) {
+          handlerDeleteMessage(message);
+        }
+      } else if (typeNumber === 6) {
+
+        // sụ kiện đánh dấu message đã đọc
+        if (deviceSend !== deviceInfo) {
+          SetMarkPaticipantReadMessage(conversation.participants)
+          //HandlerUpdateReadMessage(message, userChat);
         }
       }
-    }
-    socket?.on('reciver_message_seen', (messageRead: any) => {
-      console.log('nhận được tin nhắn đã đọc',messageRead);
-      handlerReciverMarklReadMessage(messageRead);
-    })
-    return 
-  },[])
+    });
+    socket?.on('userTyping', ({ userChat, isTyping, deviceSend, roomId }) => {
+      if (userChat._id !== user._id && deviceSend !== deviceInfo) {
+        setTypingUsers({ userChat, isTyping, deviceSend, roomId });
+        handlerEndReciverTyping(userChat, false, deviceSend, roomId);
+      }
+    });
+    return () => {
+      socket?.off('new_message');
+      socket?.off('userTyping');
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
   return {
     color,
     userChat,
@@ -395,66 +465,68 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     handlerDeleteMessage,
     highlightedMessageId,
     typingUsers,
+    checkReadMessage,
+    markPaticipantReadMessage,
   };
 };
 //const markMessageAsSeen = (messageId: string) => {
-  //   socket?.emit('message_seen', {
-  //     readingUser: conversation.isRead.filter(value => {
-  //       value.user._id === userChat._id;
-  //       return value;
-  //     }),
-  //     roomId: conversation._id,
-  //   });
-  // };
-  //  const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-  //   const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
-  //   const isAtBottom = contentOffset.y + layoutMeasurement.height >= contentSize.height - 20;
+//   socket?.emit('message_seen', {
+//     readingUser: conversation.isRead.filter(value => {
+//       value.user._id === userChat._id;
+//       return value;
+//     }),
+//     roomId: conversation._id,
+//   });
+// };
+//  const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+//   const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+//   const isAtBottom = contentOffset.y + layoutMeasurement.height >= contentSize.height - 20;
 
-  //   if (isAtBottom) {
-  //     socket?.emit("message_seen", { messageId:messages[messages.length]._id, userChat, roomId:conversation._id });
-  //   }
-  // };
-  // useEffect(() => {
-  //   // 📌 Lọc ra tin nhắn cuối cùng mà người khác gửi
-  //   const lastMessage = messages
-  //     .filter(msg => msg.user._id !== user._id) // Chỉ lấy tin nhắn người khác gửi
-  //     .pop(); // Lấy tin nhắn cuối cùng
+//   if (isAtBottom) {
+//     socket?.emit("message_seen", { messageId:messages[messages.length]._id, userChat, roomId:conversation._id });
+//   }
+// };
+// useEffect(() => {
+//   // 📌 Lọc ra tin nhắn cuối cùng mà người khác gửi
+//   const lastMessage = messages
+//     .filter(msg => msg.user._id !== user._id) // Chỉ lấy tin nhắn người khác gửi
+//     .pop(); // Lấy tin nhắn cuối cùng
 
-  //   if (!lastMessage) return; // Nếu không có tin nhắn thì không làm gì cả
+//   if (!lastMessage) return; // Nếu không có tin nhắn thì không làm gì cả
 
-  //   // 📌 Kiểm tra xem tin nhắn đã có trong isRead chưa
-  //   const isAlreadyRead = markMessage.some(
-  //     read => read.messageId === lastMessage._id && read.user._id === user._id
-  //   );
+//   // 📌 Kiểm tra xem tin nhắn đã có trong isRead chưa
+//   const isAlreadyRead = markMessage.some(
+//     read => read.messageId === lastMessage._id && read.user._id === user._id
+//   );
 
-  //   if (!isAlreadyRead) {
-  //     // 📌 Nếu chưa đọc, gửi sự kiện "message:read" lên server
-  //     socket?.emit("message:read", {
-  //       conversationId: conversation._id,
-  //       messageId: lastMessage._id,
-  //       user: {
-  //         _id: user._id,
-  //         name: user.name,
-  //         avatar: user.avatar
-  //       },
-  //       readAt: new Date().toISOString(),
-  //     });
-  //     // Cập nhật state để không gửi lại sự kiện
-  //     // SetMarkMessage(prev =>
+//   if (!isAlreadyRead) {
+//     // 📌 Nếu chưa đọc, gửi sự kiện "message:read" lên server
+//     socket?.emit("message:read", {
+//       conversationId: conversation._id,
+//       messageId: lastMessage._id,
+//       user: {
+//         _id: user._id,
+//         name: user.name,
+//         avatar: user.avatar
+//       },
+//       readAt: new Date().toISOString(),
+//     });
+//     // Cập nhật state để không gửi lại sự kiện
+//     // SetMarkMessage(prev =>
 
-  //     //   {
-  //     //     user: { _id: user._id, name: user.name, avatar: user.avatar },
-  //     //     messageId: lastMessage._id,
-  //     //     readAt: new Date().toISOString(),
-  //     //   },
-  //     // );
-  //   }
-  // }, [messages]); // Chạy khi tin nhắn thay đổi
-  // const handlerMoreMessage = useCallback(async (message: any) => {
-  //   console.log(message)
-  //   setMessageMoreAction(message)
-  //   // setMessages((prevMessages: any) =>
-  //   //   prevMessages.filter((id: any) => id._id !== message._id),
-  //   // );
-  //   // setSelectedMessages(null);
-  // }, []);
+//     //   {
+//     //     user: { _id: user._id, name: user.name, avatar: user.avatar },
+//     //     messageId: lastMessage._id,
+//     //     readAt: new Date().toISOString(),
+//     //   },
+//     // );
+//   }
+// }, [messages]); // Chạy khi tin nhắn thay đổi
+// const handlerMoreMessage = useCallback(async (message: any) => {
+//   console.log(message)
+//   setMessageMoreAction(message)
+//   // setMessages((prevMessages: any) =>
+//   //   prevMessages.filter((id: any) => id._id !== message._id),
+//   // );
+//   // setSelectedMessages(null);
+// }, []);

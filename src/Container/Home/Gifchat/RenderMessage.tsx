@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -12,19 +12,22 @@ import {
   Keyboard,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {Avatar, Bubble, Day} from 'react-native-gifted-chat';
-import {useDispatch, useSelector} from 'react-redux';
+import { Avatar, Bubble, Day } from 'react-native-gifted-chat';
+import { useDispatch, useSelector } from 'react-redux';
 import userMessage from '../../../type/Home/useMessage_type';
 
 import useCheckingService from '../../../service/Checking_service';
-import {ReplyMessage} from './ViewRender/ReplyMessage';
-import {ReactionIcons} from './ViewRender/ReactionIcons';
-import {MessageComponent} from './ViewRender/TextMessage ';
-import {MessageStatus} from './ViewRender/MessageStatus';
-import {messageIcon} from '../../../type/react-type';
-import {Message_type} from '../../../type/Home/Chat_type';
+import { ReplyMessage } from './ViewRender/ReplyMessage';
+import { ReactionIcons } from './ViewRender/ReactionIcons';
+import { MessageComponent } from './ViewRender/TextMessage ';
+import { MessageStatus } from './ViewRender/MessageStatus';
+import { messageIcon } from '../../../type/react-type';
+import { Message_type } from '../../../type/Home/Chat_type';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import Conversation, {
+  participants,
+} from '../../../type/Home/Converstation_type';
 
 interface MessageProps {
   currentMessage: Message_type;
@@ -38,6 +41,8 @@ interface MessageProps {
   selectedMessages_id: any;
   setSelectedMessages: React.Dispatch<React.SetStateAction<any>>;
   setReactionPosition: React.Dispatch<React.SetStateAction<any>>;
+  markPaticipantReadMessage: participants[];
+  checkReadMessage?: any;
 }
 
 const MessageItem: React.FC<MessageProps> = ({
@@ -54,14 +59,16 @@ const MessageItem: React.FC<MessageProps> = ({
   selectedMessages_id,
   setSelectedMessages,
   setReactionPosition,
+  markPaticipantReadMessage,
+  checkReadMessage,
 }) => {
-  const {user} = useCheckingService();
+  const { user } = useCheckingService();
   const [color] = useState(useSelector((state: any) => state.colorApp.value));
-  const {width} = useWindowDimensions();
+  const { width } = useWindowDimensions();
   const [sizeMessage, setSizeMessage] = useState<{
     widthMessage: number;
     heightMessage: number;
-  }>({widthMessage: 0, heightMessage: 0});
+  }>({ widthMessage: 0, heightMessage: 0 });
   const SWIPE_THRESHOLD = width * 0.4; // Chỉ cần vuốt khoảng 1/4 màn hình
   const MAX_SWIPE_DISTANCE = width * 0.3; // Giảm khoảng cách tối đa
   const [showReactions, setShowReactions] = useState(false);
@@ -103,22 +110,23 @@ const MessageItem: React.FC<MessageProps> = ({
   ).current;
   // /  console.log(currentMessage.attachments)
   const handleLongPressMessage = (
-    {x, y}: {x: number; y: number},
+    { x, y }: { x: number; y: number },
     message: any,
   ) => {
-    setReactionPosition({x, y}); // Lưu vị trí nhấn giữ
+    setReactionPosition({ x, y }); // Lưu vị trí nhấn giữ
     handleLongPress(message); // Gọi hàm xử lý nhấn giữ
     setShowReactions(true);
   };
+
   return (
-    <View style={{marginBottom: 2, marginHorizontal: 10, position: 'relative'}}>
+    <View style={{ marginBottom: 2, marginHorizontal: 10, position: 'relative' }}>
       <Day {...props} />
       {currentMessage.recall === false ? (
         currentMessage.receiver.includes(userChat.user_id) && (
           <>
             <Animated.View
               {...panResponder.panHandlers}
-              style={{transform: [{translateX}]}}>
+              style={{ transform: [{ translateX }] }}>
               {currentMessage.replyTo !== null &&
                 currentMessage.replyTo.user && (
                   <ReplyMessage
@@ -128,26 +136,31 @@ const MessageItem: React.FC<MessageProps> = ({
                     userChat={userChat}
                   />
                 )}
+              {currentMessage.statusSendding === null ||
+                (currentMessage.statusSendding === false && isMyMessage && (
+                  <View
+                    style={{
+                      alignSelf: 'flex-end',
+                      position: 'absolute',
+                      alignItems: 'center',
+                      top: -10,
+                      zIndex: 1,
+                      alignContent: 'center',
+                      justifyContent: 'flex-end',
+                    }}>
+                    <AntDesign name="exclamationcircle" size={18} color="red" />
+                  </View>
+                ))}
               <View
                 style={{
                   flexDirection: 'row',
-                  alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
-                  alignItems: 'center',
-                  gap: 10,
                 }}>
-                {currentMessage.statusSendding === null ||
-                  (currentMessage.statusSendding === false && (
-                    <AntDesign
-                      name="exclamationcircle"
-                      size={18}
-                      color="red"
-                      style={{
-                        alignSelf: 'flex-end',
-                      
-                      }}
-                    />
-                  ))}
-                <View style={{flex: 1}}>
+                <View style={{ flex: 1 }}>
+                  {checkReadMessage === currentMessage._id && (
+                    <View style={{ alignItems: 'center', marginVertical: 10 }}>
+                      <Text>Tin nhắn chưa đọc</Text>
+                    </View>
+                  )}
                   <MessageComponent
                     isFirstMessage={isFirstMessage}
                     isMyMessage={isMyMessage}
@@ -160,6 +173,15 @@ const MessageItem: React.FC<MessageProps> = ({
                     setSelectedMessages={setSelectedMessages}
                     highlightedMessageId={highlightedMessageId}
                   />
+                  <View
+                    style={{
+                      width: sizeMessage.widthMessage,
+                      height: 'auto',
+                      backgroundColor: 'red',
+                      bottom: 0,
+                      left: 0,
+                      alignSelf: 'flex-end',
+                    }}></View>
                   {currentMessage.reactions.length > 0 &&
                     currentMessage.reactions.slice(-2).map((reaction: any) => {
                       const icon = messageIcon.find(
@@ -175,13 +197,34 @@ const MessageItem: React.FC<MessageProps> = ({
                             bottom: 1,
                             alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
                           }}>
-                          <Text style={{fontSize: 18}}>{icon.icon}</Text>
+                          <Text style={{ fontSize: 18 }}>{icon.icon}</Text>
                         </TouchableOpacity>
                       ) : null;
                     })}
                 </View>
               </View>
             </Animated.View>
+            {markPaticipantReadMessage.map((item, index) => {
+              if (
+                item.message_readed_id === currentMessage._id &&
+                item.user._id !== userChat._id
+              ) {
+                return (
+                  <View
+                    style={{ alignSelf: 'flex-end', marginTop: 10 }}
+                    key={`${item.message_readed_id}-${item.user._id}`}>
+                    <Image
+                      key={index}
+                      style={{ width: 15, height: 15, borderRadius: 25 }}
+                      source={{
+                        uri: item.user.avatar,
+                      }}
+                    />
+                  </View>
+                );
+              }
+              return null;
+            })}
           </>
         )
       ) : (
@@ -192,7 +235,7 @@ const MessageItem: React.FC<MessageProps> = ({
             padding: 5,
             borderRadius: 5,
           }}>
-          <Text style={{fontWeight: 'bold', fontSize: 15}}>
+          <Text style={{ fontWeight: 'bold', fontSize: 15 }}>
             Tin nhắn này bị thu hồi
           </Text>
         </View>

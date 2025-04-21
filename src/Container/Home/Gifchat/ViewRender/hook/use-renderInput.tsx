@@ -1,5 +1,4 @@
-
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   TextInput,
@@ -9,41 +8,40 @@ import {
   Animated,
   Alert,
 } from 'react-native';
-import _, { debounce, throttle } from "lodash";
-import {useSelector} from 'react-redux';
+
+import { useSelector } from 'react-redux';
 
 import Conversation from '../../../../../type/Home/Converstation_type';
-import {BSON} from 'bson';
+import { BSON } from 'bson';
 import PermissionCamera from '../../../../../util/Permision/CameraChatPermission';
 import userMessage from '../../../../../type/Home/useMessage_type';
 import { Message_type } from '../../../../../type/Home/Chat_type';
-import {NavigationProp, useNavigation} from '@react-navigation/native';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../../../../../type/rootStackScreen';
 import { eventEmitter } from '../../../../../eventEmitter/EventEmitter';
 import { useSocket } from '../../../../../util/socket.io';
+import { debounce } from '../../../../../Constants/funcUtil/debounce';
 type NavigationProps = NavigationProp<RootStackParamList>;
 const useRenderInput = (props: any) => {
   const deviceInfo = useSelector(
-    (value: {deviceInfor: {value: any}}) => value.deviceInfor.value,
+    (value: { deviceInfor: { value: any } }) => value.deviceInfor.value,
   );
-  const {onSend, userChat, replyMessage, setReplyMessage} = props;
+  const { onSend, userChat, replyMessage, setReplyMessage } = props;
 
   const color = useSelector(
-    (value: {colorApp: {value: any}}) => value.colorApp.value,
+    (value: { colorApp: { value: any } }) => value.colorApp.value,
   );
   const navigation = useNavigation<NavigationProps>();
-  const typingTimeout = useRef<NodeJS.Timeout | null>(null);
   const conversation: Conversation = props.conversation;
   const [isShowSendText, setIsShowSendText] = useState(true);
-
+  const [statusTyping, setStatusTyping] = useState(false);
   const [changeIcon, setChangeIcon] = useState(true);
-  const [text, settext] = useState('');
+  const [text, setText] = useState('');
   const [inputHeight, setInputHeight] = useState(30);
   const newdate = new Date().toISOString();
-  const [openMap,setOpenMap]=useState<boolean>(false);
+  const [openMap, setOpenMap] = useState<boolean>(false);
   const socket = useSocket();
   const handMessage = useCallback(() => {
-   
     return {
       _id: new BSON.ObjectId().toString(),
       conversation_id: conversation._id,
@@ -55,27 +53,28 @@ const useRenderInput = (props: any) => {
       createdAt: newdate,
       reactions: [],
       receiver: conversation.participantIds,
-    
+
       replyTo:
         replyMessage === null
           ? null
           : {
-              _id: replyMessage._id,
-              text:
-                replyMessage.messageType === 'text'
-                  ? replyMessage.text
-                  : 'reply atatment',
-              user: replyMessage.user,
-              messageType: replyMessage.messageType,
-            },
+            _id: replyMessage._id,
+            text:
+              replyMessage.messageType === 'text'
+                ? replyMessage.text
+                : 'reply atatment',
+            user: replyMessage.user,
+            messageType: replyMessage.messageType,
+          },
       recall: false,
     };
   }, [text]);
 
   const handleSend = useCallback(() => {
     if (text.trim() !== '') {
+      handleStopTyping();
       onSend(handMessage(), [], true);
-      settext('');
+      setText('');
       setChangeIcon(true);
       setReplyMessage(null);
     }
@@ -97,13 +96,13 @@ const useRenderInput = (props: any) => {
           user: userChat,
           messageType: 'attachment',
           text: null,
-     
+
           attachments: files,
           callDetails: null,
           createdAt: newdate,
           reactions: [],
           receiver: conversation.participantIds,
-      
+
           replyTo: null,
           recall: false,
         };
@@ -128,45 +127,57 @@ const useRenderInput = (props: any) => {
       Alert.alert('Permission camera denied');
     }
   }, []);
-  const onClose=()=>{
-    setOpenMap(!openMap)
-  }
-
- // Hàm throttle để gửi sự kiện typing trong quá trình nhập liệu
-  const throttledTyping = throttle((isTyping) => {
-    if (!conversation || !socket) return;
-    socket.emit("typing", {deviceInfo,  userChat, roomId: conversation._id, isTyping });
-  }, 1000); // Throttle mỗi 1 giây
+  const onClose = () => {
+    setOpenMap(!openMap);
+  };
 
   // Hàm debounce để gửi sự kiện "dừng nhập"
-  const debouncedStopTyping = debounce(() => {
+  const handleStopTyping = useCallback(() => {
     if (!conversation || !socket) return;
-    socket.emit("typing", {deviceInfo,userChat, roomId: conversation._id, isTyping: false });
-  }, 300); // Debounce 300ms
+    setStatusTyping(false);
+    socket.emit('typing', {
+      deviceInfo,
+      userChat,
+      roomId: conversation._id,
+      isTyping: false,
+    });
+  }, []);
 
-  const handleTyping = () => {
-    // Gửi sự kiện "đang nhập" với throttle
-    throttledTyping(true);
+  const debouncedTyping = useRef(
+    debounce((value: string) => {
 
-    // Đặt timeout để gửi sự kiện "dừng nhập" sau 4 giây
-    if (typingTimeout.current) {
-      clearTimeout(typingTimeout.current);
-    }
-    typingTimeout.current = setTimeout(() => {
-      debouncedStopTyping();
-    }, 4000);
+      if (!conversation || !socket) return;
+      setStatusTyping(true);
+      if (value.trim() === '') {
+        handleStopTyping();
+      } else {
+        socket.emit('typing', {
+          deviceInfo,
+          userChat,
+          roomId: conversation._id,
+          isTyping: true,
+        });
+      }
+    }, 1000)
+  ).current;
+
+  const onchangeTyping = (value: string) => {
+    setText(value);
+    debouncedTyping(value); // gọi debounce đã được tạo sẵn
   };
-
-  const onchangeTyping = () => {
-    handleTyping();
-  };
-  
-return {
+  return {
     handlePress,
-    handleTyping,onchangeTyping
-    ,text,settext,openMap,onClose,
-    handleSend,changeIcon,isShowSendText,setIsShowSendText,inputHeight,setInputHeight,setChangeIcon
-}
-    
-}
-export default useRenderInput
+    onchangeTyping,
+    text,
+    openMap,
+    onClose,
+    handleSend,
+    changeIcon,
+    isShowSendText,
+    setIsShowSendText,
+    inputHeight,
+    setInputHeight,
+    setChangeIcon,
+  };
+};
+export default useRenderInput;

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   FlatList,
   Image,
@@ -8,19 +8,19 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
-import {useDispatch, UseDispatch, UseSelector, useSelector} from 'react-redux';
-import {Search} from '../../../assets/svg/svgfile';
-import {useSocket} from '../../../util/socket.io';
-import {findAndconvertConversation} from '../../../cache_data/exportdata.ts/converstation_cache';
+import { useDispatch, UseDispatch, UseSelector, useSelector } from 'react-redux';
+import { Search } from '../../../assets/svg/svgfile';
+import { useSocket } from '../../../util/socket.io';
+import { findAndconvertConversation } from '../../../cache_data/exportdata.ts/converstation_cache';
 import userMessage from '../../../type/Home/useMessage_type';
-import {participants} from '../../../type/Home/Converstation_type';
-const HeaderHome: React.FC<{navigation: any; data_friend: userMessage[]}> = ({
+import { participants } from '../../../type/Home/Converstation_type';
+const HeaderHome: React.FC<{ navigation: any; data_friend: userMessage[] }> = ({
   navigation,
   data_friend,
 }) => {
   const user = useSelector((state: any) => state.auth.value);
   // console.log(typeof user)
-  const {width, height} = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const socket = useSocket();
   const isPortrait = height > width;
   const dispatch = useDispatch();
@@ -58,9 +58,9 @@ const HeaderHome: React.FC<{navigation: any; data_friend: userMessage[]}> = ({
               borderRadius: 100,
               backgroundColor: color.gray,
             }}
-            source={{uri: user.avatar}}
+            source={{ uri: user.avatar }}
           />
-          <Text style={{color: color.light, fontWeight: 'bold'}}>
+          <Text style={{ color: color.light, fontWeight: 'bold' }}>
             {user.name}
           </Text>
         </TouchableOpacity>
@@ -88,21 +88,21 @@ const HeaderHome: React.FC<{navigation: any; data_friend: userMessage[]}> = ({
           width: '90%',
           height: '30%',
         }}>
-        <View style={{alignItems: 'center', flexDirection: 'row'}}>
+        <View style={{ alignItems: 'center', flexDirection: 'row' }}>
           <Search width={30} color={'pink'} stroke={'white'} />
-          <Text style={{color: color.light, fontSize: 15, fontWeight: '500'}}>
+          <Text style={{ color: color.light, fontSize: 15, fontWeight: '500' }}>
             Tìm kiếm
           </Text>
         </View>
       </Pressable>
-      <View style={{flex: 1, width: width, marginTop: 5}}>
+      <View style={{ flex: 1, width: width, marginTop: 5 }}>
         <FlatList
           ListHeaderComponent={<HeaderTop_Chat />}
           horizontal={true}
           keyExtractor={item => item._id.toString()}
           data={data_friend}
           showsHorizontalScrollIndicator={false} // Ẩn thanh cuộn ngang
-          renderItem={({item}) => {
+          renderItem={({ item }) => {
             const statusUser = user_Status.find(
               (user: any) => user._id === item._id,
             );
@@ -127,7 +127,12 @@ const HeaderHome: React.FC<{navigation: any; data_friend: userMessage[]}> = ({
                     }}></View>
                 )}
                 <TouchableOpacity
-                  style={{justifyContent: 'center', alignItems: 'center',alignSelf: 'center'}}
+                  style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+
+                    // backgroundColor: color.white,
+                  }}
                   onPress={async () => {
                     try {
                       // Tìm hoặc chuyển cuộc hội thoại với user lên đầu danh sách
@@ -154,7 +159,7 @@ const HeaderHome: React.FC<{navigation: any; data_friend: userMessage[]}> = ({
                         participants,
                         participantIds,
 
-                        {dispatch, user},
+                        { dispatch, user },
                       );
                       if (conversation) {
                         const recipientIds = participantIds.filter(
@@ -166,7 +171,7 @@ const HeaderHome: React.FC<{navigation: any; data_friend: userMessage[]}> = ({
                         });
                       }
                       // Chuyển đến màn hình chat cá nhân với thông tin người dùng
-                      navigation.navigate('HomeChatPersion', {conversation});
+                      navigation.navigate('HomeChatPersion', { conversation });
                     } catch (error) {
                       console.error('Lỗi trong handler_chat:', error);
                     }
@@ -191,7 +196,7 @@ const HeaderHome: React.FC<{navigation: any; data_friend: userMessage[]}> = ({
                       borderRadius: 100,
                       backgroundColor: 'gray',
                     }}
-                    source={{uri: item.avatar}}
+                    source={{ uri: item.avatar }}
                   />
                   <Text
                     ellipsizeMode="tail"
@@ -200,6 +205,11 @@ const HeaderHome: React.FC<{navigation: any; data_friend: userMessage[]}> = ({
                       color: color.white,
                       alignSelf: 'center',
                       width: 70,
+                      fontSize: 15,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      textAlign: 'center',
+                      fontWeight: '500'
                     }}>
                     {item.name}
                   </Text>

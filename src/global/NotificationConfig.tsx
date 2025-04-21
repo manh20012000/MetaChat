@@ -2,6 +2,7 @@ import messaging from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance, EventType, Notification, AndroidAction } from '@notifee/react-native';
 import { navigationRef } from '../navigation/navigation';
 import { NotificationConfig, notificationType } from '../type/notification_type';
+import { AppState } from 'react-native';
 
 // Cấu hình thông báo
 const notificationConfigs: any = {
@@ -150,8 +151,13 @@ const handleNotificationDisplay = async (remoteMessage: any) => {
       return;
     }
 
-    const config = notificationConfigs[data.type];
+    const appState = AppState.currentState;
+    if (appState === 'active') {
+      console.log('App is in foreground, skip showing notification');
+      return; // 👉 Bỏ qua hiển thị khi đang foreground
+    }
 
+    const config = notificationConfigs[data.type];
     if (!config) {
       console.log('Unsupported notification type:', data.type);
       return;

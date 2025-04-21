@@ -8,10 +8,9 @@ export type participants={
       role: string;
       status_read: boolean;
       user_id: string;
-      message_readed_id: string; // ID tin nhắn đã đọc
-      readAt: string; // Thời gian đọc tin nhắn
-    }; // Người đã đọc tin nhắn
-    
+    },
+     message_readed_id: string, 
+      readAt: string,
   
 }
 type Conversation = {

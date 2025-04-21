@@ -1,12 +1,12 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {Alert, Button, Dimensions, useWindowDimensions} from 'react-native';
-import {BottomSheetModal} from '@gorhom/bottom-sheet';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Alert, Button, Dimensions, useWindowDimensions } from 'react-native';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import {getData} from '../../../service/resfull_api.ts';
-import {API_ROUTE} from '../../../service/api_enpoint.ts';
+import { getData } from '../../../service/resfull_api.ts';
+import { API_ROUTE } from '../../../service/api_enpoint.ts';
 import {
   getConversations,
   createConversation,
@@ -16,22 +16,24 @@ import {
   recallMessage,
   deleteMessageError,
   deleteMessage,
+  handlerMarkMessageRead,
+  delete_converStation_deviceOther,
 } from '../../../cache_data/exportdata.ts/converstation_cache.ts';
 import {
   getListfriend,
   createListfriend,
 } from '../../../cache_data/exportdata.ts/friend_cache.ts';
-import {useSocket} from '../../../util/socket.io.tsx';
-import {realm} from '../../../cache_data/Schema/schema_realm_model.tsx';
+import { useSocket } from '../../../util/socket.io.tsx';
+import { realm } from '../../../cache_data/Schema/schema_realm_model.tsx';
 import Conversation from '../../../type/Home/Converstation_type.ts';
 import userMessage from '../../../type/Home/useMessage_type.ts';
 dayjs.extend(relativeTime);
 
 export const useHomeLogic = (navigation: any) => {
-  const {width, height} = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const color = useSelector((state: any) => state.colorApp.value);
   const deviceInfo = useSelector(
-    (value: {deviceInfor: {value: any}}) => value.deviceInfor.value,
+    (value: { deviceInfor: { value: any } }) => value.deviceInfor.value,
   );
 
   const user = useSelector((state: any) => state.auth.value);
@@ -44,9 +46,11 @@ export const useHomeLogic = (navigation: any) => {
   const insets = useSafeAreaInsets();
   const socket = useSocket();
   const [typingUsers, setTypingUsers] = useState<{
-    userchat: userMessage;
+    userChat: userMessage;
     isTyping: boolean;
-  } | null>();
+    deviceSend: string;
+    roomId: string;
+  }>();
   const [data_convertstation, setData_convertStation] = useState<
     Conversation[]
   >([]);
@@ -82,7 +86,7 @@ export const useHomeLogic = (navigation: any) => {
       );
     });
     setModalVisible(false);
-    delete_converStation(selectConverstion, {dispatch, user});
+    delete_converStation(selectConverstion, { dispatch, user }, deviceInfo);
     setSelectConverstation(null);
   }, [selectConverstion]);
 
@@ -111,7 +115,7 @@ export const useHomeLogic = (navigation: any) => {
       API_ROUTE.GET_CONVERTSTATION_CHAT,
       null,
       skip,
-      {dispatch, user},
+      { dispatch, user },
     );
     if (data_converstation.data.length > 0) {
       try {
@@ -133,7 +137,7 @@ export const useHomeLogic = (navigation: any) => {
       API_ROUTE.GET_LIST_FRIEND_CHAT,
       null,
       skipfriend,
-      {dispatch, user},
+      { dispatch, user },
     );
 
     if (listuser.friend.length > 0) {
@@ -187,26 +191,45 @@ export const useHomeLogic = (navigation: any) => {
     };
     checkout();
   }, []);
+  const typingTimeoutRef = useRef<any>(null);
+  const handlerEndReciverTyping = useCallback(
+    (userChat, isTyping, deviceSend, roomId) => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current); // Clear timeout cũ nếu có
+      }
 
+      typingTimeoutRef.current = setTimeout(() => {
+        setTypingUsers({ userChat, isTyping, deviceSend, roomId });
+      }, 3000);
+    },
+    [],
+  );
   useEffect(() => {
     if (!socket) return;
     const handleConnect = () => {
       data_convertstation.forEach((item: any) => {
-        socket.emit('join_room', {conversationId: item._id, user: user.name});
+        socket.emit('join_room', { conversationId: item._id, user: user.name });
       });
     };
 
     const handleNewMessage = async (messages: any) => {
       try {
-        const {message, conversation, send_id, type, deviceSend, userSend} =
+        const { message, conversation, send_id, type, deviceSend, userSend } =
           messages;
 
         const typeNumber = Number(type);
-
+        handlerEndReciverTyping(
+          message.user,
+          false,
+          deviceSend,
+          conversation._id,
+        );
         if (typeNumber === 1) {
+          console.log('viết máy lần ');
           await Converstation_Message(message, conversation, send_id);
         } else if (typeNumber === 2) {
           if (send_id !== user._id) {
+            // thực hiện cập nhật tin nhắn mới
             updateMessage(message, conversation);
           }
         } else if (typeNumber === 3) {
@@ -218,6 +241,15 @@ export const useHomeLogic = (navigation: any) => {
           if (send_id === user._id && deviceSend !== deviceInfo) {
             deleteMessage(conversation._id, message._id);
           }
+        } else if (typeNumber === 5) {
+          // xóa cuộc thoại trên thiết bị của user này xóa nhưng họ đăng nhập trên thiết bị khác
+          if (send_id === user._id && deviceSend !== deviceInfo) {
+            delete_converStation_deviceOther(conversation._id);
+          }
+        } else if (typeNumber === 6) {
+          // đánh dấu tin nhắn đã đọc
+
+          handlerMarkMessageRead(conversation._id, conversation.participants);
         }
       } catch (error) {
         console.log('lỗi khi chèn message', error);
@@ -229,10 +261,11 @@ export const useHomeLogic = (navigation: any) => {
     } else {
       socket.on('connect', handleConnect);
     }
-    socket?.on('userTyping', ({userchat, isTyping, deviceSend}) => {
-      if (userchat._id === user._id && deviceSend !== deviceInfo) {
+    socket?.on('userTyping', ({ userChat, isTyping, deviceSend, roomId }) => {
+      if (userChat._id !== user._id && deviceSend !== deviceInfo) {
+        setTypingUsers({ userChat, isTyping, deviceSend, roomId });
+        handlerEndReciverTyping(userChat, false, deviceSend, roomId);
       }
-      setTypingUsers({userchat, isTyping});
     });
 
     socket.on('new_message', handleNewMessage);
@@ -256,13 +289,16 @@ export const useHomeLogic = (navigation: any) => {
       socket.off('connect', handleConnect);
       conversationObjects.removeListener(updateConversations);
       socket?.off('userTyping');
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
     };
   }, [socket?.connected]);
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     const timer = setTimeout(() => {
       setRefreshing(false);
-    }, 2000);
+    }, 1000);
 
     return () => {
       clearTimeout(timer);
