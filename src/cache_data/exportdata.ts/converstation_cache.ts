@@ -248,7 +248,6 @@ const Converstation_Message = async (
         existingConversation.updatedAt = message.createdAt;
         existingConversation.lastSync = message.createdAt;
       } else {
-        console.log('Không có cuộc hội thoại, tạo mới');
         realm.create('Conversation', converstation(conversation, message));
       }
     });

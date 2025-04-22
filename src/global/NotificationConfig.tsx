@@ -117,7 +117,7 @@ const handleNotificationPress = async ({ type, detail }: any) => {
           try {
             navigationRef.navigate('ChatScreen', {
               conversationId: data.conversationId,
-               userId: data.userId,
+              userId: data.userId,
             });
           } catch (err) {
             console.log('Lỗi điều hướng message:', err);
@@ -153,7 +153,7 @@ const handleNotificationDisplay = async (remoteMessage: any) => {
 
     const appState = AppState.currentState;
     if (appState === 'active') {
-      console.log('App is in foreground, skip showing notification');
+      // console.log('App is in foreground, skip showing notification');
       return; // 👉 Bỏ qua hiển thị khi đang foreground
     }
 
@@ -182,14 +182,14 @@ const handleNotificationDisplay = async (remoteMessage: any) => {
         actions:
           data.type === notificationType.NOTIFI_MESSAGE
             ? [
-                {
-                  title: 'Trả lời',
-                  pressAction: { id: 'reply_message' },
-                  input: {
-                    placeholder: 'Nhập tin nhắn...',
-                  },
-                } as AndroidAction,
-              ]
+              {
+                title: 'Trả lời',
+                pressAction: { id: 'reply_message' },
+                input: {
+                  placeholder: 'Nhập tin nhắn...',
+                },
+              } as AndroidAction,
+            ]
             : config.actions,
         fullScreenAction:
           data.type === notificationType.NOTIFI_VIDEO_CALL
@@ -219,14 +219,14 @@ export const initializeNotifications = () => {
       {
         id: 'message',
         actions: [
-            {
-              id: 'reply_message',
-              title: 'Trả lời',
+          {
+            id: 'reply_message',
+            title: 'Trả lời',
             //   input: {
             //     buttonTitle: 'Gửi', 
             //   },
-            },
-          ],
+          },
+        ],
       },
       {
         id: 'incoming_call',

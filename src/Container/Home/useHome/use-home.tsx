@@ -218,6 +218,7 @@ export const useHomeLogic = (navigation: any) => {
           messages;
 
         const typeNumber = Number(type);
+        console.log(typeNumber, '')
         handlerEndReciverTyping(
           message.user,
           false,
@@ -225,7 +226,7 @@ export const useHomeLogic = (navigation: any) => {
           conversation._id,
         );
         if (typeNumber === 1) {
-          console.log('viết máy lần ');
+          console.log(typeNumber, 'haha')
           await Converstation_Message(message, conversation, send_id);
         } else if (typeNumber === 2) {
           if (send_id !== user._id) {
@@ -248,7 +249,6 @@ export const useHomeLogic = (navigation: any) => {
           }
         } else if (typeNumber === 6) {
           // đánh dấu tin nhắn đã đọc
-
           handlerMarkMessageRead(conversation._id, conversation.participants);
         }
       } catch (error) {

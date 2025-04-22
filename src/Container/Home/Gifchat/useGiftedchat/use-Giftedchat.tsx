@@ -321,7 +321,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     const currentUserParticipant = conversation.participants.find(
       (value: participants) => value.user._id === userChat._id,
     );
-
+    // console.log(currentUserParticipant)
     if (!currentUserParticipant || !lastMessage) return;
 
     const lastReadMessageId = currentUserParticipant.message_readed_id;
@@ -343,7 +343,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     const nextUnreadMessage = conversation.messages
       .slice(indexLastRead + 1)
       .find(msg => msg.user._id !== userChat._id); // bỏ qua tin của mình
-
+    // console.log(nextUnreadMessage, 'sdhjsdjs')
     if (nextUnreadMessage) {
       setCheckReadMessage(nextUnreadMessage._id);
     } else {
