@@ -1,9 +1,9 @@
 import React from 'react';
-import {Pressable, View, Text, Image} from 'react-native';
+import { Pressable, View, Text, Image } from 'react-native';
 import userMessage from '../../type/Home/useMessage_type';
 
 import dayjs from 'dayjs';
-import {Message_type} from '../../type/Home/Chat_type';
+import { Message_type } from '../../type/Home/Chat_type';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import Conversation from '../../type/Home/Converstation_type';
 import TypingIndicator from '../../Constants/TypingInput';
@@ -87,7 +87,7 @@ const MessageItem = ({
           });
         }}
         onLongPress={() => handlePresentModalPress(item)}
-        style={({pressed}) => [
+        style={({ pressed }) => [
           {
             width: '100%',
             flexDirection: 'row',
@@ -97,7 +97,7 @@ const MessageItem = ({
             marginVertical: 8,
             backgroundColor: pressed ? 'rgb(210, 230, 255)' : color.black,
             shadowColor: '#000',
-            shadowOffset: {width: 0, height: 2},
+            shadowOffset: { width: 0, height: 2 },
           },
         ]}>
         {statusUser && (
@@ -122,7 +122,7 @@ const MessageItem = ({
               marginRight: 15,
               backgroundColor: color.gray,
             }}
-            source={{uri: item.avatar}}
+            source={{ uri: item.avatar }}
           />
         ) : (
           <View
@@ -199,10 +199,10 @@ const MessageItem = ({
                   .slice(0, 4)
                   .map((participant: any, index: number) => {
                     const positions = [
-                      {top: 0, left: 0},
-                      {top: 0, right: 0},
-                      {bottom: 0, left: 0},
-                      {bottom: 0, right: 0},
+                      { top: 0, left: 0 },
+                      { top: 0, right: 0 },
+                      { bottom: 0, left: 0 },
+                      { bottom: 0, right: 0 },
                     ];
                     return (
                       <Image
@@ -217,7 +217,7 @@ const MessageItem = ({
                           borderColor: 'white',
                           backgroundColor: color.gray,
                         }}
-                        source={{uri: participant.user.avatar}}
+                        source={{ uri: participant.user.avatar }}
                       />
                     );
                   });
@@ -225,7 +225,7 @@ const MessageItem = ({
             })()}
           </View>
         )}
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <Text
             style={{
               fontWeight: 'bold',
@@ -237,21 +237,21 @@ const MessageItem = ({
             {item.roomName
               ? item.roomName
               : item.participants
-                  .filter(
-                    (participant: any) => participant.user.name !== user.name,
-                  )
-                  .map((participant: any) => participant.user.name)
-                  .filter((name: string) => !!name)
-                  .join(', ')}
+                .filter(
+                  (participant: any) => participant.user.name !== user.name,
+                )
+                .map((participant: any) => participant.user.name)
+                .filter((name: string) => !!name)
+                .join(', ')}
           </Text>
           {typingUsers?.isTyping ? (
-            <TypingIndicator typingUsers={typingUsers} size={25} dotSize={26} />
+            <TypingIndicator typingUsers={typingUsers} size={20} dotSize={12} />
           ) : (
             <View
               style={{
                 flexDirection: 'row',
-                width: '80%',
-                gap: 10,
+                width: '70%',
+                gap: 20,
               }}>
               <Text
                 ellipsizeMode="tail"
@@ -260,15 +260,15 @@ const MessageItem = ({
                   fontSize: 14,
                   fontWeight: 'bold',
                   color: color.white,
-                  width:'70%',
+                  width: 'auto',
                 }}>
                 {item.messages[0]?.user?.user_id === user._id
                   ? `You: ${getMessageContent(item.messages[0])}`
                   : `${item.messages[0]?.user?.name}: ${getMessageContent(
-                      item.messages[0],
-                    )}`}
+                    item.messages[0],
+                  )}`}
               </Text>
-              <Text ellipsizeMode="tail" numberOfLines={1}>
+              <Text ellipsizeMode="tail" numberOfLines={1} style={{ width: 60 }}>
                 {dayjs(item.messages[0]?.createdAt).fromNow()}
               </Text>
             </View>

@@ -25,6 +25,9 @@ import {messageIcon} from '../../../type/react-type';
 import {Message_type} from '../../../type/Home/Chat_type';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import Conversation, {
+  participants,
+} from '../../../type/Home/Converstation_type';
 
 interface MessageProps {
   currentMessage: Message_type;
@@ -38,6 +41,8 @@ interface MessageProps {
   selectedMessages_id: any;
   setSelectedMessages: React.Dispatch<React.SetStateAction<any>>;
   setReactionPosition: React.Dispatch<React.SetStateAction<any>>;
+  markPaticipantReadMessage: participants[];
+  checkReadMessage?: any;
 }
 
 const MessageItem: React.FC<MessageProps> = ({
@@ -54,6 +59,8 @@ const MessageItem: React.FC<MessageProps> = ({
   selectedMessages_id,
   setSelectedMessages,
   setReactionPosition,
+  markPaticipantReadMessage,
+  checkReadMessage,
 }) => {
   const {user} = useCheckingService();
   const [color] = useState(useSelector((state: any) => state.colorApp.value));
@@ -110,6 +117,7 @@ const MessageItem: React.FC<MessageProps> = ({
     handleLongPress(message); // Gọi hàm xử lý nhấn giữ
     setShowReactions(true);
   };
+
   return (
     <View style={{marginBottom: 2, marginHorizontal: 10, position: 'relative'}}>
       <Day {...props} />
@@ -128,26 +136,31 @@ const MessageItem: React.FC<MessageProps> = ({
                     userChat={userChat}
                   />
                 )}
+              {currentMessage.statusSendding === null ||
+                (currentMessage.statusSendding === false && isMyMessage && (
+                  <View
+                    style={{
+                      alignSelf: 'flex-end',
+                      position: 'absolute',
+                      alignItems: 'center',
+                      top: -10,
+                      zIndex: 1,
+                      alignContent: 'center',
+                      justifyContent: 'flex-end',
+                    }}>
+                    <AntDesign name="exclamationcircle" size={18} color="red" />
+                  </View>
+                ))}
               <View
                 style={{
                   flexDirection: 'row',
-                  alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
-                  alignItems: 'center',
-                  gap: 10,
                 }}>
-                {currentMessage.statusSendding === null ||
-                  (currentMessage.statusSendding === false && (
-                    <AntDesign
-                      name="exclamationcircle"
-                      size={18}
-                      color="red"
-                      style={{
-                        alignSelf: 'flex-end',
-                      
-                      }}
-                    />
-                  ))}
                 <View style={{flex: 1}}>
+                  {checkReadMessage === currentMessage._id && (
+                    <View style={{alignItems: 'center', marginVertical: 10}}>
+                      <Text>Tin nhắn chưa đọc</Text>
+                    </View>
+                  )}
                   <MessageComponent
                     isFirstMessage={isFirstMessage}
                     isMyMessage={isMyMessage}
@@ -160,6 +173,15 @@ const MessageItem: React.FC<MessageProps> = ({
                     setSelectedMessages={setSelectedMessages}
                     highlightedMessageId={highlightedMessageId}
                   />
+                  <View
+                    style={{
+                      width: sizeMessage.widthMessage,
+                      height: 'auto',
+                      backgroundColor: 'red',
+                      bottom: 0,
+                      left: 0,
+                      alignSelf: 'flex-end',
+                    }}></View>
                   {currentMessage.reactions.length > 0 &&
                     currentMessage.reactions.slice(-2).map((reaction: any) => {
                       const icon = messageIcon.find(
@@ -182,6 +204,27 @@ const MessageItem: React.FC<MessageProps> = ({
                 </View>
               </View>
             </Animated.View>
+            {markPaticipantReadMessage.map((item, index) => {
+              if (
+                item.message_readed_id === currentMessage._id &&
+                item.user._id !== userChat._id
+              ) {
+                return (
+                  <View
+                    style={{alignSelf: 'flex-end', marginTop: 10}}
+                    key={`${item.message_readed_id}-${item.user._id}`}>
+                    <Image
+                      key={index}
+                      style={{width: 15, height: 15, borderRadius: 25}}
+                      source={{
+                        uri: item.user.avatar,
+                      }}
+                    />
+                  </View>
+                );
+              }
+              return null;
+            })}
           </>
         )
       ) : (

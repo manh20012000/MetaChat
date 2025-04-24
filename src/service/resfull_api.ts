@@ -39,13 +39,13 @@ const postFormData = async (route: string, data: any, check: any) => {
   formData.append('conversation', JSON.stringify(data.conversation));
   formData.append('user', JSON.stringify(data.user));
   formData.append('filesOrder', JSON.stringify(data.filesOrder));
-  formData.append("deviceSend",JSON.stringify(data.deviceSend))
+  formData.append('deviceSend', JSON.stringify(data.deviceSend));
   data.message.attachments.forEach((file: any, index: number) => {
     // console.log(file.url)
     formData.append('media', {
       uri: file.url || `file://${file.path}`,
-      name:file.name,
-      type:file.type,
+      name: file.name,
+      type: file.type,
     });
   });
 
@@ -80,14 +80,12 @@ const getData = async (route: string, query: any, param: any, check: any) => {
     return null;
   }
   try {
-    
-    const response:response = await axios.get(`${API_URL}/${route}/${param}`, {
+    const response: response = await axios.get(`${API_URL}/${route}/${param}`, {
       params: query ?? null,
       headers: {
         'Content-Type': 'application/json',
         authorization: `Bearer ${checking.access_token} `,
       },
-      
     });
 
     return response.data;
@@ -98,7 +96,6 @@ const getData = async (route: string, query: any, param: any, check: any) => {
 };
 const getResearch = async (route: string, params: any) => {
   try {
-    
     const response: response = await axios.get(`${API_URL}/${route}`, {
       params: {text: params},
       headers: {
@@ -170,8 +167,8 @@ const patchData = async (
 const deleteData = async (
   route: string,
   check: any,
-  _id: string,
-  params: string,
+  _id: string, //đây là id của cuộc thoại converstation
+  deviceSend: string,
 ) => {
   const checking = await checkAndRefreshToken(check.dispatch, check.user);
   if (checking === null) {
@@ -181,8 +178,9 @@ const deleteData = async (
       const response = await axios.delete(`${API_URL}/${route}/${_id}`, {
         headers: {
           'Content-Type': 'application/json',
-          authorization: `Bearer ${checking.access_token} `,
+          authorization: `Bearer ${checking.access_token}`,
         },
+        params: {deviceSend},
 
         // Tham số truyền qua query
       });
@@ -205,13 +203,13 @@ export {
   getResearch,
   API_URL,
 };
-  // const extension = file.name?.split('.').pop() || 'file'; // Lấy phần mở rộng nếu có
-    // const name =
-    //   file.name || `${new Date().toISOString().slice(0, -5)}.${extension}`;
-    // let type = ;
-    // if (!type) {
-    //   // Gán MIME type dựa trên phần mở rộng
-    //   if (extension.match(/(jpg|jpeg|png|gif)/i)) type = `image/${extension}`;
-    //   else if (extension.match(/(mp4|mov|avi)/i)) type = `video/${extension}`;
-    //   else type = 'application/octet-stream'; // Mặc định nếu không rõ
-    // }
+// const extension = file.name?.split('.').pop() || 'file'; // Lấy phần mở rộng nếu có
+// const name =
+//   file.name || `${new Date().toISOString().slice(0, -5)}.${extension}`;
+// let type = ;
+// if (!type) {
+//   // Gán MIME type dựa trên phần mở rộng
+//   if (extension.match(/(jpg|jpeg|png|gif)/i)) type = `image/${extension}`;
+//   else if (extension.match(/(mp4|mov|avi)/i)) type = `video/${extension}`;
+//   else type = 'application/octet-stream'; // Mặc định nếu không rõ
+// }

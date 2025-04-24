@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   TextInput,
@@ -11,18 +11,18 @@ import {
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import {InputToolbar} from 'react-native-gifted-chat';
-import {useSelector} from 'react-redux';
-import {Send} from '../../../assets/svg/svgfile';
+import { InputToolbar } from 'react-native-gifted-chat';
+import { useSelector } from 'react-redux';
+import { Send } from '../../../assets/svg/svgfile';
 import Conversation from '../../../type/Home/Converstation_type';
-import {BSON} from 'bson';
+import { BSON } from 'bson';
 import PermissionCamera from '../../../util/Permision/CameraChatPermission';
 import userMessage from '../../../type/Home/useMessage_type';
-import {Message_type} from '../../../type/Home/Chat_type';
-import {NavigationProp, useNavigation} from '@react-navigation/native';
-import {RootStackParamList} from '../../../type/rootStackScreen';
-import {eventEmitter} from '../../../eventEmitter/EventEmitter';
-import useRenderInput from './ViewRender/hook/usr-renderInput';
+import { Message_type } from '../../../type/Home/Chat_type';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from '../../../type/rootStackScreen';
+import { eventEmitter } from '../../../eventEmitter/EventEmitter';
+import useRenderInput from './ViewRender/hook/use-renderInput';
 import MicroChat from '../../../Container/Home/Chat_component/Microphone/MicroChat';
 import MicrophonePermission from '../../../util/Permision/MicrophonePermision';
 import ModalMap from '../../../Container/Home/Chat_component/Mapshare/ShareMap';
@@ -37,10 +37,11 @@ type TCusttomTypeInput = {
   setReplyMessage: React.Dispatch<React.SetStateAction<Message_type | null>>;
   handlePresentModalPress: () => void;
 };
+
 const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
-  const {width, height} = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const deviceInfo = useSelector(
-    (value: {deviceInfor: {value: any}}) => value.deviceInfor.value,
+    (value: { deviceInfor: { value: any } }) => value.deviceInfor.value,
   );
   const {
     handlePresentModalPress,
@@ -52,14 +53,13 @@ const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
   } = props;
 
   const color = useSelector(
-    (value: {colorApp: {value: any}}) => value.colorApp.value,
+    (value: { colorApp: { value: any } }) => value.colorApp.value,
   );
   const [turnOnMic, setTurnOnMic] = useState<boolean>(false);
 
   const {
     handlePress,
     text,
-    settext,
     handleSend,
     changeIcon,
     isShowSendText,
@@ -77,23 +77,23 @@ const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
         <View
           style={{
             width: width,
-            marginBottom: 30+inputHeight,
+            marginBottom: 10,
             alignContent: 'center',
             paddingHorizontal: 10,
             borderTopWidth: 2,
             borderTopColor: 'gray',
             justifyContent: 'center',
             alignSelf: 'center',
-            
+
           }}>
-          <Text style={{color: 'white', fontWeight: 'bold'}}>
+          <Text style={{ color: 'white', fontWeight: 'bold' }}>
             Replying to{' '}
             {replyMessage.user !== userChat.user_id
               ? 'youself'
               : replyMessage.user.name}
           </Text>
           <Text
-            style={{color: 'white', width: width - 50, fontSize: 18}}
+            style={{ color: 'white', width: width - 50, fontSize: 18 }}
             numberOfLines={1}
             ellipsizeMode="tail">
             {replyMessage.messageType === 'text'
@@ -112,11 +112,11 @@ const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
               alignSelf: 'center',
               justifyContent: 'center',
             }}>
-           <MaterialIcons
+            <MaterialIcons
               name="cancel"
               size={20}
               color="white"
-              style={{alignSelf: 'center'}}
+              style={{ alignSelf: 'center' }}
             />
           </TouchableOpacity>
         </View>
@@ -128,11 +128,11 @@ const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-around',
-            position: 'absolute',
+            // position: 'absolute',
             bottom: 5,
             paddingVertical: 10,
             zIndex: 1,
-            height: inputHeight+10,
+            height: inputHeight + 10,
 
           }}>
           {changeIcon ? (
@@ -143,15 +143,15 @@ const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
                 alignItems: 'center',
               }}>
               <TouchableOpacity
-                onPress={async() => {
+                onPress={async () => {
                   console.log(await MapLocaltedPermission())
-                  if(await MapLocaltedPermission()){
+                  if (await MapLocaltedPermission()) {
                     onClose()
-                  }else{
+                  } else {
                     Linking.openSettings();
                     console.log('cấp quyền thất bại ');
                   }
-                  
+
                 }}>
                 <FontAwesome
                   name="location-arrow"
@@ -227,7 +227,8 @@ const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
               }
               onFocus={() => setChangeIcon(true)}
               onChangeText={value => {
-                onchangeTyping()
+
+                onchangeTyping(value)
                 if (value !== '') {
                   setChangeIcon(false);
                   setIsShowSendText(false);
@@ -235,7 +236,7 @@ const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
                   setChangeIcon(true);
                   setIsShowSendText(true);
                 }
-                settext(value);
+
               }}
             />
             <TouchableOpacity>
@@ -248,7 +249,7 @@ const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
           </View>
           {isShowSendText ? (
             <TouchableOpacity>
-              <Text style={{fontSize: 25}}>{conversation?.icon}</Text>
+              <Text style={{ fontSize: 25 }}>{conversation?.icon}</Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity

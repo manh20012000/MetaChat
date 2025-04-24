@@ -16,7 +16,7 @@ import {
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {useHomeLogic} from './useHome/use-home.tsx';
+import { useHomeLogic } from './useHome/use-home.tsx';
 import HeaderHome from '../../Screen/Home/homeComponent/HeaderHome.tsx';
 import Statusbar from '../../Constants/StatusBar.tsx';
 import BottonsheetHome from '../../Screen/Home/homeComponent/BottomsheetHome.tsx';
@@ -24,8 +24,8 @@ import dayjs from 'dayjs';
 import Conversation from '../../type/Home/Converstation_type.ts';
 import MessageItem from '../ConverstationItem/ItemConversation.tsx';
 
-export const HomeView = ({navigation}: {navigation: any}) => {
-  
+export const HomeView = ({ navigation }: { navigation: any }) => {
+
   const {
     color,
     user,
@@ -44,12 +44,12 @@ export const HomeView = ({navigation}: {navigation: any}) => {
     handlerShowmodal,
     handlePresentModalPress,
     handleSheetChanges, onRefresh, refreshing,
-     typingUsers
+    typingUsers
   } = useHomeLogic(navigation);
- 
+
   return (
     <BottomSheetModalProvider>
-      <View style={{flex: 1, backgroundColor: color.dark}}>
+      <View style={{ flex: 1, backgroundColor: color.dark }}>
         <Statusbar
           bgrstatus={color.dark}
           bgrcolor={color.light}
@@ -58,30 +58,31 @@ export const HomeView = ({navigation}: {navigation: any}) => {
         {onloading === true ? (
           <ActivityIndicator size="large" color="#00ff00" />
         ) : (
-          <View style={{flex: 1, backgroundColor: color.dark}}>
+          <View style={{ flex: 1, backgroundColor: color.dark }}>
             <FlatList
-                refreshing
-                ListHeaderComponent={
-                  <HeaderHome navigation={navigation} data_friend={data_friend} />
-                }
-                keyExtractor={(item, index) => item._id}
-                initialNumToRender={10}
-                data={data_convertstation}
-                renderItem={({ item }) => (
-                  <MessageItem
+              refreshing
+              ListHeaderComponent={
+                <HeaderHome navigation={navigation} data_friend={data_friend} />
+              }
+              keyExtractor={(item, index) => item._id}
+              initialNumToRender={10}
+              data={data_convertstation}
+              renderItem={({ item }) => (
+                <MessageItem
+                  key={item._id}
                   typingUsers={typingUsers}
-                    user_Status={user_Status}
-                    item={item}
-                    user={user}
-                    color={color}
-                    navigation={navigation}
-                    socket={socket}
-                    handlePresentModalPress={handlePresentModalPress}
-                  />
-                )}
-                refreshControl={
-                  <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-                }
+                  user_Status={user_Status}
+                  item={item}
+                  user={user}
+                  color={color}
+                  navigation={navigation}
+                  socket={socket}
+                  handlePresentModalPress={handlePresentModalPress}
+                />
+              )}
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }
             />
           </View>
         )}
@@ -91,8 +92,8 @@ export const HomeView = ({navigation}: {navigation: any}) => {
         onChange={handleSheetChanges}
         enableContentPanningGesture={false}
         snapPoints={snapPoints}>
-        <BottomSheetView style={{flex: 1, backgroundColor: color.gray}}>
-          <View style={{alignContent: 'center', alignItems: 'center'}}>
+        <BottomSheetView style={{ flex: 1, backgroundColor: color.gray }}>
+          <View style={{ alignContent: 'center', alignItems: 'center' }}>
             <BottonsheetHome
               handlerShowmodal={handlerShowmodal}
               bottomSheetModalRef={bottomSheetModalRef}
@@ -123,7 +124,7 @@ export const HomeView = ({navigation}: {navigation: any}) => {
               alignItems: 'center',
             }}>
             <Ionicons name="alert-circle-outline" size={40} color="red" />
-            <Text style={{fontSize: 18, fontWeight: 'bold', marginTop: 10}}>
+            <Text style={{ fontSize: 18, fontWeight: 'bold', marginTop: 10 }}>
               Xác nhận xóa?
             </Text>
             <Text
@@ -135,7 +136,7 @@ export const HomeView = ({navigation}: {navigation: any}) => {
               }}>
               Bạn có chắc chắn muốn xóa cuộc trò chuyện này không?
             </Text>
-            <View style={{flexDirection: 'row', marginTop: 20}}>
+            <View style={{ flexDirection: 'row', marginTop: 20 }}>
               <TouchableOpacity
                 style={{
                   flex: 1,
@@ -146,7 +147,7 @@ export const HomeView = ({navigation}: {navigation: any}) => {
                   marginRight: 10,
                 }}
                 onPress={() => setModalVisible(false)}>
-                <Text style={{color: 'white'}}>Hủy</Text>
+                <Text style={{ color: 'white' }}>Hủy</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={{
@@ -157,7 +158,7 @@ export const HomeView = ({navigation}: {navigation: any}) => {
                   backgroundColor: 'red',
                 }}
                 onPress={handleDeleteConverStation}>
-                <Text style={{color: 'white'}}>Xóa</Text>
+                <Text style={{ color: 'white' }}>Xóa</Text>
               </TouchableOpacity>
             </View>
           </View>

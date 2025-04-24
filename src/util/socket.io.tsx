@@ -20,23 +20,23 @@ export const SocketProvider: React.FC<HomeProviderProps> = ({ children }) => {
   const dispatch = useDispatch();
 
   const [socket, setSocket] = useState<Socket | null>(null);
+
   const user = useSelector((state: any) => state.auth.value);
 
   const api_socket = API_URL
 
   useEffect(() => {
+    if (!user) return;
     const connectToSocketServer = async () => {
+
       if (user) {
         try {
-          const userToken: string | null = await AsyncStorage.getItem('user');
 
-          const parsedToken = userToken ? JSON.parse(userToken) : null;
-          const accessToken = parsedToken?.access_token;
-          const iduser = parsedToken?._id;
-          if (!accessToken) {
+          const iduser = user?._id;
+          if (!user) {
             throw new Error('JWT token not found');
           }
-    
+
           const newSocket: Socket = socketIOClient(`${api_socket}`, {
             transports: ['websocket'],
             reconnection: true,
@@ -44,7 +44,7 @@ export const SocketProvider: React.FC<HomeProviderProps> = ({ children }) => {
             reconnectionDelayMax: 5000,
             reconnectionAttempts: Infinity,
             auth: {
-              token: accessToken,
+              token: user?.access_token,
               userId: iduser,
             },
           });
@@ -69,7 +69,7 @@ export const SocketProvider: React.FC<HomeProviderProps> = ({ children }) => {
       }
     };
 
-    connectToSocketServer();
+    connectToSocketServer().then();
 
     return () => {
       socket?.disconnect();

@@ -1,6 +1,10 @@
 import { StyleSheet, Text, View, Modal, Alert } from 'react-native';
 import React, { useCallback, useEffect, useState } from 'react';
-import { createNavigationContainerRef, NavigationContainer, useNavigation } from '@react-navigation/native';
+import {
+  createNavigationContainerRef,
+  NavigationContainer,
+  useNavigation,
+} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Login from '../Screen/User_Auth/login.tsx';
 import Register from '../Screen/User_Auth/register.tsx';
@@ -28,6 +32,7 @@ import DeviceInfo from 'react-native-device-info';
 import VideoCallHome from '../Container/Home/VideoCallComponent/VideoCallHome.tsx';
 import IncomingVideoCallScreen from '../Container/Home/VideoCallComponent/IncomingVideoCallScreen.tsx';
 import { RootStackParamList } from '../type/rootStackScreen.tsx';
+import { checkAndRefreshToken } from '../util/checkingToken.ts';
 const Stack = createNativeStackNavigator();
 
 const screens = [
@@ -37,14 +42,13 @@ const screens = [
   { name: 'ChatScreen', component: ChatScreen },
   { name: 'SearchScreen', component: SearchScreen },
   { name: 'HomeChatPersion', component: HomeChatPersion },
-   {name:'CameraChat',  component:CameraChat},
-   {name:"Setting",component:SettingComponent},
-   {name:"VideoCallHome",component:VideoCallHome},
-   {name:"CommingVideoCall",component:IncomingVideoCallScreen}
+  { name: 'CameraChat', component: CameraChat },
+  { name: 'Setting', component: SettingComponent },
+  { name: 'VideoCallHome', component: VideoCallHome },
+  { name: 'CommingVideoCall', component: IncomingVideoCallScreen },
 ];
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
 const Navigation: React.FC = () => {
-
   const dispath = useDispatch();
   const [loading, setLoading] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -52,12 +56,12 @@ const Navigation: React.FC = () => {
 
   useEffect(() => {
     const checkLoginStatus = async () => {
-      const deviceId =await DeviceInfo.getUniqueId();
-      dispath(getInfo(deviceId))
+      const deviceId = await DeviceInfo.getUniqueId();
+      dispath(getInfo(deviceId));
       try {
         const user_String: any = await AsyncStorage.getItem('user');
         const userObject = JSON.parse(user_String);
-        // console.log(userObject, 'userObject');
+     
         if (userObject !== null) {
           const decoded: JwtPayload = jwtDecode(userObject.refresh_token);
           const isTokenExpired = decoded.exp
@@ -66,6 +70,18 @@ const Navigation: React.FC = () => {
           if (isTokenExpired) {
             setIsLoggedIn(false);
           } else {
+            const accessTokenDecoded = jwtDecode(userObject.access_token);
+            const isTokenExpiredaccep = accessTokenDecoded.exp
+              ? accessTokenDecoded.exp * 1000 < Date.now()
+              : true;
+            if (isTokenExpiredaccep) {
+              try {
+                checkAndRefreshToken(dispath, userObject);
+              } catch (error) {
+                console.log('Error refreshing token:', error);
+                setIsLoggedIn(false);
+              }
+            }
             setIsLoggedIn(true);
             dispath(login(userObject));
           }
@@ -74,34 +90,36 @@ const Navigation: React.FC = () => {
         }
       } catch (err: any) {
         console.log(err, 'navigation log err');
+        setIsLoggedIn(false);
       }
       setLoading(true);
     };
     checkLoginStatus();
   }, []);
   const checkNetworkStatus = useCallback(() => {
-    const unsubscribe = NetInfo.addEventListener((state) => {
-      if (state.isConnected !== isConnected) {
-        setIsConnected(state.isConnected);
-        dispath(check(state.isConnected));
+    const unsubscribe = NetInfo.addEventListener(state => {
+      try {
+        if (state.isConnected !== isConnected) {
+          setIsConnected(state.isConnected);
+          dispath(check(state.isConnected));
 
-        if (!state.isConnected) {
-          // socket?.disconnect();
-          // socket?.removeAllListeners();
-          // socket?.close();
-          Alert.alert(
-            'No Internet Connection',
-            'Your network connection is too weak or unavailable.',
-          );
-       
+          if (!state.isConnected) {
+           
+            Alert.alert(
+              'No Internet Connection',
+              'Your network connection is too weak or unavailable.',
+            );
+          }
+          //  else {
+          //   console.log("✅ Có mạng trở lại, đang kết nối lại socket...");
+          //   if (!socket?.connected) {
+          //     socket?.connect();
+          //     // dispatch(Status(user._id));
+          //   }
+          // }
         }
-        //  else {
-        //   console.log("✅ Có mạng trở lại, đang kết nối lại socket...");
-        //   if (!socket?.connected) {
-        //     socket?.connect();
-        //     // dispatch(Status(user._id));
-        //   }
-        // }
+      } catch (error) {
+        console.error('Error checking network status:', error);
       }
     });
 
@@ -112,7 +130,6 @@ const Navigation: React.FC = () => {
     return () => unsubscribe();
   }, [checkNetworkStatus]);
 
-  
   return (
     loading && (
       <NavigationContainer ref={navigationRef}>
@@ -128,4 +145,3 @@ const Navigation: React.FC = () => {
   );
 };
 export default Navigation;
-

@@ -58,12 +58,14 @@ export const GiftedChatView = ({
     handlerDeleteMessage,
     setSelectedItemsMedia,
     typingUsers,
+    markPaticipantReadMessage,
+    checkReadMessage,
   } = useGiftedChatLogic(conversation);
 
   return (
     <>
       <Pressable
-       delayLongPress={200}
+        delayLongPress={200}
         onPress={() => {
           Keyboard.dismiss();
 
@@ -100,6 +102,7 @@ export const GiftedChatView = ({
             renderSend={renderSend}
             renderMessage={(props: any) => (
               <MessageItem
+           
                 highlightedMessageId={highlightedMessageId}
                 currentMessage={props.currentMessage}
                 props={props}
@@ -110,12 +113,14 @@ export const GiftedChatView = ({
                 selectedMessages_id={selectedMessages?._id}
                 setSelectedMessages={setSelectedMessages}
                 setReactionPosition={setReactionPosition}
+                markPaticipantReadMessage={markPaticipantReadMessage}
+                checkReadMessage={checkReadMessage}
               />
             )}
             renderTime={() => null}
             isLoadingEarlier={true}
             showUserAvatar={true}
-            keyboardShouldPersistTaps="handled" 
+            keyboardShouldPersistTaps="handled"
             listViewProps={{
               initialNumToRender: 15, // Số tin nhắn được render ban đầu
               maxToRenderPerBatch: 10, // Số lượng tin nhắn tối đa được render trong một lần cập nhật
@@ -126,17 +131,21 @@ export const GiftedChatView = ({
               ref: flatListRef, // Gán ref
             }}
             messagesContainerStyle={{
-              marginBottom: replyMessage === null ? 60 : 0,
+              // marginBottom: replyMessage === null ? 60 : 0,
               paddingVertical: 10,
             }}
             parsePatterns={linkStyle => [
               {type: 'phone', style: linkStyle, onPress: onPressPhoneNumber},
               {pattern: /#(\w+)/},
             ]}
-            // isTyping={typingUsers?.isTyping}
+            // isTyping={true}
             renderFooter={() =>
               typingUsers?.isTyping ? (
-             <TypingIndicator typingUsers={typingUsers}  size={25} dotSize={26} />
+                <TypingIndicator
+                  typingUsers={typingUsers}
+                  size={20}
+                  dotSize={10}
+                />
               ) : null
             }
           />
@@ -157,7 +166,7 @@ export const GiftedChatView = ({
           </BottomSheetView>
         </BottomSheetModal>
       </BottomSheetModalProvider>
-      {selectedMessages &&!replyMessage && (
+      {selectedMessages && !replyMessage && (
         <>
           <ReactionIcons
             isMyMessage={true}
