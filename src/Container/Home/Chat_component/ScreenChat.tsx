@@ -32,16 +32,15 @@ const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
   route,
   navigation,
 }) => {
-
   const networkConnect = useSelector((value: any) => value.network.value);
   const color = useSelector((value: any) => value.colorApp.value);
   const insert = useSafeAreaInsets();
   const [user] = useState(useSelector((state: any) => state.auth.value));
   const {width, height} = useWindowDimensions();
   const isPortrait = height > width;
-  const {conversation}=route.params
+  const {conversation} = route.params;
   const socket = useSocket();
- 
+
   const [userChat] = useState<any>(
     conversation.participants.find(
       (participant: any) => participant.user.user_id === user._id,
@@ -49,15 +48,14 @@ const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
   );
   const sendConnectCall = async () => {
     try {
-  
       if (!networkConnect) {
         Alert.alert('Kết nối mạng không ổn định');
         return;
       }
-  
+
       // 👉 Xác định người nhận (participant) là những người khác user hiện tại
       const participantIds = conversation.participantIds.filter(
-        (id: string) => id !== user.user_id
+        (id: string) => id !== user.user_id,
       );
 
       // 👉 Thông tin người gọi (caller)
@@ -68,19 +66,19 @@ const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
         avatar: userChat.avatar,
         socketId: socket?.id, // sẽ được server điền khi cần
       };
-       socket?.emit('startCall', {
+      socket?.emit('startCall', {
         caller: callerData,
         roomId: conversation._id,
-        participants:conversation.participants,
+        participants: conversation.participants,
         isCaller: true,
-        participantIds, 
-      });// gửi mảng user_id người nhận
-  
-     // 👉 Điều hướng sang màn hình cuộc gọi
+        participantIds,
+      }); // gửi mảng user_id người nhận
+
+      // 👉 Điều hướng sang màn hình cuộc gọi
       navigation.navigate('VideoCallHome', {
         caller: callerData,
         roomId: conversation._id,
-        participants:conversation.participants,
+        participants: conversation.participants,
         participantIds,
         isOnpenCamera: false,
         conversation,
@@ -90,7 +88,7 @@ const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
       console.error('📛 Lỗi khi nhấn nút gọi:', error);
     }
   };
-  
+
   return (
     <View style={{backgroundColor: color.dark, flex: 1}}>
       <Statusbar
@@ -115,7 +113,7 @@ const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
           <TouchableOpacity
             style={{alignItems: 'center', justifyContent: 'center'}}
             onPress={() => navigation.goBack()}>
-             <Ionicons name="arrow-back" size={35} color={color.blue}/>
+            <Ionicons name="arrow-back" size={35} color={color.blue} />
             {/* <Icon
               color={color.white}
               name="back"
@@ -158,10 +156,9 @@ const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
                 // Lọc ra những người tham gia khác currentUser
                 const filteredParticipants = conversation.participants.filter(
                   (participant: any) =>
-                    participant.user._id !== conversation.participants[0].user._id,
+                    participant.user._id !== userChat.user._id,
                 );
 
-                // Số lượng người tham gia khác currentUser
                 const count = filteredParticipants.length;
                 if (count === 1) {
                   // Chỉ hiển thị ảnh của 1 người (chiếm 100%)
@@ -276,7 +273,7 @@ const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
               justifyContent: 'center',
             }}
             onPress={sendConnectCall}>
-        <Ionicons name="call-sharp" size={25} color={color.blue}/>
+            <Ionicons name="call-sharp" size={25} color={color.blue} />
           </TouchableOpacity>
           <TouchableOpacity
             style={{
@@ -289,7 +286,7 @@ const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
             onPress={() => {
               navigation.navigate('VideoCallHome', {type: 'videocall'});
             }}>
-            <Ionicons name="videocam" size={25} color={color.blue}/>
+            <Ionicons name="videocam" size={25} color={color.blue} />
           </TouchableOpacity>
           <TouchableOpacity
             style={{
@@ -299,7 +296,7 @@ const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-              <Ionicons name="information-circle" size={30} color={color.blue}/>
+            <Ionicons name="information-circle" size={30} color={color.blue} />
           </TouchableOpacity>
         </View>
       </View>

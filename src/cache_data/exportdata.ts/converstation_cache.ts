@@ -19,7 +19,7 @@ const createConversation = async (Conversation: Conversation) => {
     if (existingConversation) {
       return; // Dừng lại nếu đã tồn tại
     }
-
+    console.log(Conversation.totalMessage);
     // Nếu không tồn tại, thêm vào Realm
     if (Conversation.participants.length > 0) {
       realm.write(() => {
@@ -37,6 +37,8 @@ const createConversation = async (Conversation: Conversation) => {
           isDeleted: Conversation.isDeleted,
           createdAt: Conversation.createdAt,
           lastSync: Conversation.lastSync,
+          totalMessage:
+            Conversation.totalMessage ?? Conversation.messages.length,
         });
       });
     }
@@ -233,7 +235,6 @@ const Converstation_Message = async (
     const conditions = conversation.participantIds
       .map((id: any, index: any) => `participantIds CONTAINS $${index}`)
       .join(' AND ');
-
     const conversations = realm
       .objects('Conversation')
       .filtered(
@@ -247,6 +248,7 @@ const Converstation_Message = async (
         (existingConversation.messages as Message_type[]).unshift(message);
         existingConversation.updatedAt = message.createdAt;
         existingConversation.lastSync = message.createdAt;
+        existingConversation.totalMessage = conversation.totalMessage | 1;
       } else {
         realm.create('Conversation', converstation(conversation, message));
       }

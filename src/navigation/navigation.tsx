@@ -61,7 +61,7 @@ const Navigation: React.FC = () => {
       try {
         const user_String: any = await AsyncStorage.getItem('user');
         const userObject = JSON.parse(user_String);
-        // console.log(userObject, 'userObject');
+     
         if (userObject !== null) {
           const decoded: JwtPayload = jwtDecode(userObject.refresh_token);
           const isTokenExpired = decoded.exp
@@ -104,9 +104,7 @@ const Navigation: React.FC = () => {
           dispath(check(state.isConnected));
 
           if (!state.isConnected) {
-            // socket?.disconnect();
-            // socket?.removeAllListeners();
-            // socket?.close();
+           
             Alert.alert(
               'No Internet Connection',
               'Your network connection is too weak or unavailable.',

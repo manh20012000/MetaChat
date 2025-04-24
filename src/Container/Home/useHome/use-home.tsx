@@ -197,13 +197,19 @@ export const useHomeLogic = (navigation: any) => {
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current); // Clear timeout cũ nếu có
       }
-
+      // if (isTyping === false) {
+      //   console.log('nhảy vào đây ', isTyping);
+      //   // Nếu không còn typing thì xử lý ngay
+      //   setTypingUsers({ userChat, isTyping, deviceSend, roomId });
+      //   return;
+      // }
       typingTimeoutRef.current = setTimeout(() => {
         setTypingUsers({ userChat, isTyping, deviceSend, roomId });
       }, 3000);
     },
     [],
   );
+
   useEffect(() => {
     if (!socket) return;
     const handleConnect = () => {
@@ -216,17 +222,12 @@ export const useHomeLogic = (navigation: any) => {
       try {
         const { message, conversation, send_id, type, deviceSend, userSend } =
           messages;
-
         const typeNumber = Number(type);
-        console.log(typeNumber, '')
-        handlerEndReciverTyping(
-          message.user,
-          false,
-          deviceSend,
-          conversation._id,
-        );
+        if (typeNumber !== 6) {
+          setTypingUsers({ userChat:message.user,isTyping:false,deviceSend:deviceSend, roomId:conversation._id });
+        }
         if (typeNumber === 1) {
-          console.log(typeNumber, 'haha')
+         
           await Converstation_Message(message, conversation, send_id);
         } else if (typeNumber === 2) {
           if (send_id !== user._id) {

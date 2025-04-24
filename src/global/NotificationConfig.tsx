@@ -65,6 +65,7 @@ const createNotificationChannels = async (): Promise<void> => {
 
 // Xử lý sự kiện nhấn thông báo
 const handleNotificationPress = async ({ type, detail }: any) => {
+  alert('thông báo ')
   if (
     type === EventType.PRESS ||
     type === EventType.ACTION_PRESS ||

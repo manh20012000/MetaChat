@@ -1,18 +1,17 @@
 import {Message_type} from './Chat_type';
-export type participants={
-    user: {
-      _id: string;
-      action_notifi: boolean;
-      avatar: string;
-      name: string;
-      role: string;
-      status_read: boolean;
-      user_id: string;
-    },
-     message_readed_id: string, 
-      readAt: string,
-  
-}
+export type participants = {
+  user: {
+    _id: string;
+    action_notifi: boolean;
+    avatar: string;
+    name: string;
+    role: string;
+    status_read: boolean;
+    user_id: string;
+  };
+  message_readed_id: string;
+  readAt: string;
+};
 type Conversation = {
   _id: string; // ID của cuộc trò chuyện
   roomName: string | null; // Tên của nhóm hoặc tên động được tạo từ các thành viên
@@ -30,7 +29,7 @@ type Conversation = {
   permission: string;
   messageError: Message_type[];
   otherContent: string;
-
+  totalMessage: number;
   lastSync: string;
 };
 export default Conversation;

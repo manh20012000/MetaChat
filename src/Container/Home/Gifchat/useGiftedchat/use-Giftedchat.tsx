@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useSelector} from 'react-redux';
 import {
   Animated,
   FlatList,
@@ -10,16 +10,16 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from 'react-native';
-import { GiftedChat } from 'react-native-gifted-chat';
-import { API_ROUTE } from '../../../../service/api_enpoint';
-import { useSocket } from '../../../../util/socket.io';
-import { BottomSheetModal } from '@gorhom/bottom-sheet';
-import { postFormData } from '../../../../service/resfull_api';
+import {GiftedChat} from 'react-native-gifted-chat';
+import {API_ROUTE} from '../../../../service/api_enpoint';
+import {useSocket} from '../../../../util/socket.io';
+import {BottomSheetModal} from '@gorhom/bottom-sheet';
+import {postFormData} from '../../../../service/resfull_api';
 import useCheckingService from '../../../../service/Checking_service';
 import Conversation, {
   participants,
 } from '../../../../type/Home/Converstation_type';
-import { Message_type } from '../../../../type/Home/Chat_type';
+import {Message_type} from '../../../../type/Home/Chat_type';
 import {
   Converstation_Message,
   deleteMessage,
@@ -28,21 +28,21 @@ import {
   recallMessage,
   update_Converstation,
 } from '../../../../cache_data/exportdata.ts/converstation_cache';
-import { Vibration } from 'react-native';
-import { converstationsend } from '../../../../util/util_chat/converstationSend';
-import { updateMessageReaction } from '../../../../service/MesssageService';
+import {Vibration} from 'react-native';
+import {converstationsend} from '../../../../util/util_chat/converstationSend';
+import {updateMessageReaction} from '../../../../service/MesssageService';
 import userMessage from '../../../../type/Home/useMessage_type';
 
 export const useGiftedChatLogic = (conversation: Conversation) => {
-  const { width, height } = useWindowDimensions();
+  const {width, height} = useWindowDimensions();
   const color = useSelector(
-    (value: { colorApp: { value: any } }) => value.colorApp.value,
+    (value: {colorApp: {value: any}}) => value.colorApp.value,
   );
 
   const deviceInfo = useSelector(
-    (value: { deviceInfor: { value: any } }) => value.deviceInfor.value,
+    (value: {deviceInfor: {value: any}}) => value.deviceInfor.value,
   );
-  const { user, dispatch } = useCheckingService();
+  const {user, dispatch} = useCheckingService();
   const giftedChatRef = useRef<any>(null);
   const socket = useSocket();
   const networkConnect = useSelector((value: any) => value.network.value);
@@ -79,7 +79,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   }>();
   const [messageMoreAction, setMessageMoreAction] =
     useState<Message_type | null>(null);
-  const [reactionPosition, setReactionPosition] = useState({ x: 0, y: 0 });
+  const [reactionPosition, setReactionPosition] = useState({x: 0, y: 0});
   const [userChat] = useState<any>(
     conversation.participants.find(
       (participant: any) => participant.user.user_id === user._id,
@@ -141,7 +141,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     const index = messages.findIndex(msg => msg._id === messageId);
     if (index !== -1 && flatListRef.current) {
       setHighlightedMessageId(messageId); // Đánh dấu tin nhắn đang highlight
-      flatListRef.current.scrollToIndex({ index, animated: true });
+      flatListRef.current.scrollToIndex({index, animated: true});
       setTimeout(() => setHighlightedMessageId(null), 2000);
     }
   };
@@ -181,9 +181,9 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current); // Clear timeout cũ nếu có
       }
-
+  
       typingTimeoutRef.current = setTimeout(() => {
-        setTypingUsers({ userChat, isTyping, deviceSend, roomId });
+        setTypingUsers({userChat, isTyping, deviceSend, roomId});
       }, 3000);
     },
     [],
@@ -229,7 +229,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
           setMessages(previousMessages =>
             previousMessages.map(msg =>
               msg._id === newMessage._id
-                ? { ...msg, status: 'sent', statusSendding: true }
+                ? {...msg, status: 'sent', statusSendding: true}
                 : msg,
             ),
           );
@@ -240,7 +240,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
           throw new Error('Message sending failed');
         }
       } catch (error) {
-        const failedMessage: Message_type = { ...message, statusSendding: false };
+        const failedMessage: Message_type = {...message, statusSendding: false};
         if (!statusMessage) {
         } else {
           await MessageError(failedMessage, conversation, userChat);
@@ -248,7 +248,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
         setMessages((previousMessages: Message_type[]) =>
           previousMessages.map((msg: Message_type) =>
             msg._id === newMessage._id
-              ? { ...msg, status: 'failed', statusSendding: false }
+              ? {...msg, status: 'failed', statusSendding: false}
               : msg,
           ),
         );
@@ -264,7 +264,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
       for (let i = previousMessages.length - 1; i >= 0; i--) {
         if (previousMessages[i]._id === message._id) {
           const updatedMessages = [...previousMessages];
-          updatedMessages[i] = { ...message };
+          updatedMessages[i] = {...message};
           return updatedMessages;
         }
       }
@@ -277,7 +277,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
       for (let i = previousMessages.length - 1; i >= 0; i--) {
         if (previousMessages[i]._id === message._id) {
           const updatedMessages = [...previousMessages];
-          updatedMessages[i] = { ...message };
+          updatedMessages[i] = {...message};
           return updatedMessages;
         }
       }
@@ -311,13 +311,20 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
   }, []);
 
   const handlerMarkMessage = () => {
-    if (!conversation.messages || conversation.messages.length === 0 || !conversation || !userChat)
+    if (
+      !conversation.messages ||
+      conversation.messages.length === 0 ||
+      !conversation ||
+      !userChat
+    )
       return;
-    // tin nhắn mới nhất đã được sắp sếp lên đầu 
-    const lastMessage = [...conversation.messages]
-      .find(msg => msg.user._id !== userChat._id); // tìm tin nhắn cuối cùng KHÔNG phải của mình
+    // console.log(conversation.participants)
+    // tin nhắn mới nhất đã được sắp sếp lên đầu
+    const lastMessage = [...conversation.messages].find(
+      msg => msg.user._id !== userChat._id,
+    ); // tìm tin nhắn cuối cùng KHÔNG phải của mình
 
-    // lấy ra vị trí mình đoc trước đó 
+    // lấy ra vị trí mình đoc trước đó
     const currentUserParticipant = conversation.participants.find(
       (value: participants) => value.user._id === userChat._id,
     );
@@ -325,7 +332,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     if (!currentUserParticipant || !lastMessage) return;
 
     const lastReadMessageId = currentUserParticipant.message_readed_id;
-    // console.log(lastReadMessageId)
+
     // Nếu tin nhắn cuối cùng chưa được đánh dấu là đã đọc
     if (lastReadMessageId !== lastMessage._id) {
       // Gửi sự kiện đã đọc cho người khác biết
@@ -338,12 +345,19 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     const indexLastRead = conversation.messages.findIndex(
       msg => msg._id === lastReadMessageId,
     );
-    // console.log(indexLastRead)
+
+    if (indexLastRead === -1) {
+      setCheckReadMessage(null); // hoặc bỏ qua nếu không rõ vị trí
+      return;
+    }
     // Tìm message tiếp theo sau tin đã đọc trước đó
     const nextUnreadMessage = conversation.messages
       .slice(indexLastRead + 1)
       .find(msg => msg.user._id !== userChat._id); // bỏ qua tin của mình
-    // console.log(nextUnreadMessage, 'sdhjsdjs')
+    // console.log("Last message:", lastMessage);
+    // console.log("Last read ID:", lastReadMessageId);
+    // console.log("Index last read:", indexLastRead);
+    // console.log("Next unread message:", nextUnreadMessage);
     if (nextUnreadMessage) {
       setCheckReadMessage(nextUnreadMessage._id);
     } else {
@@ -351,33 +365,42 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
     }
   };
 
-
-  const HandlerUpdateReadMessage = useCallback((message: Message_type, user: userMessage) => {
-    const updatedParticipants = markPaticipantReadMessage.map(
-      (participant: participants) => {
-        if (user._id === participant.user._id) {
-          return {
-            ...participant,
-            user: {
-              ...user,
-              message_readed_id: message._id, // Cập nhật ID tin nhắn đã đọc
-              readAt: new Date().toISOString(),
-            },
-          };
-        }
-        return participant;
-      },
-    );
-    if (!updatedParticipants) return;
-    SetMarkPaticipantReadMessage(updatedParticipants);
-  }, []);
+  const HandlerUpdateReadMessage = useCallback(
+    (message: Message_type, user: userMessage) => {
+      const updatedParticipants = markPaticipantReadMessage.map(
+        (participant: participants) => {
+          if (user._id === participant.user._id) {
+            return {
+              ...participant,
+              user: {
+                ...user,
+                message_readed_id: message._id, // Cập nhật ID tin nhắn đã đọc
+                readAt: new Date().toISOString(),
+              },
+            };
+          }
+          return participant;
+        },
+      );
+      if (!updatedParticipants) return;
+      SetMarkPaticipantReadMessage(updatedParticipants);
+    },
+    [],
+  );
   useEffect(() => {
     handlerMarkMessage();
     socket?.on('new_message', messages => {
-      const { message, send_id, type, deviceSend, conversation } = messages;
+      const {message, send_id, type, deviceSend, conversation} = messages;
       const typeNumber = Number(type);
+      if (typeNumber !== 6) {
+        setTypingUsers({
+          userChat: message.user,
+          isTyping: false,
+          deviceSend: deviceSend,
+          roomId: conversation._id,
+        });
+      }
       if (typeNumber === 1) {
-        //sự kiện cho tin nhắn mới
         if (deviceSend !== deviceInfo) {
           handlerEndReciverTyping(userChat, false, deviceSend, null);
           setMessages(previousMessages =>
@@ -392,7 +415,7 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
             for (let i = previousMessages.length - 1; i >= 0; i--) {
               if (previousMessages[i]._id === message._id) {
                 const updatedMessages = [...previousMessages];
-                updatedMessages[i] = { ...message };
+                updatedMessages[i] = {...message};
                 return updatedMessages;
               }
             }
@@ -411,23 +434,20 @@ export const useGiftedChatLogic = (conversation: Conversation) => {
           handlerDeleteMessage(message);
         }
       } else if (typeNumber === 6) {
-
         // sụ kiện đánh dấu message đã đọc
         if (deviceSend !== deviceInfo) {
-          SetMarkPaticipantReadMessage(conversation.participants)
+          SetMarkPaticipantReadMessage(conversation.participants);
           //HandlerUpdateReadMessage(message, userChat);
         }
       }
     });
-    socket?.on('userTyping', ({ userChat, isTyping, deviceSend, roomId }) => {
+    socket?.on('userTyping', ({userChat, isTyping, deviceSend, roomId}) => {
       if (userChat._id !== user._id && deviceSend !== deviceInfo) {
-        setTypingUsers({ userChat, isTyping, deviceSend, roomId });
+        setTypingUsers({userChat, isTyping, deviceSend, roomId});
         handlerEndReciverTyping(userChat, false, deviceSend, roomId);
       }
     });
     return () => {
-      socket?.off('new_message');
-      socket?.off('userTyping');
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }

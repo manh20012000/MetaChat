@@ -18,23 +18,17 @@ import changeNavigationBarColor from 'react-native-navigation-bar-color';
 import {color} from './src/assets/color/color.js';
 import UseApp from './src/global/UseApp.tsx';
 function App(): React.JSX.Element {
-
-
- 
   changeNavigationBarColor('#000000', true);
-   UseApp()
- 
+  UseApp();
+
   return (
     <Provider store={store}>
       <GestureHandlerRootView style={{backgroundColor: color.black, flex: 1}}>
         <SocketProvider>
-          <Navigation 
-           />
+          <Navigation />
         </SocketProvider>
       </GestureHandlerRootView>
     </Provider>
   );
 }
 export default App;
-
-

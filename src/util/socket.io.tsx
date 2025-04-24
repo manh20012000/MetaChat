@@ -26,10 +26,10 @@ export const SocketProvider: React.FC<HomeProviderProps> = ({ children }) => {
   const api_socket = API_URL
 
   useEffect(() => {
+    if (!user) return;
     const connectToSocketServer = async () => {
-      console.log('jakdjskdjskj', user._id)
+
       if (user) {
-        console.log('mở connect ')
         try {
 
           const iduser = user?._id;
@@ -69,7 +69,7 @@ export const SocketProvider: React.FC<HomeProviderProps> = ({ children }) => {
       }
     };
 
-    connectToSocketServer();
+    connectToSocketServer().then();
 
     return () => {
       socket?.disconnect();
