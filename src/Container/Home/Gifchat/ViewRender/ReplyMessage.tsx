@@ -7,7 +7,7 @@ interface ReplyMessageProps {
     currentMessage: Message_type;
     isMyMessage: boolean;
     scrollToMessage: (messageId: string) => void;
-    userChat:userMessage
+    userChat: userMessage
 }
 
 export const ReplyMessage: React.FC<ReplyMessageProps> = ({
@@ -16,22 +16,26 @@ export const ReplyMessage: React.FC<ReplyMessageProps> = ({
     scrollToMessage,
     userChat
 }) => {
-//    console.log(currentMessage)
+    //    console.log(currentMessage)
     return (
         <View
             style={{
                 alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
-                marginLeft: isMyMessage ? 0 : 40,
+                marginLeft: isMyMessage ? 0 : 30,
+                marginTop: 5,
             }}>
             <Text style={{ fontSize: 10, fontWeight: 'bold' }}>
-                {currentMessage.replyTo.user._id !== currentMessage.user._id
+                {currentMessage.user._id === userChat._id
                     ? 'You'
-                    : currentMessage.replyTo.user.name}{' '}
+                    : currentMessage.user.name}{' '}
                 replied to{' '}
-                {currentMessage.replyTo.user._id === currentMessage.user._id
-                    ? 'yourself'
-                    : currentMessage.replyTo.user.name}
+                {currentMessage.replyTo.user._id === userChat._id
+                    ? 'You'
+                    : currentMessage.replyTo.user._id === currentMessage.user._id
+                        ? 'yoursel'
+                        : currentMessage.replyTo.user.name}
             </Text>
+
             <TouchableOpacity
                 onPress={() => scrollToMessage(currentMessage.replyTo._id)}
                 style={{
@@ -41,7 +45,7 @@ export const ReplyMessage: React.FC<ReplyMessageProps> = ({
                     maxWidth: '65%',
                     alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
                 }}>
-                    
+
                 <Text style={{ color: '#ccc', fontSize: 13, fontWeight: 'bold' }}>
                     {currentMessage.replyTo.messageType === 'text'
                         ? currentMessage.replyTo.text
