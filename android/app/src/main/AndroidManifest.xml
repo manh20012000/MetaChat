@@ -65,6 +65,23 @@
 </service>
 
         <!-- Foreground Service (cho Android 10+) -->
-    
+     <!-- Service cho Firebase Messaging -->
+        <service
+            android:name="io.invertase.firebase.messaging.ReactNativeFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- Receiver cho Notifee -->
+        <receiver 
+    android:name="app.notifee.core.Receiver"
+    android:exported="false">
+    <intent-filter>
+        <action android:name="app.notifee.ACTION_PRESS" />
+        <action android:name="app.notifee.ACTION_REPLY" />
+    </intent-filter>
+</receiver>
     </application>
 </manifest>
