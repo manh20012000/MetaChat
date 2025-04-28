@@ -85,7 +85,7 @@ const VideoCallPreview: React.FC<PreviewVideoCallProps> = ({
                     streamURL={stream.toURL()}
                     style={styles.fullScreen}
                   />
-                  <Text style={styles.userName}>{participant?.name || socketId}</Text>
+                  <Text style={styles.userName}>{participant.user?.name || socketId}</Text>
                 </View>
               );
             })}
@@ -118,11 +118,11 @@ const VideoCallPreview: React.FC<PreviewVideoCallProps> = ({
         <View style={styles.mainView}>
           <View style={styles.avatarContainer}>
             <Image
-              source={{ uri: remoteUser?.avatar || 'default_avatar_url' }}
+              source={{ uri: remoteUser.user?.avatar || 'default_avatar_url' }}
               style={styles.avatarLarge}
               onError={() => console.log('🎥 [VideoCallPreview] Failed to load remote user avatar')}
             />
-            <Text style={styles.userName}>{remoteUser?.name || 'Unknown'}</Text>
+            <Text style={styles.userName}>{remoteUser.user?.name || 'Unknown'}</Text>
           </View>
         </View>
       );

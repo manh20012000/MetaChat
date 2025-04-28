@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
@@ -16,13 +17,14 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-    <uses-permission android:name="android.permission.CALL_PHONE"/>
+    <uses-permission android:name="android.permission.CALL_PHONE"/> 
+    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
     <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
-    
+   
     <application
       android:name=".MainApplication"
       android:label="@string/app_name"
@@ -43,8 +45,7 @@
         android:exported="true"
         android:screenOrientation="portrait"
         android:windowSoftInputMode="stateVisible|adjustResize"
-        android:theme="@style/Theme.AppCompat.NoActionBar">
-        
+        android:theme="@style/Theme.AppCompat.NoActionBar">       
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
@@ -53,19 +54,17 @@
           <category android:name="android.intent.category.BROWSABLE" />
         </intent-filter>
       </activity>
-   <service
-    android:name="io.wazo.callkeep.VoiceConnectionService"
-    android:label="VoiceConnectionService"
-    android:foregroundServiceType="phoneCall"
-    android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE"
-    android:exported="true">
-    <intent-filter>
-        <action android:name="android.telecom.ConnectionService" />
-    </intent-filter>
-</service>
-
-        <!-- Foreground Service (cho Android 10+) -->
-     <!-- Service cho Firebase Messaging -->
+      <service
+        android:name="io.wazo.callkeep.VoiceConnectionService"
+        android:label="VoiceConnectionService"
+        android:foregroundServiceType="phoneCall"
+        android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.telecom.ConnectionService" />
+        </intent-filter> 
+      </service>
+      <!-- Firebase Messaging -->
         <service
             android:name="io.invertase.firebase.messaging.ReactNativeFirebaseMessagingService"
             android:exported="false">
@@ -74,14 +73,28 @@
             </intent-filter>
         </service>
 
-        <!-- Receiver cho Notifee -->
-        <receiver 
-    android:name="app.notifee.core.Receiver"
-    android:exported="false">
-    <intent-filter>
-        <action android:name="app.notifee.ACTION_PRESS" />
-        <action android:name="app.notifee.ACTION_REPLY" />
-    </intent-filter>
-</receiver>
+ <!-- Receiver cho Call Actions (Accept, Reject, Reply, etc.) -->
+        <receiver
+            android:name=".CallActionReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="ACTION_ACCEPT" />
+                <action android:name="ACTION_REJECT" />
+                <action android:name="ACTION_REPLY" />
+                <action android:name="ACTION_LIKE" />
+            </intent-filter>
+        </receiver>
+
+       <!-- Receiver cho Notifee -->
+        <receiver
+            android:name="app.notifee.core.Receiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="app.notifee.ACTION_PRESS" />
+                <action android:name="app.notifee.ACTION_REPLY" />
+            </intent-filter>
+        </receiver>
+           
     </application>
 </manifest>

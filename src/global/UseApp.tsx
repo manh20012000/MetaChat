@@ -1,17 +1,26 @@
 import { useEffect } from 'react';
-import { Permission, PermissionsAndroid, Platform } from 'react-native';
-import { initializeNotifications } from './NotificationConfig';
-import { setupCallKeep } from './CallKepp';
-
-// Kiểm tra và yêu cầu quyền Android
-
+import { PermissionsAndroid, Platform } from 'react-native';
+import { initializeNotifications } from './NotificationHandler';
+// import { setupCallKeep } from './CallKeep';
+import HandlerPermission from '../util/Permision/SettupPermission';
 const useApp = () => {
   useEffect(() => {
     const initialize = async () => {
-      await setupCallKeep();
-      // Khởi tạo thông báo từ NotifiConfig
-      const cleanup = initializeNotifications();
-      return cleanup;
+      const permission = await HandlerPermission();
+
+      if (permission) {
+        console.log('Permission granted');
+        // Nếu quyền được cấp, có thể khởi tạo CallKeep hoặc thông báo
+        // await setupCallKeep();  // Nếu bạn cần cấu hình cuộc gọi video
+        const cleanup = initializeNotifications(); // Khởi tạo thông báo
+        return cleanup;
+      } else {
+        const cleanup = initializeNotifications(); // Khởi tạo thông báo
+
+        console.log('Permission not granted');
+        return cleanup;
+        // Xử lý khi quyền không được cấp, có thể thông báo cho người dùng
+      }
     };
 
     initialize().catch(console.error);

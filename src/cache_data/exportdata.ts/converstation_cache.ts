@@ -3,8 +3,7 @@ import {Message_type} from '../../type/Home/Chat_type';
 import {realm} from '../Schema/schema_realm_model';
 import {itemuser} from '../../type/Home/search_type';
 import {BSON, EJSON, ObjectId} from 'bson';
-
-import {deleteData, postData} from '../../service/resfull_api';
+import {postData, deleteData} from '../../service/resfull_api';
 import {API_ROUTE} from '../../service/api_enpoint';
 import {converstation} from '../../util/util_chat/converstation';
 import userMessage from '../../type/Home/useMessage_type';
@@ -207,6 +206,14 @@ const delete_converStation = async (
     throw error;
   }
 };
+/*const loadMoreMessages = () => {
+  const moreMessages = realm.objects('Message')
+    .filtered('conversationId = $0', conversationId)
+    .sorted('createdAt', true)
+    .slice(offset, offset + 20);
+  setOffset(offset + 20);
+  setMessages([...moreMessages, ...messages]);
+}; */
 const delete_converStation_deviceOther = async (consverstation_id: string) => {
   try {
     const oldConversation = realm.objectForPrimaryKey(

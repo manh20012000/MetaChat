@@ -1,68 +1,96 @@
-// NotificationHandler.js
-import notifee, { AndroidImportance } from '@notifee/react-native';
-import { navigationRef } from '../navigation/navigation';
 import messaging from '@react-native-firebase/messaging';
+import notifee, {EventType} from '@notifee/react-native';
+import {
+  handleMessageNotification,
+  handleMessageNotificationPress,
+} from '../Container/Notification/NotifeConfige/MessageNotifi';
+import {
+  handleVideoCallNotificationPress,
+  handleVideoCallNotification,
+} from '../Container/Notification/NotifeConfige/VideoCallNotif';
+// import {createNotificationChannels} from '../confige/NotificationConfige';
+import HandlerIncommingVideoCall from '../Constants/HandlerInCommingVideoCall';
 
-export async function handleBackgroundNotification(remoteMessage) {
-  const { data, notification } = remoteMessage;
+import {
+  CallNotifiButton,
+  MESSAGE_TYPE,
+  VIDEO_CALL_TYPE,
+} from '../Constants/type_constants/type_notifi';
 
-  if (!data || !data.type) return;
+export const handleBackgroundNotification = async (remoteMessage: any) => {
+  const {data} = remoteMessage;
 
-  if (data.type === 'message') {
-    await notifee.displayNotification({
-      title: notification?.title || 'New message',
-      body: notification?.body || '',
-      android: {
-        channelId: 'default_channel_id',
-        importance: AndroidImportance.HIGH,
-        actions: [
-          { title: 'Like', pressAction: { id: 'like' } },
-          { title: 'Reply', pressAction: { id: 'reply' } },
-        ],
-      },
-      data: {
-        type: 'message',
-        screen: data.screen,
-        roomId: data.roomId,
-      },
-    });
-  } else if (data.type === 'call') {
-    await notifee.displayNotification({
-      title: notification?.title || 'Incoming Call',
-      body: notification?.body || 'Someone is calling you...',
-      android: {
-        channelId: 'call_channel_id',
-        importance: AndroidImportance.HIGH,
-        actions: [
-          { title: 'Accept', pressAction: { id: 'accept' } },
-          { title: 'Decline', pressAction: { id: 'decline' } },
-        ],
-      },
-      data: {
-        type: 'call',
-        roomId: data.roomId,
-        screen: 'VideoCallScreen',
-      },
-    });
+  if (data?.type === MESSAGE_TYPE) {
+    await handleMessageNotification(remoteMessage);
+  } else if (data?.type === VIDEO_CALL_TYPE) {
+    HandlerIncommingVideoCall(data, false, CallNotifiButton.COMMING);
+    await handleVideoCallNotification(remoteMessage);
   }
-}
+};
 
-// Xử lý khi người dùng nhấn vào hành động (action) trong thông báo
-notifee.onBackgroundEvent(async ({ type, detail }) => {
-  const { pressAction, notification } = detail;
+export const handleNotificationPress = async ({type, detail}: any) => {
+  const {notification} = detail;
 
-  if (type === 1 && pressAction?.id) {
-    const screen = notification?.data?.screen;
-    const roomId = notification?.data?.roomId;
-
-    // if (pressAction.id === 'like') {
-    //   console.log('User liked the message');
-    // } else if (pressAction.id === 'reply') {
-    //     navigationRef.navigate(screen, { roomId });
-    // } else if (pressAction.id === 'accept') {
-    //     navigationRef.navigate(screen, { roomId });
-    // } else if (pressAction.id === 'decline') {
-    //   console.log('Call declined');
-    // }
+  if (notification.data?.type === MESSAGE_TYPE) {
+    handleMessageNotificationPress({type, detail});
+  } else if (notification.data?.type === VIDEO_CALL_TYPE) {
+    handleVideoCallNotificationPress({type, detail});
   }
-});
+};
+
+export const initializeNotifications = async () => {
+  await messaging().requestPermission();
+  // createNotificationChannels().then(() => {
+  //   notifee.setNotificationCategories([
+  //     {
+  //       id: 'incoming_call',
+  //       actions: [
+  //         {id: 'accept_call', title: 'Nhận'},
+  //         {id: 'reject_call', title: 'Từ chối', destructive: true},
+  //       ],
+  //     },
+  //     {
+  //       id: 'incoming_message',
+  //       actions: [
+  //         {id: 'like_message', title: '👍 Like'},
+  //         {id: 'reply_message', title: '💬 Reply', input: {}},
+  //       ],
+  //     },
+  //   ]);
+  // });
+
+  notifee.getInitialNotification().then(initialNotification => {
+    if (initialNotification) {
+      handleNotificationPress({
+        type: EventType.PRESS,
+        detail: initialNotification,
+      });
+    }
+  });
+
+  // Foreground event của notifee (khi user tương tác với thông báo đang hiện)
+  const unsubscribeForegroundEvent = notifee.onForegroundEvent(
+    handleNotificationPress,
+  );
+
+  // Background event của notifee
+  notifee.onBackgroundEvent(handleNotificationPress);
+
+  // Xử lý khi app đang foreground (tin nhắn đến khi app mở)
+  const unsubscribeForegroundMessage = messaging().onMessage(
+    async remoteMessage => {
+      await handleBackgroundNotification(remoteMessage);
+    },
+  );
+
+  // Xử lý khi app background/quit
+  messaging().setBackgroundMessageHandler(handleBackgroundNotification); // Chỉ set 1 lần duy nhất!!
+  const unsubscribeBackgroundEvent = () => {
+    console.log('Unsubscribed from background events');
+  };
+  return () => {
+    unsubscribeForegroundEvent();
+    unsubscribeForegroundMessage();
+    unsubscribeBackgroundEvent();
+  };
+};

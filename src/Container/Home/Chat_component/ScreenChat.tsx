@@ -60,10 +60,10 @@ const HomeChatPersion: React.FC<{route: any; navigation: any}> = ({
 
       // 👉 Thông tin người gọi (caller)
       const callerData = {
-        _id: userChat._id, // đây là ID MongoDB của user hiện tại
-        user_id: userChat.user_id, // user_id chính là định danh trong hệ thống
-        name: conversation.roomName || userChat.name,
-        avatar: userChat.avatar,
+        _id: userChat.user._id, // đây là ID MongoDB của user hiện tại
+        user_id: userChat.user.user_id, // user_id chính là định danh trong hệ thống
+        name: conversation.roomName || userChat.user.name,
+        avatar: userChat.user.avatar,
         socketId: socket?.id, // sẽ được server điền khi cần
       };
       socket?.emit('startCall', {
