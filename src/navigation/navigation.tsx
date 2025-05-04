@@ -6,33 +6,33 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Login from '../Screen/User_Auth/login.tsx';
-import Register from '../Screen/User_Auth/register.tsx';
+import Login from '../screens/User_Auth/login.tsx';
+import Register from '../screens/User_Auth/register.tsx';
 import Bottomtab_Navigation from './bottomtab_Navigation.tsx';
-import ChatScreen from '../Container/Home/UserHomeChat.tsx';
+import ChatScreen from '../containers/Home/HomeChat.tsx';
 import { useDispatch, useSelector } from 'react-redux';
-import { login } from '../Redux_Toolkit/Reducer/auth.slice.ts';
+import { login } from '../stores/reducer/auth.slice.ts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
-import SearchScreen from '../Screen/Component/Home_search/HomeSearch/Search.tsx';
-import HomeChatPersion from '../Container/Home/Chat_component/ScreenChat.tsx';
-import Create_Group from '../Screen/Home/Draw_navigation/Create_Group.tsx';
-import Friend from '../Screen/Home/Draw_navigation/Friend.tsx';
-import Setting_Chat from '../Screen/Home/Draw_navigation/Setting_Chat.tsx';
-import Adttenment from '../Screen/Home/Draw_navigation/Adttenment.tsx';
-import Private_Converstation from '../Screen/Home/Draw_navigation/Private_Converstation.tsx';
+import SearchScreen from '../components/modules/home_component/home_search/Search.tsx';
+import HomeChatPersion from '../containers/Home/ScreenChat.tsx';
+import Create_Group from '../screens/Draw_Navigation/Create_Group.tsx';
+import friendSchema from '../cache_datas/schema/schema_user.ts';
+import Setting_Chat from '../screens/Draw_Navigation/Setting_Chat.tsx';
+import Adttenment from '../screens/Draw_Navigation/Adttenment.tsx';
 import NetInfo from '@react-native-community/netinfo';
-import { check } from '../Redux_Toolkit/Reducer/network_connect.ts';
-import { DeviceSlice, getInfo } from '../Redux_Toolkit/Reducer/deviceInfor.ts';
-import CameraChat from '../Container/Home/Chat_component/CameraChat/CamaraView.tsx';
-import SettingComponent from '../Screen/User/UseComponent/Setting.tsx';
-import { useSocket } from '../util/socket.io.tsx';
-import { Status } from '../Redux_Toolkit/Reducer/status.User.ts';
+import { check } from '../stores/reducer/network_connect.ts';
+import { DeviceSlice, getInfo } from '../stores/reducer/deviceInfor.ts';
+import CameraChat from '../components/modules/home_component/chat_component/camera_chat/CamaraView.tsx';
+import SettingComponent from '../screens/User/UseComponent/Setting.tsx';
+import { useSocket } from '../provinders/socket.io.tsx';
+import { Status } from '../stores/reducer/status.User.ts';
 import DeviceInfo from 'react-native-device-info';
-import VideoCallHome from '../Container/Home/VideoCallComponent/VideoCallHome.tsx';
-import IncomingVideoCallScreen from '../Container/Home/VideoCallComponent/IncomingVideoCallScreen.tsx';
-import { RootStackParamList } from '../type/rootStackScreen.tsx';
-import { checkAndRefreshToken } from '../util/checkingToken.ts';
+import VideoCallHome from '../components/modules/home_component/video_call/VideoCallHome.tsx';
+import IncomingVideoCallScreen from '../components/modules/home_component/video_call/IncomingVideoCallScreen.tsx';
+import { RootStackParamList } from '../types/navigation_type/rootStackScreen.tsx';
+import { checkAndRefreshToken } from '../utils/checkingToken.ts';
+
 const Stack = createNativeStackNavigator();
 
 const screens = [
@@ -61,7 +61,7 @@ const Navigation: React.FC = () => {
       try {
         const user_String: any = await AsyncStorage.getItem('user');
         const userObject = JSON.parse(user_String);
-     
+
         if (userObject !== null) {
           const decoded: JwtPayload = jwtDecode(userObject.refresh_token);
           const isTokenExpired = decoded.exp
@@ -104,7 +104,7 @@ const Navigation: React.FC = () => {
           dispath(check(state.isConnected));
 
           if (!state.isConnected) {
-           
+
             Alert.alert(
               'No Internet Connection',
               'Your network connection is too weak or unavailable.',

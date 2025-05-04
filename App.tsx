@@ -9,14 +9,14 @@ import React, {useEffect, useState} from 'react';
 import type {PropsWithChildren} from 'react';
 import {ActivityIndicator, StyleSheet, useColorScheme} from 'react-native';
 import {Provider} from 'react-redux';
-import {store} from './src/Redux_Toolkit/Store';
-import Navigation from './src/navigation/navigation';
+import { store } from './src/stores/Store.ts';
+import Navigation from './src/navigation/navigation.tsx';
 import FlashMessage from 'react-native-flash-message';
-import {SocketProvider} from './src/util/socket.io.tsx';
+import { SocketProvider } from './src/provinders/socket.io.tsx';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
 import {color} from './src/assets/color/color.js';
-import UseApp from './src/global/UseApp.tsx';
+import UseApp from './src/globals_confige/UseApp.tsx';
 function App(): React.JSX.Element {
   changeNavigationBarColor('#000000', true);
   UseApp();
