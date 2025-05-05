@@ -1,10 +1,10 @@
 import { StyleSheet, Text, View } from 'react-native';
 import React from 'react';
-import Notification_screen from '../Screen/Notification/Notification_screen.tsx';
+import Notification_screen from '../screens/Notification/Notification_screen.tsx';
 
-import User_profile from '../Screen/User/User_profile.tsx';
-import Media_screen from '../Container/Add_Media/Media_screen.tsx';
-import Watch from '../Screen/Video_Watch/Watch.tsx';
+import User_profile from '../screens/User/User_profile.tsx';
+import Media_screen from '../containers/Add_Media/Media_screen.tsx';
+import Watch from '../screens/Video_Watch/Watch.tsx';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {
   Notifi_icon,
@@ -24,14 +24,14 @@ const Tab = createBottomTabNavigator();
 const Bottomtab_Navigation: React.FC<{ navigation: any }> = ({ navigation }) => {
   return (
     <Tab.Navigator
-      screenOptions={({route}) => ({
+      screenOptions={({ route }) => ({
         animation: 'fade',
         tabBarHideOnKeyboard: true, // Ẩn Bottom Tab khi bàn phím hiển thị
         tabBarActiveTintColor: 'red', // Màu icon/text khi được chọn
         tabBarInactiveTintColor: 'white', // Màu icon/text khi không được chọn
         headerShown: false,
-        tabBarStyle: {backgroundColor: 'black'},
-        tabBarIcon: ({focused, color, size}) => {
+        tabBarStyle: { backgroundColor: 'black' },
+        tabBarIcon: ({ focused, color, size }) => {
           let iconComponent;
           if (route.name === 'Home') {
             iconComponent = (
@@ -61,7 +61,7 @@ const Bottomtab_Navigation: React.FC<{ navigation: any }> = ({ navigation }) => 
                 height={36}
                 stroke={focused ? 'white' : '#888888'}
                 fill={focused ? 'white' : '#888888'}
-                style={{marginTop: '25%'}}
+                style={{ marginTop: '25%' }}
               />
             );
           } else if (route.name === 'Notifi') {
@@ -97,7 +97,7 @@ const Bottomtab_Navigation: React.FC<{ navigation: any }> = ({ navigation }) => 
       <Tab.Screen
         name="  "
         component={Media_screen}
-        listeners={({navigation}) => ({
+        listeners={({ navigation }) => ({
           blur: () => navigation.setParams({}), // Reset params hoặc thực hiện unmount.
         })}
       />
