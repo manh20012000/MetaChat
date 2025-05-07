@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import GiftedChatView from '../../components/modules/home_component/chat_component/gifted_chat/GiftedChat';
 import { useSocket } from '../../provinders/socket.io';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { filterParticipants } from '../../utils/util_chat/get_paticipants';
 const HomeChatPersion: React.FC<{ route: any; navigation: any }> = ({
   route,
   navigation,
@@ -44,28 +45,32 @@ const HomeChatPersion: React.FC<{ route: any; navigation: any }> = ({
       const participantIds = conversation.participantIds.filter(
         (id: string) => id !== user.user_id,
       );
-
-      // 👉 Thông tin người gọi (caller)
+      const participants = filterParticipants(conversation.participants, userChat.user)
+     
+      //👉 Thông tin người gọi (caller)
       const callerData = {
-        _id: userChat._id, // đây là ID MongoDB của user hiện tại
-        user_id: userChat.user_id, // user_id chính là định danh trong hệ thống
-        name: conversation.roomName || userChat.name,
-        avatar: userChat.avatar,
-        socketId: socket?.id, // sẽ được server điền khi cần
+        _id: userChat.user._id, // đây là ID MongoDB của user hiện tại
+        user_id: userChat.user.user_id, // user_id chính là định danh trong hệ thống
+        name: userChat.user.name,
+        avatar: userChat.user.avatar,
+        socketId: socket?.id,
       };
+
       socket?.emit('startCall', {
         caller: callerData,
         roomId: conversation._id,
-        participants: conversation.participants,
+        roomName: conversation.roomName || null,
+        participants: participants,
         isCaller: true,
         participantIds,
       }); // gửi mảng user_id người nhận
 
-      // 👉 Điều hướng sang màn hình cuộc gọi
-      navigation.navigate('VideoCallHome', {
+      //👉 Điều hướng sang màn hình cuộc gọi
+      navigation.navigate('CallerScreen', {
         caller: callerData,
         roomId: conversation._id,
-        participants: conversation.participants,
+        roomName: conversation.roomName || null,
+        participants: participants,
         participantIds,
         isOnpenCamera: false,
         conversation,

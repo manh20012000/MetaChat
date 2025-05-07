@@ -91,7 +91,7 @@ const handleNotificationPress = async ({ type, detail }: any) => {
               isCaller: false,
               status: 'accept_call',
             };
-            navigationRef.navigate('CommingVideoCall', navigationData);
+            navigationRef.navigate('ReciverScreen', navigationData);
           } catch (err) {
             console.log(`Lỗi điều hướng ${data.type}:`, err);
           }
@@ -107,7 +107,7 @@ const handleNotificationPress = async ({ type, detail }: any) => {
             isCaller: false,
             status: 'reject',
           };
-          navigationRef.navigate('CommingVideoCall', navigationData);
+          navigationRef.navigate('ReciverScreen', navigationData);
         } catch (err) {
           console.log(`Lỗi điều hướng reject ${data.type}:`, err);
         }

@@ -1,6 +1,6 @@
 import notifee, {AndroidImportance, EventType} from '@notifee/react-native';
 import {navigationRef} from '../../../navigation/navigation';
-import HandlerIncommingVideoCall from '../../../constants/func_utils/handler_incomming_videocall';
+import HandlerReciverVideoCall from '../../../constants/func_utils/handler_incomming_videocall';
 import {
   CallNotifiButton,
   CallStatus,
@@ -81,17 +81,17 @@ export const handleVideoCallNotificationPress = async ({type, detail}: any) => {
     data?.type === VIDEO_CALL_TYPE
   ) {
     if (pressAction?.id === CallNotifiButton.ACCEPT) {
-      HandlerIncommingVideoCall(data, true, CallNotifiButton.ACCEPT);
+      HandlerReciverVideoCall(data,  true, CallNotifiButton.ACCEPT);
       if (detail.notification?.id) {
         await notifee.cancelNotification(detail.notification.id);
       }
     } else if (pressAction?.id === CallNotifiButton.REJECT) {
-      HandlerIncommingVideoCall(data, false, CallNotifiButton.REJECT);
+      HandlerReciverVideoCall(data, false, CallNotifiButton.REJECT);
       if (detail.notification?.id) {
         await notifee.cancelNotification(detail.notification.id);
       }
     } else if (!pressAction?.id && type === EventType.PRESS) {
-      HandlerIncommingVideoCall(data, true, CallNotifiButton.COMMING);
+      HandlerReciverVideoCall(data, true, CallNotifiButton.COMMING);
 
       if (detail.notification?.id) {
         await notifee.cancelNotification(detail.notification.id);

@@ -17,9 +17,9 @@ import {
 } from '@gorhom/bottom-sheet';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useHomeLogic } from './use_home/use-home.tsx';
-import HeaderHome from '../../components/commons/homeComponent/HeaderHome.tsx';
+import HeaderHome from '../../components/commons/home_components/HeaderHome.tsx';
 import Statusbar from '../../components/commons/StatusBar.tsx';
-import BottonsheetHome from '../../components/commons/homeComponent/BottomsheetHome.tsx';
+import BottonsheetHome from '../../components/commons/home_components/BottomsheetHome.tsx';
 import dayjs from 'dayjs';
 import Conversation from '../../types/home_type/Converstation_type.ts';
 import MessageItem from '../../components/modules/home_component/converstation/ItemConversation.tsx';

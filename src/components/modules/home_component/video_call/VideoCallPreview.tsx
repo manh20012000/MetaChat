@@ -8,7 +8,7 @@ import { useSocket } from '../../../../provinders/socket.io';
 const { width, height } = Dimensions.get('window');
 
 interface PreviewVideoCallProps {
-  participants: any[];
+  participanteds: any[];
   isCameraOn: boolean;
   localVideoRef: any; // Không cần thiết, có thể xóa
   remoteStreams: Map<string, MediaStream>;
@@ -16,27 +16,18 @@ interface PreviewVideoCallProps {
 }
 
 const VideoCallPreview: React.FC<PreviewVideoCallProps> = ({
-  participants,
+  participanteds,
   isCameraOn,
   localStream,
   remoteStreams, localVideoRef
 }) => {
+
   const user = useSelector((state: any) => state.auth.value);
   const socket = useSocket();
   const [smallViewPosition, setSmallViewPosition] = React.useState({
     x: width - 120,
     y: 20,
   });
-
-  // // Log khi component được render
-  // React.useEffect(() => {
-  //   console.log('🎥 [VideoCallPreview] Component mounted');
-  //   console.log('🎥 [VideoCallPreview] Participants:', participants);
-  //   console.log('🎥 [VideoCallPreview] Remote streams:', Array.from(remoteStreams.entries()));
-  //   console.log('🎥 [VideoCallPreview] Local stream:', localStream?.id);
-  //   console.log('🎥 [VideoCallPreview] Is camera on:', isCameraOn);
-  //   console.log('🎥 [VideoCallPreview] Current user socket ID:', socket?.id);
-  // }, []);
 
   const onGestureEvent = (event: any) => {
     const { translationX, translationY } = event.nativeEvent;
@@ -66,7 +57,7 @@ const VideoCallPreview: React.FC<PreviewVideoCallProps> = ({
               return !isLocal;
             })
             .map(([socketId, stream]) => {
-              const participant = participants.find(p => {
+              const participant = participanteds.find(p => {
                 const participantSocketId = Array.isArray(p.socketId)
                   ? p.socketId[0]
                   : p.socketId;
@@ -85,7 +76,7 @@ const VideoCallPreview: React.FC<PreviewVideoCallProps> = ({
                     streamURL={stream.toURL()}
                     style={styles.fullScreen}
                   />
-                  <Text style={styles.userName}>{participant.user?.name || socketId}</Text>
+                  <Text style={styles.userName}>{participant?.name || socketId}</Text>
                 </View>
               );
             })}
@@ -93,7 +84,7 @@ const VideoCallPreview: React.FC<PreviewVideoCallProps> = ({
       );
     } else {
       // console.log('🎥 [VideoCallPreview] No remote streams, rendering avatar');
-      const remoteUser = participants.find(p => {
+      const remoteUser = participanteds.find(p => {
         const participantSocketId = Array.isArray(p.socketId) ? p.socketId[0] : p.socketId;
         const isLocal = participantSocketId === socket?.id;
         // console.log(
@@ -101,7 +92,7 @@ const VideoCallPreview: React.FC<PreviewVideoCallProps> = ({
         // );
         return !isLocal;
       });
-
+      console.log(remoteUser,remoteUser.user.name)
       if (!remoteUser) {
         // console.log('🎥 [VideoCallPreview] No remote user found');
         return (
