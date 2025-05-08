@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
   Image,
@@ -15,7 +15,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import GiftedChatView from '../../components/modules/home_component/chat_component/gifted_chat/GiftedChat';
 import { useSocket } from '../../provinders/socket.io';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { filterParticipants } from '../../utils/util_chat/get_paticipants';
+import { filterParticipants, MapParticipants } from '../../utils/util_chat/get_paticipants';
+import { mediaDevices } from 'react-native-webrtc';
 const HomeChatPersion: React.FC<{ route: any; navigation: any }> = ({
   route,
   navigation,
@@ -34,6 +35,30 @@ const HomeChatPersion: React.FC<{ route: any; navigation: any }> = ({
       (participant: any) => participant.user.user_id === user._id,
     ),
   );
+  useEffect(() => {
+    const handleer = async () => {
+      const stream = await mediaDevices.getUserMedia({
+        audio: true,
+        video: {
+          width: 720,
+          height: 1080,
+          frameRate: 30,
+          facingMode: 'user',
+        },
+      });
+
+      stream.getVideoTracks().forEach(track => {
+        console.log('Video track:', track);
+        track.enabled = false;
+      });
+
+      stream.getAudioTracks().forEach(track => {
+        console.log('Audio track:', track);
+        track.enabled = true;
+      });
+    }
+    handleer()
+  }, [])
   const sendConnectCall = async () => {
     try {
       if (!networkConnect) {
@@ -42,36 +67,40 @@ const HomeChatPersion: React.FC<{ route: any; navigation: any }> = ({
       }
 
       // 👉 Xác định người nhận (participant) là những người khác user hiện tại
-      const participantIds = conversation.participantIds.filter(
-        (id: string) => id !== user.user_id,
-      );
-      const participants = filterParticipants(conversation.participants, userChat.user)
-     
+
+      const participants = MapParticipants(conversation.participants)
+
       //👉 Thông tin người gọi (caller)
       const callerData = {
         _id: userChat.user._id, // đây là ID MongoDB của user hiện tại
         user_id: userChat.user.user_id, // user_id chính là định danh trong hệ thống
         name: userChat.user.name,
         avatar: userChat.user.avatar,
-        socketId: socket?.id,
-      };
 
-      socket?.emit('startCall', {
-        caller: callerData,
+      };
+      const converstationVideocall = {
         roomId: conversation._id,
         roomName: conversation.roomName || null,
+        avatar: conversation.avatar || null,
+        type: conversation.type, // Loại cuộc trò chuyện (vd: "group" hoặc "direct")
+        color: conversation.color, // Màu sắc của nhóm (nếu có)
+        icon: conversation.iconicon, //
+        background: conversation.background, // Background của nhóm (nếu có)
         participants: participants,
-        isCaller: true,
-        participantIds,
+
+
+      }
+      socket?.emit('startCall', {
+        caller: callerData,
+        converstationVideocall,
+        participantIds: conversation.participantIds,
       }); // gửi mảng user_id người nhận
 
       //👉 Điều hướng sang màn hình cuộc gọi
       navigation.navigate('CallerScreen', {
         caller: callerData,
-        roomId: conversation._id,
-        roomName: conversation.roomName || null,
-        participants: participants,
-        participantIds,
+        converstationVideocall,
+        participantIds: conversation.participantIds,
         isOnpenCamera: false,
         conversation,
         isCaller: true,

@@ -7,7 +7,7 @@ const HandlerPermission = async (): Promise<boolean> => {
         PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
         PermissionsAndroid.PERMISSIONS.CAMERA,
         PermissionsAndroid.PERMISSIONS.CALL_PHONE,
-        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+        // PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
       ];
 
       const permissionsToRequest: Permission[] = [];

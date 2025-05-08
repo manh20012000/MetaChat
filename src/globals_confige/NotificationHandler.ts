@@ -23,6 +23,7 @@ export const handleBackgroundNotification = async (remoteMessage: any) => {
   if (data?.type === MESSAGE_TYPE) {
     await handleMessageNotification(remoteMessage);
   } else if (data?.type === VIDEO_CALL_TYPE) {
+
     HandlerReciverVideoCall(data, false, CallNotifiButton.COMMING);
     await handleVideoCallNotification(remoteMessage);
   }

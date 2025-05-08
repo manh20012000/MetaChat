@@ -1,8 +1,6 @@
-// CallerScreen.tsx
 import {
   View,
   StatusBar,
-  TouchableOpacity,
   StyleSheet,
 } from 'react-native';
 import React, { useEffect, useRef } from 'react';
@@ -20,84 +18,59 @@ interface CallerScreenProps {
 
 const CallerScreen: React.FC<CallerScreenProps> = ({ navigation, route }) => {
   const {
-    roomId,
+    converstationVideocall,
+    participantIds,
     caller,
     isCaller,
     isOnpenCamera,
-    participants,
-    roomName,
   } = route.params;
-  console.log(participants[0], participants[1])
-  // Get socket instance
+  const { roomId, participants, roomName } = converstationVideocall;
   const socket = useSocket();
   const color = useSelector((value: any) => value.colorApp.value);
   const insets = useSafeAreaInsets();
 
-  // Video reference
   const localVideoRef = useRef<any>(null);
 
-  // Use WebRTC hook
   const {
     localStream,
     remoteStreams,
     participanteds,
     isMicOn,
-    setIsMicOn, setRemoteStreams,
+    setIsMicOn,
     statusCamera,
     setStatusCamera,
     setupMedia,
-    setupPeerConnection,
-    createOffer,
     endCall,
     isSpeakerOn,
     setIsSpeakerOn,
     setLocalStream,
     setParticipanteds,
+    setRemoteStreams,
+    handleRejoin,
   } = useWebRTC({
     socket,
     roomId,
     isCaller,
     isOnpenCamera,
     participants,
-    navigation
+    navigation,
+    caller,
   });
 
-  // Set up call
   useEffect(() => {
     const initCall = async () => {
-      // Set up media
       const success = await setupMedia();
       if (!success) {
         console.error('Failed to set up media');
         endCall();
         return;
       }
-
-      // Initialize connections with existing participants
-      if (participants && participants.length > 0 && socket && localStream) {
-        participants.forEach(participant => {
-          // Don't create connection to self
-          if (participant.socketId && participant.socketId !== socket.id) {
-            const peer = setupPeerConnection(participant.socketId, localStream);
-
-            // If this is the caller, create an offer for each participant
-            if (isCaller) {
-              createOffer(peer, participant.socketId);
-            }
-          }
-        });
-      }
     };
 
     initCall();
 
-    // Clean up on unmount
-    return () => {
-      endCall();
-    };
   }, []);
 
-  // Handle call updates from server
   useEffect(() => {
     if (!socket) return;
 
@@ -106,52 +79,35 @@ const CallerScreen: React.FC<CallerScreenProps> = ({ navigation, route }) => {
       participant: any;
       allParticipants: any[];
     }) => {
-      console.log(`Call update: ${data.type}`);
 
-      // Update participants list
       setParticipanteds(data.allParticipants);
-
-      // Handle new participant joining
-      if (data.type === 'participant_joined' && localStream) {
-        const participantSocketId = data.participant.socketId;
-
-        // Create connection to new participant (if not self)
-        if (participantSocketId && participantSocketId !== socket.id) {
-          const peer = setupPeerConnection(participantSocketId, localStream);
-
-          // If caller, create an offer
-          if (isCaller) {
-            createOffer(peer, participantSocketId);
-          }
-        }
-      }
     };
 
     const handleUserLeft = ({ userId }: { userId: string }) => {
       console.log(`User left: ${userId}`);
-
-      // Find participant and remove their connection
-      const participant = participants.find(p => p.user_id === userId);
-      if (participant?.socketId) {
-        // Remove from remote streams
-        setRemoteStreams(prev => {
-          const newStreams = new Map(prev);
-          newStreams.delete(participant.socketId);
-          return newStreams;
-        });
-      }
+      setRemoteStreams(prev => {
+        const newStreams = { ...prev };
+        delete newStreams[userId];
+        return newStreams;
+      });
     };
 
-    // Set up event listeners
     socket.on('call_update', handleCallUpdate);
     socket.on('userLeftCall', handleUserLeft);
+    socket.on('call_ended', endCall);
+    socket.on('call_cancelled', endCall);
+    socket.on('force_end_call', endCall);
+    socket.on('connect', handleRejoin);
 
-    // Clean up listeners
     return () => {
-      socket.off('call_update', handleCallUpdate);
-      socket.off('userLeftCall', handleUserLeft);
+      socket.off('call_update');
+      socket.off('userLeftCall');
+      socket.off('call_ended');
+      socket.off('call_cancelled');
+      socket.off('force_end_call');
+      socket.off('connect');
     };
-  }, [socket, participants, localStream, isCaller, setupPeerConnection, createOffer]);
+  }, [socket,]);
 
   return (
     <View style={styles.container}>
@@ -163,11 +119,13 @@ const CallerScreen: React.FC<CallerScreenProps> = ({ navigation, route }) => {
 
       <View style={[styles.previewContainer, { paddingTop: insets.top }]}>
         <VideoCallPreview
+          converstationVideocall={converstationVideocall}
           participanteds={participanteds}
           isCameraOn={statusCamera}
           localVideoRef={localVideoRef}
           remoteStreams={remoteStreams}
           localStream={localStream}
+          caller={caller}
         />
       </View>
 

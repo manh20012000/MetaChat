@@ -1,123 +1,158 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, Image, StyleSheet, Dimensions, StatusBar, ImageBackground } from 'react-native';
 import { RTCView, MediaStream } from 'react-native-webrtc';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { useSelector } from 'react-redux';
 import { useSocket } from '../../../../provinders/socket.io';
+import { TUser } from '../../../../types/home_type/Converstation_type';
 
 const { width, height } = Dimensions.get('window');
 
 interface PreviewVideoCallProps {
   participanteds: any[];
   isCameraOn: boolean;
-  localVideoRef: any; // Không cần thiết, có thể xóa
-  remoteStreams: Map<string, MediaStream>;
+  remoteStreams: { [userId: string]: MediaStream };
   localStream: MediaStream | null;
+  localVideoRef: any;
+  converstationVideocall: any;
+  caller: TUser;
 }
 
 const VideoCallPreview: React.FC<PreviewVideoCallProps> = ({
   participanteds,
   isCameraOn,
   localStream,
-  remoteStreams, localVideoRef
+  remoteStreams,
+  converstationVideocall,
+  caller,
 }) => {
-
   const user = useSelector((state: any) => state.auth.value);
+  const color = useSelector((value: any) => value.colorApp.value);
   const socket = useSocket();
   const [smallViewPosition, setSmallViewPosition] = React.useState({
     x: width - 120,
     y: 20,
   });
+  const { roomName, avatar, participants, background } = converstationVideocall;
+
+  // Lọc participant, loại bỏ user hiện tại
+  const participant = participants.filter((item: TUser) => item.user_id !== user._id);
+  const overlayColor = background ? `${background}80` : 'rgba(0, 0, 0, 0.5)';
 
   const onGestureEvent = (event: any) => {
     const { translationX, translationY } = event.nativeEvent;
-    setSmallViewPosition({
-      x: Math.max(0, Math.min(width - 100, smallViewPosition.x + translationX)),
-      y: Math.max(0, Math.min(height - 150, smallViewPosition.y + translationY)),
-    });
+    setSmallViewPosition(prev => ({
+      x: Math.max(0, Math.min(width - 100, prev.x + translationX)),
+      y: Math.max(0, Math.min(height - 150, prev.y + translationY)),
+    }));
   };
 
   const onHandlerStateChange = (event: any) => {
     if (event.nativeEvent.state === State.END) {
-      console.log('👆 [VideoCallPreview] Small view position updated:', smallViewPosition);
+      // Có thể lưu vị trí nếu cần
     }
   };
 
   const renderMainView = () => {
-    if (remoteStreams.size > 0) {
-      // console.log('🎥 [VideoCallPreview] Rendering remote streams');
-      return (
-        <View style={styles.mainView}>
-          {Array.from(remoteStreams.entries())
-            .filter(([socketId]) => {
-              const isLocal = socketId === socket?.id;
-              // console.log(
-              //   `🎥 [VideoCallPreview] Filtering remote stream - Socket ID: ${socketId}, Is local: ${isLocal}`
-              // );
-              return !isLocal;
-            })
-            .map(([socketId, stream]) => {
-              const participant = participanteds.find(p => {
-                const participantSocketId = Array.isArray(p.socketId)
-                  ? p.socketId[0]
-                  : p.socketId;
-                return participantSocketId === socketId;
-              });
-              // console.log(
-              //   `🎥 [VideoCallPreview] Rendering remote stream for ${socketId}, Participant:`,
-              //   participant
-              // );
-              return (
-                <View key={socketId} style={styles.remoteVideoContainer}>
-                  <RTCView
-                    key={socketId}
-                    objectFit="cover"
-                    mirror={false}
-                    streamURL={stream.toURL()}
-                    style={styles.fullScreen}
-                  />
-                  <Text style={styles.userName}>{participant?.name || socketId}</Text>
-                </View>
-              );
-            })}
-        </View>
-      );
-    } else {
-      // console.log('🎥 [VideoCallPreview] No remote streams, rendering avatar');
-      const remoteUser = participanteds.find(p => {
-        const participantSocketId = Array.isArray(p.socketId) ? p.socketId[0] : p.socketId;
-        const isLocal = participantSocketId === socket?.id;
-        // console.log(
-        //   `🎥 [VideoCallPreview] Finding remote user - Socket ID: ${participantSocketId}, Is local: ${isLocal}`
-        // );
-        return !isLocal;
-      });
-      console.log(remoteUser,remoteUser.user.name)
-      if (!remoteUser) {
-        // console.log('🎥 [VideoCallPreview] No remote user found');
-        return (
-          <View style={styles.mainView}>
-            <View style={styles.avatarContainer}>
-              <Text style={styles.userName}>Không có người tham gia</Text>
-            </View>
-          </View>
-        );
-      }
+    // Lấy danh sách remoteStreams, loại bỏ stream của user hiện tại
+    const remoteEntries = Object.entries(remoteStreams).filter(([userId]) => userId !== user._id);
 
-      // console.log('🎥 [VideoCallPreview] Rendering remote user avatar:', remoteUser);
+    // Nếu có remoteStreams, hiển thị video
+    if (remoteEntries.length > 0) {
       return (
         <View style={styles.mainView}>
-          <View style={styles.avatarContainer}>
-            <Image
-              source={{ uri: remoteUser.user?.avatar || 'default_avatar_url' }}
-              style={styles.avatarLarge}
-              onError={() => console.log('🎥 [VideoCallPreview] Failed to load remote user avatar')}
-            />
-            <Text style={styles.userName}>{remoteUser.user?.name || 'Unknown'}</Text>
-          </View>
+          {remoteEntries.map(([userId, stream]) => {
+            const participant = participanteds.find(p => p.user_id === userId);
+            return (
+              <View key={userId} style={styles.remoteVideoContainer}>
+                <RTCView
+                  objectFit="cover"
+                  mirror={false}
+                  streamURL={stream.toURL()}
+                  style={styles.fullScreen}
+                />
+                <Text style={styles.userName}>{participant?.name ?? userId}</Text>
+              </View>
+            );
+          })}
         </View>
       );
     }
+
+    // Nếu camera tắt và không có remoteStreams, hiển thị giống IncommingVideoCall
+    if (!isCameraOn) {
+      return (
+        <View style={styles.contentContainer}>
+          {roomName ? (
+            <View style={styles.roomContainer}>
+              {avatar && (
+                <Image
+                  source={{ uri: avatar }}
+                  style={styles.roomAvatar}
+                />
+              )}
+              <Text style={styles.roomName}>{roomName}</Text>
+            </View>
+          ) : participant.length === 1 ? (
+            <View style={styles.singleParticipantContainer}>
+              <Image
+                source={{ uri: participant[0].avatar || 'https://via.placeholder.com/150' }}
+                style={styles.singleAvatar}
+              />
+              <Text style={styles.singleName}>{participant[0].name || participant[0].user_id}</Text>
+            </View>
+          ) : (
+            <View style={styles.multiParticipantContainer}>
+              {/* Hàng avatar */}
+              <View style={styles.avatarRow}>
+                {participant.slice(0, 4).map((p: TUser) => (
+                  <Image
+                    key={p.user_id}
+                    source={{ uri: p.avatar || 'https://via.placeholder.com/100' }}
+                    style={styles.multiAvatar}
+                  />
+                ))}
+              </View>
+              {/* Hàng tên */}
+              <View style={styles.nameRow}>
+                {participant.slice(0, 4).map((p: TUser) => (
+                  <Text
+                    key={p.user_id}
+                    style={styles.multiName}
+                    numberOfLines={1}
+                  >
+                    {p.name || p.user_id}
+                  </Text>
+                ))}
+              </View>
+            </View>
+          )}
+        </View>
+      );
+    }
+
+    // Nếu camera bật nhưng không có remoteStreams, hiển thị avatar participant
+    const remoteUser = participanteds.find(p => p.user_id !== user._id);
+
+    return (
+      <View style={styles.mainView}>
+        <View style={styles.avatarContainer}>
+          {remoteUser?.avatar ? (
+            <Image
+              source={{ uri: remoteUser.avatar }}
+              style={styles.avatarLarge}
+              onError={() => console.log('❌ Failed to load avatar')}
+            />
+          ) : (
+            <Image
+              source={{ uri: 'https://via.placeholder.com/150' }}
+              style={styles.avatarLarge}
+            />
+          )}
+          <Text style={styles.userName}>{remoteUser?.name ?? 'Không có người tham gia'}</Text>
+        </View>
+      </View>
+    );
   };
 
   const renderSmallView = () => {
@@ -133,10 +168,10 @@ const VideoCallPreview: React.FC<PreviewVideoCallProps> = ({
           ) : (
             <View style={styles.avatarContainerSmall}>
               <Image
-                source={{ uri: user?.avatar || 'default_avatar_url' }}
+                source={{ uri: user?.avatar || 'https://via.placeholder.com/60' }}
                 style={styles.avatarSmall}
               />
-              <Text style={styles.userNameSmall}>{user?.name || 'You'}</Text>
+              <Text style={styles.userNameSmall}>{user?.name ?? 'You'}</Text>
             </View>
           )}
         </View>
@@ -145,17 +180,99 @@ const VideoCallPreview: React.FC<PreviewVideoCallProps> = ({
   };
 
   return (
-    <View style={styles.container}>
-      {renderMainView()}
-      {renderSmallView()}
-    </View>
+    <ImageBackground
+      source={{ uri: roomName ? avatar : participant[0]?.avatar || 'https://via.placeholder.com/300' }}
+      style={styles.container}
+      resizeMode="cover"
+    >
+      <View style={[styles.overlay, { backgroundColor: overlayColor }]}>
+        <StatusBar
+          translucent={true}
+          barStyle={color.dark ? 'light-content' : 'dark-content'}
+          backgroundColor="transparent"
+        />
+        {renderMainView()}
+        {renderSmallView()}
+      </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  contentContainer: {
+    flex: 0.7,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    marginTop: 50,
+  },
+  roomContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  roomAvatar: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    marginBottom: 20,
+  },
+  roomName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
+    paddingHorizontal: 20,
+  },
+  singleParticipantContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  singleAvatar: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    marginBottom: 20,
+  },
+  singleName: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#fff',
+    textAlign: 'center',
+  },
+  multiParticipantContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    marginBottom: 10,
+  },
+  multiAvatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    margin: 10,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+  },
+  multiName: {
+    fontSize: 16,
+    color: '#fff',
+    width: 100,
+    textAlign: 'center',
+    margin: 10,
+    fontWeight: '500',
   },
   mainView: {
     width: '100%',

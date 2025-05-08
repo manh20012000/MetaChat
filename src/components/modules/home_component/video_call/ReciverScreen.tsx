@@ -1,11 +1,5 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  StatusBar,
-} from 'react-native';
+import {View, Text, StyleSheet, StatusBar} from 'react-native';
 import {useRoute, useNavigation, RouteProp} from '@react-navigation/native';
 import {useSocket} from '../../../../provinders/socket.io';
 import {RootStackParamList} from '../../../../types/navigation_type/rootStackScreen';
@@ -17,11 +11,20 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useWebRTC} from './use_video_call/useWebRTC';
 import IncommingVideoCall from './InCommingVideoCall';
 
+interface Participant {
+  user_id: string;
+  socketId: string;
+  name?: string;
+  avatar?: string;
+  [key: string]: any;
+}
+
 const ReceiverScreen: React.FC = () => {
   const route = useRoute<RouteProp<RootStackParamList, 'ReciverScreen'>>();
-  const {caller, roomId, participants, isCaller, isOnpenCamera, status} =
+  const {caller, converstationVideocall, isCaller, isOnpenCamera, status} =
     route.params || {};
 
+  const {roomId, participants, roomName} = converstationVideocall || {};
   const navigation = useNavigation();
   const socket = useSocket();
   const user = useSelector((state: any) => state.auth.value);
@@ -29,7 +32,6 @@ const ReceiverScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const localVideoRef = useRef<any>(null);
 
-  // Call status
   const [callStatus, setCallStatus] = useState<
     CallNotifiButton.ACCEPT | CallNotifiButton.REJECT | CallNotifiButton.COMMING
   >(
@@ -40,118 +42,98 @@ const ReceiverScreen: React.FC = () => {
       : CallNotifiButton.COMMING,
   );
 
-  // Use WebRTC hook
   const {
     localStream,
     remoteStreams,
-    isMicOn,
     participanteds,
+    isMicOn,
     setIsMicOn,
     statusCamera,
     setStatusCamera,
     setupMedia,
     setupPeerConnection,
     createOffer,
-    handleSignal,
     endCall,
     isSpeakerOn,
     setIsSpeakerOn,
     setLocalStream,
     setParticipanteds,
+    handleRejoin,
   } = useWebRTC({
     socket,
     roomId,
     isCaller,
-    participants,
     isOnpenCamera,
+    participants,
     navigation,
+    caller,
   });
 
-  // Track if call has been accepted
   const hasAcceptedCall = useRef(false);
 
-  // Handle accepting a call
   const handleAccept = useCallback(() => {
     if (hasAcceptedCall.current) {
       console.log('Call already accepted');
       return;
     }
 
-    hasAcceptedCall.current = true;
-    console.log(`Accepting call from ${caller?.name}`);
-    setCallStatus(CallNotifiButton.ACCEPT);
-
-    if (
-      !participants ||
-      participants.length === 0 ||
-      !socket ||
-      !caller?.socketId
-    ) {
-      console.error('Invalid call info:', {
-        participants,
-        socket,
-        callerSocketId: caller?.socketId,
-      });
+    if (!caller || !socket || !user?._id || !roomId) {
+  
+      navigation.goBack();
       return;
     }
 
-    // Find current user in participants
-    const userReceiver = participants.find(
-      (p: any) => p.user.user_id === user._id,
-    );
+    hasAcceptedCall.current = true;
+    setCallStatus(CallNotifiButton.ACCEPT);
+
+    const userReceiver = participants?.find((p: any) => p.user_id === user._id);
     if (!userReceiver) {
-      console.error('User receiver not found in participants');
+      navigation.goBack();
       return;
     }
 
     socket.emit('call_accepted', {
       roomId,
-      caller: {...caller, socketId: caller.socketId},
+      caller,
       userReceiver: {
-        _id: userReceiver.user._id,
-        user_id: userReceiver.user.user_id,
-        name: userReceiver.user.name,
-        avatar: userReceiver.user.avatar,
-        socketId: socket?.id,
+        _id: userReceiver._id,
+        user_id: userReceiver.user_id,
+        name: userReceiver.name,
+        avatar: userReceiver.avatar,
       },
     });
 
-    // Initialize media and connections
     setupMedia().then(success => {
       if (!success) {
         console.error('Failed to set up media');
         endCall();
       }
     });
-  }, [socket, caller, participants, user, roomId, setupMedia, endCall]);
+  }, [
+  ]);
 
-  // Handle declining a call
   const handleDecline = useCallback(() => {
-    console.log(`Declining call from ${caller?.name}`);
+
     setCallStatus(CallNotifiButton.REJECT);
 
-    if (!socket || !caller || !user?._id) {
-      console.error('Missing required info for declining:', {
-        socket,
-        caller,
-        userId: user?._id,
-      });
-      endCall();
+    if (!socket || !caller || !user?._id || !roomId) {
+     
+      navigation.goBack();
       return;
     }
 
-    // Notify server of rejection
     socket.emit('call_declined', {
       roomId,
       caller,
-      userReceiver: {user_id: user._id, socketId: socket.id},
+      userReceiver: {_id: user._id, user_id: user.user_id},
     });
 
-    endCall();
-  }, [socket, caller, user?._id, roomId, endCall]);
+    navigation.goBack();
+  }, [socket]);
 
-  // Auto-accept or auto-reject based on status param
+  // Log params and statusCamera
   useEffect(() => {
+    console.log('Initial statusCamera:', statusCamera);
     if (status === CallNotifiButton.ACCEPT) {
       console.log('Auto-accepting call due to status');
       handleAccept();
@@ -159,96 +141,106 @@ const ReceiverScreen: React.FC = () => {
       console.log('Auto-rejecting call due to status');
       handleDecline();
     }
-  }, [status, handleAccept, handleDecline]);
 
-  // Set up WebRTC when call is accepted
-  useEffect(() => {
-    if (callStatus !== CallNotifiButton.ACCEPT) return;
-
-    const initWebRTC = async () => {
-      // Set up media
-      const success = await setupMedia();
-      if (!success) {
-        console.error('Failed to set up media');
-        endCall();
-        return;
-      }
-
-      // Set up connections with existing participants
-      if (participants && localStream) {
-        for (const participant of participants) {
-          const participantSocketId = participant.socketId;
-          if (participantSocketId && participantSocketId !== socket?.id) {
-            setupPeerConnection(participantSocketId, localStream);
-          }
-        }
-      }
+    return () => {
+      hasAcceptedCall.current = false;
     };
-
-    initWebRTC();
   }, [
-    callStatus,
-    setupMedia,
-    participants,
-    localStream,
-    socket?.id,
-    setupPeerConnection,
-    endCall,
   ]);
-  console.log(participants);
-  // Handle call updates
+
+  // Sync mic and camera status
+  useEffect(() => {
+    if (!localStream) return;
+
+   
+    localStream.getAudioTracks().forEach(track => {
+      track.enabled = isMicOn;
+    });
+
+    if (isOnpenCamera && localStream.getVideoTracks().length > 0) {
+      console.log('Syncing camera status:', statusCamera);
+      localStream.getVideoTracks().forEach(track => {
+        track.enabled = statusCamera;
+      });
+    }
+  }, []);
+
+  // Setup WebRTC
+  useEffect(() => {
+    if (callStatus !== CallNotifiButton.ACCEPT || !localStream) return;
+
+    for (const participant of participanteds) {
+      const userId = participant.user_id;
+      const targetSocketId = participant.socketId;
+      if (userId && targetSocketId && userId !== user._id) {
+        console.log(
+          `Setting up peer for ${userId} with socketId ${targetSocketId}`,
+        );
+        setupPeerConnection(userId, targetSocketId, localStream);
+      }
+    }
+  }, []);
+
+  // Handle socket events
   useEffect(() => {
     if (!socket) return;
 
     const handleCallUpdate = (data: {
       type: string;
-      participant: any;
-      allParticipants: any[];
+      participant: Participant;
+      allParticipants: Participant[];
     }) => {
-      console.log(`Call update: ${data.type}`);
-      setParticipanteds(data.allParticipants);
+    
+      setParticipanteds(prev => {
+        if (JSON.stringify(prev) === JSON.stringify(data.allParticipants)) {
+          return prev;
+        }
+        return data.allParticipants;
+      });
 
-      // Handle new participant
       if (data.type === 'participant_joined' && localStream) {
-        const participantSocketId = data.participant.socketId;
-        if (participantSocketId && participantSocketId !== socket.id) {
-          const peer = setupPeerConnection(participantSocketId, localStream);
+        const userId = data.participant.user_id;
+        const targetSocketId = data.participant.socketId;
+        if (userId && targetSocketId && userId !== user._id) {
+          console.log(
+            `New participant ${userId} joined with socketId ${targetSocketId}`,
+          );
+          const peer = setupPeerConnection(userId, targetSocketId, localStream);
           if (isCaller) {
-            createOffer(peer, participantSocketId);
+            createOffer(peer, userId, targetSocketId);
           }
         }
       }
     };
 
-    // Set up socket event listeners
     socket.on('call_update', handleCallUpdate);
     socket.on('call_ended', () => {
-      console.log('Call ended by server');
+      console.log('Received call_ended from server');
       endCall();
     });
     socket.on('call_cancelled', () => {
-      console.log('Call cancelled by caller');
+      console.log('Received call_cancelled from server');
       endCall();
     });
     socket.on('force_end_call', ({reason}: any) => {
-      console.log(`Force end call: ${reason}`);
+      console.log('Received force_end_call:', reason);
       endCall();
     });
+    socket.on('connect', () => {
+      console.log('Socket reconnected');
+      handleRejoin();
+    });
 
-    // Clean up listeners
     return () => {
       socket.off('call_update', handleCallUpdate);
       socket.off('call_ended');
       socket.off('call_cancelled');
       socket.off('force_end_call');
+      socket.off('connect');
     };
   }, [
     socket,
-    localStream,
-    setupPeerConnection,
-    endCall,
-    isCaller,
-    createOffer,
+   
   ]);
 
   return (
@@ -258,32 +250,30 @@ const ReceiverScreen: React.FC = () => {
         barStyle={color.dark ? 'light-content' : 'dark-content'}
         backgroundColor={'transparent'}
       />
-
-      {/* Video preview area */}
       <View style={[styles.previewContainer, {paddingTop: insets.top}]}>
-        <>
-          {callStatus === CallNotifiButton.ACCEPT && (
-            <VideoCallPreview
-              participanteds={participanteds || []}
-              isCameraOn={statusCamera}
-              localVideoRef={localVideoRef}
-              remoteStreams={remoteStreams}
-              localStream={localStream}
-            />
-          )}
-
-          {callStatus === CallNotifiButton.COMMING && (
-
-            <IncommingVideoCall
+        {callStatus === CallNotifiButton.ACCEPT && caller ? (
+          <VideoCallPreview
+            converstationVideocall={converstationVideocall}
+            participanteds={participanteds || []}
+            isCameraOn={statusCamera}
+            localVideoRef={localVideoRef}
+            remoteStreams={remoteStreams}
+            localStream={localStream}
             caller={caller}
-              paticipant={participants}
-              handleAccept={handleAccept}
-              handleDecline={handleDecline}
-            />
-          )}
-        </>
+          />
+        ) : callStatus === CallNotifiButton.COMMING && caller ? (
+          <IncommingVideoCall
+            caller={caller}
+            converstationVideocall={converstationVideocall}
+            handleAccept={handleAccept}
+            handleDecline={handleDecline}
+          />
+        ) : (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>Invalid call information</Text>
+          </View>
+        )}
       </View>
-
       {callStatus === CallNotifiButton.ACCEPT && (
         <ActionButton
           localStream={localStream as any}
@@ -308,6 +298,15 @@ const styles = StyleSheet.create({
   },
   previewContainer: {
     flex: 1,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    color: '#fff',
+    fontSize: 18,
   },
 });
 

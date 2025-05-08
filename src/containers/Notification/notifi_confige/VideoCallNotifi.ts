@@ -12,8 +12,9 @@ export const handleVideoCallNotification = async (remoteMessage: any) => {
   try {
     const {data} = remoteMessage;
     if (!data) throw new Error('No data in message');
-
-    const {roomId, callerName} = data;
+    const {callerName,converstationVideocall,caller}=data
+    const dataconver=JSON.parse(converstationVideocall);
+    const {roomId} =dataconver;
     if (!roomId) {
       throw new Error('Missing required fields');
     }

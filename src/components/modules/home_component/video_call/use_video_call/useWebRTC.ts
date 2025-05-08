@@ -8,7 +8,6 @@ import {
 } from 'react-native-webrtc';
 import {Socket} from 'socket.io-client';
 
-// Props for the custom hook
 interface WebRTCHookProps {
   socket: Socket | null;
   roomId: string;
@@ -16,6 +15,7 @@ interface WebRTCHookProps {
   isOnpenCamera: boolean;
   navigation: any;
   participants: any[];
+  caller: {user_id: string; id: string; name: string; avatar: string};
 }
 
 interface ExtendedRTCPeerConnection extends RTCPeerConnection {
@@ -28,31 +28,30 @@ export const useWebRTC = ({
   socket,
   roomId,
   isCaller,
-  isOnpenCamera,
+  isOnpenCamera, // trạng thái mở camera hay tắt camera
   navigation,
   participants,
+  caller,
 }: WebRTCHookProps) => {
-  // States
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
-  const [remoteStreams, setRemoteStreams] = useState<Map<string, MediaStream>>(
-    new Map(),
-  );
+  const [remoteStreams, setRemoteStreams] = useState<{
+    [userId: string]: MediaStream;
+  }>({});
   const [participanteds, setParticipanteds] = useState<any[]>(
     participants || [],
   );
-  const [isMicOn, setIsMicOn] = useState(true);
-  const [statusCamera, setStatusCamera] = useState(isOnpenCamera);
+  const [isMicOn, setIsMicOn] = useState<boolean>(true);
+  const [statusCamera, setStatusCamera] = useState<boolean>(isOnpenCamera);
   const [isSpeakerOn, setIsSpeakerOn] = useState(false);
 
-  // Refs
-  const peerConnections = useRef<Map<string, RTCPeerConnection>>(new Map());
+  const peerConnections = useRef<{[userId: string]: RTCPeerConnection}>({});
+  const userIdToSocketId = useRef<{[userId: string]: string}>({});
   const pendingSignals = useRef<any[]>([]);
   const isMounted = useRef(false);
   const processingOffer = useRef<Set<string>>(new Set());
   const processingAnswer = useRef<Set<string>>(new Set());
   const processedIceCandidates = useRef<Set<string>>(new Set());
 
-  // ICE servers configuration
   const iceServers = [
     {urls: 'stun:stun.l.google.com:19302'},
     {urls: 'stun:stun1.l.google.com:19302'},
@@ -68,134 +67,109 @@ export const useWebRTC = ({
     },
   ];
 
-  // Initialize media stream
   const setupMedia = useCallback(async () => {
     try {
-      // console.log('Setting up media streams');
       const stream = await mediaDevices.getUserMedia({
         audio: true,
         video: {
-          width: 640,
-          height: 480,
+          width: 720,
+          height: 1080,
           frameRate: 30,
+          facingMode: 'user',
         },
       });
 
-      // Update track states based on initial settings
       stream.getVideoTracks().forEach(track => {
+        console.log('Video track:', track);
         track.enabled = statusCamera;
       });
 
       stream.getAudioTracks().forEach(track => {
+        console.log('Audio track:', track);
         track.enabled = isMicOn;
       });
 
       setLocalStream(stream);
-      // console.log('Local stream setup complete');
       return true;
     } catch (err) {
       console.error('Failed to get media stream:', err);
       return false;
     }
-  }, [statusCamera, isMicOn]);
+  }, []);
 
-  // Set up peer connection
   const setupPeerConnection = useCallback(
-    (targetSocketId: string, stream: MediaStream): RTCPeerConnection => {
-      // console.log(`Setting up peer connection for ${targetSocketId}`);
+    (
+      userId: string,
+      targetSocketId: string,
+      stream: MediaStream,
+    ): RTCPeerConnection => {
+      if (!userId || !targetSocketId) return {} as RTCPeerConnection;
 
-      // Close existing connection if present
-      if (peerConnections.current.has(targetSocketId)) {
-        const existingPeer = peerConnections.current.get(targetSocketId)!;
-        if (existingPeer.connectionState !== 'closed') {
-          try {
-            existingPeer.close();
-          } catch (err) {
-            console.error('Error closing existing peer connection:', err);
-          }
-        }
-        peerConnections.current.delete(targetSocketId);
+      const existingPeer = peerConnections.current[userId];
+      if (existingPeer && existingPeer.connectionState !== 'closed') {
+        return existingPeer;
       }
 
-      // Create new peer connection
+      if (existingPeer && existingPeer.connectionState === 'closed') {
+        delete peerConnections.current[userId];
+      }
+
       const peer = new RTCPeerConnection({
         iceServers,
       }) as ExtendedRTCPeerConnection;
 
-      // Add all tracks from local stream to peer connection
       stream.getTracks().forEach(track => {
         peer.addTrack(track, stream);
       });
 
-      // Handle ICE candidates
       peer.onicecandidate = ({candidate}) => {
         if (candidate) {
-          const candidateId = `${targetSocketId}-${JSON.stringify(candidate)}`;
+          const candidateId = `${userId}-${JSON.stringify(candidate)}`;
           if (!processedIceCandidates.current.has(candidateId)) {
             processedIceCandidates.current.add(candidateId);
-            console.log(`Sending ICE candidate to ${targetSocketId}`);
             socket?.emit('sendSignal', {
-              signal: {candidate},
+              signal: candidate,
               targetSocketId,
               roomId,
-              type: 'iceCandidate',
+              type: 'ice-candidate',
             });
           }
         }
       };
 
-      // Handle incoming tracks
       peer.ontrack = event => {
-        // console.log(`Received track from ${targetSocketId}`);
-        const remoteStream = event.streams[0];
+        const remoteStream = event.streams[0] as unknown as MediaStream; // Lấy stream đầu tiên
         if (remoteStream) {
-          setRemoteStreams(prev => {
-            const newStreams = new Map(prev);
-            newStreams.set(targetSocketId, remoteStream as any);
-            return newStreams;
-          });
+          setRemoteStreams(prev => ({...prev, [userId]: remoteStream}));
         }
       };
 
-      // Handle connection state changes
       peer.oniceconnectionstatechange = () => {
-        console.log(
-          `ICE connection state for ${targetSocketId}: ${peer.iceConnectionState}`,
-        );
-        if (
-          ['disconnected', 'failed', 'closed'].includes(peer.iceConnectionState)
-        ) {
-          console.log(
-            `Removing peer connection for ${targetSocketId} due to state: ${peer.iceConnectionState}`,
-          );
-          peerConnections.current.delete(targetSocketId);
+        const state = peer.iceConnectionState;
+        if (['disconnected', 'failed', 'closed'].includes(state)) {
+          delete peerConnections.current[userId];
           setRemoteStreams(prev => {
-            const newStreams = new Map(prev);
-            newStreams.delete(targetSocketId);
+            const newStreams = {...prev};
+            delete newStreams[userId];
             return newStreams;
           });
         }
       };
 
-      // Save the peer connection
-      peerConnections.current.set(targetSocketId, peer);
+      peerConnections.current[userId] = peer;
+      userIdToSocketId.current[userId] = targetSocketId;
       return peer;
     },
-    [socket, roomId],
+    [socket],
   );
 
-  // Create offer
   const createOffer = useCallback(
-    async (peer: RTCPeerConnection, targetSocketId: string) => {
-      if (processingOffer.current.has(targetSocketId)) {
-        // console.log(`Already creating offer for ${targetSocketId}, skipping`);
-        return;
-      }
+    async (peer: RTCPeerConnection, userId: string, targetSocketId: string) => {
+      if (processingOffer.current.has(userId)) return;
 
-      processingOffer.current.add(targetSocketId);
+      processingOffer.current.add(userId);
 
       try {
-        // console.log(`Creating offer for ${targetSocketId}`);
         const offer = await peer.createOffer({
           offerToReceiveAudio: true,
           offerToReceiveVideo: true,
@@ -209,89 +183,77 @@ export const useWebRTC = ({
           roomId,
           type: 'offer',
         });
-
-        // console.log(`Offer sent to ${targetSocketId}`);
       } catch (err) {
-        console.error(`Error creating offer for ${targetSocketId}:`, err);
+        console.error(`Error creating offer for ${userId}:`, err);
       } finally {
-        processingOffer.current.delete(targetSocketId);
+        processingOffer.current.delete(userId);
       }
     },
-    [socket, roomId],
+    [],
   );
 
-  // Handle incoming signals
   const handleSignal = useCallback(
     async ({
       signal,
-      senderId,
+      targetSocketId,
       type,
+      userId,
     }: {
       signal: any;
-      senderId: string;
+      targetSocketId: string;
       type: string;
+      userId: string;
     }) => {
       if (!localStream) {
-        console.log(`No local stream yet, queueing signal from ${senderId}`);
-        pendingSignals.current.push({signal, senderId, type});
+        pendingSignals.current.push({signal, targetSocketId, type, userId});
         return;
       }
 
+      let peer = peerConnections.current[userId];
+      if (!peer) {
+        peer = setupPeerConnection(userId, targetSocketId, localStream);
+      }
+
       try {
-        let peer = peerConnections.current.get(senderId);
-
-        // If no peer connection exists for this sender, create one
-        if (!peer) {
-          // console.log(`Creating new peer connection for ${senderId}`);
-          peer = setupPeerConnection(senderId, localStream);
-        }
-
         switch (type) {
           case 'offer':
-            if (processingAnswer.current.has(senderId)) {
-              // console.log(
-              //   `Already processing answer for ${senderId}, queueing offer`,
-              // );
-              pendingSignals.current.push({signal, senderId, type});
+            if (processingAnswer.current.has(userId)) {
+              pendingSignals.current.push({
+                signal,
+                targetSocketId,
+                type,
+                userId,
+              });
               return;
             }
 
-            processingAnswer.current.add(senderId);
+            processingAnswer.current.add(userId);
 
             try {
-              // console.log(`Processing offer from ${senderId}`);
               await peer.setRemoteDescription(
                 new RTCSessionDescription(signal),
               );
-
               const answer = await peer.createAnswer();
               await peer.setLocalDescription(answer);
 
               socket?.emit('sendSignal', {
                 signal: answer,
-                targetSocketId: senderId,
+                targetSocketId,
                 roomId,
                 type: 'answer',
               });
-
-              // console.log(`Answer sent to ${senderId}`);
-            } catch (err) {
-              console.error(`Error processing offer from ${senderId}:`, err);
             } finally {
-              processingAnswer.current.delete(senderId);
+              processingAnswer.current.delete(userId);
             }
             break;
 
           case 'answer':
-            // console.log(`Processing answer from ${senderId}`);
             await peer.setRemoteDescription(new RTCSessionDescription(signal));
-            // console.log(`Remote description set for ${senderId}`);
             break;
 
-          case 'iceCandidate':
-            if (signal.candidate) {
-              // console.log(`Adding ICE candidate from ${senderId}`);
-              await peer.addIceCandidate(new RTCIceCandidate(signal.candidate));
+          case 'ice-candidate':
+            if (signal) {
+              await peer.addIceCandidate(new RTCIceCandidate(signal));
             }
             break;
 
@@ -299,93 +261,128 @@ export const useWebRTC = ({
             console.warn(`Unknown signal type: ${type}`);
         }
       } catch (err) {
-        console.error(`Error handling signal from ${senderId}:`, err);
+        console.error(`Error handling signal for ${userId}:`, err);
       }
     },
-    [localStream, setupPeerConnection, socket, roomId],
+    [],
   );
 
-  // End call
   const endCall = useCallback(() => {
-    // console.log('Ending call');
-
-    // Stop all tracks in local stream
     if (localStream) {
-      localStream.getTracks().forEach(track => {
-        track.stop();
-      });
+      localStream.getTracks().forEach(track => track.stop());
     }
 
-    // Close all peer connections
-    peerConnections.current.forEach((peer, socketId) => {
-      // console.log(`Closing peer connection for ${socketId}`);
+    Object.values(peerConnections.current).forEach(peer => {
       try {
         peer.close();
-      } catch (err) {
-        console.error(`Error closing peer connection for ${socketId}:`, err);
-      }
+      } catch (err) {}
     });
 
-    // Clear collections
-    peerConnections.current.clear();
+    peerConnections.current = {};
+    userIdToSocketId.current = {};
     processingOffer.current.clear();
     processingAnswer.current.clear();
     processedIceCandidates.current.clear();
 
-    // Reset state
     setLocalStream(null);
-    setRemoteStreams(new Map());
+    setRemoteStreams({});
+    setParticipanteds([]);
 
-    // Notify server
     socket?.emit('endCall', {conversationId: roomId});
-
-    // Navigate back
     navigation.goBack();
+  }, [socket, roomId, navigation, localStream]);
 
-    // console.log('Call ended');
-  }, [socket, localStream, roomId, navigation]);
+  const handleRejoin = useCallback(async () => {
+    if (!socket || !socket.connected) return;
 
-  // Process pending signals when stream becomes available
-  useEffect(() => {
-    if (localStream && pendingSignals.current.length > 0) {
-      // console.log(
-      //   `Processing ${pendingSignals.current.length} pending signals`,
-      // );
-      const signals = [...pendingSignals.current];
-      pendingSignals.current = [];
+    const userId = caller.user_id;
+    if (!userId) return;
 
-      signals.forEach(signal => {
-        handleSignal(signal);
-      });
+    // Gửi rejoin_call
+    socket.emit('rejoin_call', {roomId, userId});
+
+    // Khôi phục localStream
+    const success = await setupMedia();
+    if (!success) {
+      endCall();
+      return;
     }
-  }, [localStream, handleSignal]);
 
-  // Set up socket listeners
+    // Chờ call_update từ server để tái tạo peerConnections
+  }, []);
+
   useEffect(() => {
     if (!socket) return;
 
     isMounted.current = true;
 
-    // Set up socket event listeners
-    socket.on('receiveSignal', handleSignal);
-    socket.on('call_ended', () => {
-      // console.log('Received call_ended event');
-      endCall();
+    socket.on(
+      'receiveSignal',
+      ({signal, senderId: targetSocketId, type, userId}) => {
+        handleSignal({signal, targetSocketId, type, userId});
+      },
+    );
+    socket.on('request_offer', ({targetSocketId, userId}) => {
+      if (localStream) {
+        const peer = setupPeerConnection(userId, targetSocketId, localStream);
+        createOffer(peer, userId, targetSocketId);
+      }
     });
+    socket.on('call_update', ({type, participant, allParticipants}) => {
+      setParticipanteds(allParticipants);
+      if (type === 'participant_joined' && localStream) {
+        const userId = participant.user_id;
+        const targetSocketId =
+          userIdToSocketId.current[userId] || `temp_${userId}`;
+        const peer = setupPeerConnection(userId, targetSocketId, localStream);
+        if (isCaller) {
+          createOffer(peer, userId, targetSocketId);
+        }
+      }
+    });
+    socket.on('userLeftCall', ({userId}) => {
+      if (peerConnections.current[userId]) {
+        peerConnections.current[userId].close();
+        delete peerConnections.current[userId];
+        delete userIdToSocketId.current[userId];
+        setRemoteStreams(prev => {
+          const newStreams = {...prev};
+          delete newStreams[userId];
+          return newStreams;
+        });
+      }
+    });
+    socket.on('call_ended', endCall);
+    socket.on('call_cancelled', endCall);
+    socket.on('force_end_call', endCall);
 
-    // Cleanup on unmount
+    socket.on('connect', handleRejoin);
+
     return () => {
       isMounted.current = false;
-      socket.off('receiveSignal', handleSignal);
+      socket.off('receiveSignal');
+      socket.off('request_offer');
+      socket.off('call_update');
+      socket.off('userLeftCall');
       socket.off('call_ended');
+      socket.off('call_cancelled');
+      socket.off('force_end_call');
+      socket.off('connect');
     };
-  }, [socket, handleSignal, endCall]);
+  }, []);
 
-  // Return everything needed by components
+  useEffect(() => {
+    if (localStream && pendingSignals.current.length > 0) {
+      const signals = [...pendingSignals.current];
+      pendingSignals.current = [];
+      signals.forEach(signal => handleSignal(signal));
+    }
+  }, []);
+
   return {
     localStream,
-    participanteds,
     remoteStreams,
+    participanteds,
     isMicOn,
     setIsMicOn,
     statusCamera,
@@ -393,12 +390,12 @@ export const useWebRTC = ({
     setupMedia,
     setupPeerConnection,
     createOffer,
-    handleSignal,
     endCall,
     isSpeakerOn,
     setIsSpeakerOn,
     setLocalStream,
     setParticipanteds,
     setRemoteStreams,
+    handleRejoin,
   };
 };

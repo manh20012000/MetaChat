@@ -13,5 +13,13 @@ const filterParticipants = (
     
 };
 
+const MapParticipants = (
+  participantsList: participants[],
+ 
+)=> {
+  return participantsList
+    .map((paticipant: participants) => paticipant.user)
+    
+};
 
-export {filterParticipants};
+export {filterParticipants,MapParticipants};

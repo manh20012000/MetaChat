@@ -131,6 +131,8 @@ const findAndconvertConversation = async (
       });
       return existingConversation;
     } else {
+      const type= participantIds.length > 2 ? 'group' : 'direct';
+    
       const newConversation = {
         _id: new ObjectId().toString(),
         roomName: null,
@@ -142,6 +144,7 @@ const findAndconvertConversation = async (
         participants: participants,
         participantIds: participantIds,
         messages: [],
+        type: type,
         permission: 'lock',
         isDeleted: null,
         messageError: [],
