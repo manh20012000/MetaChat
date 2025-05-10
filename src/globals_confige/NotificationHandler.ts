@@ -10,7 +10,7 @@ import {
   handleVideoCallNotification,
 } from '../containers/Notification/notifi_confige/VideoCallNotifi';
 // import {createNotificationChannels} from '../confige/NotificationConfige';
-import HandlerIncommingVideoCall from '../constants/func_utils/handler_incomming_videocall';
+import HandlerReciverVideoCall from '../constants/func_utils/handler_incomming_videocall';
 import {
   CallNotifiButton,
   MESSAGE_TYPE,
@@ -23,7 +23,7 @@ export const handleBackgroundNotification = async (remoteMessage: any) => {
   if (data?.type === MESSAGE_TYPE) {
     await handleMessageNotification(remoteMessage);
   } else if (data?.type === VIDEO_CALL_TYPE) {
-    HandlerIncommingVideoCall(data, false, CallNotifiButton.COMMING);
+    HandlerReciverVideoCall(data, false, CallNotifiButton.COMMING);
     await handleVideoCallNotification(remoteMessage);
   }
 };
@@ -40,24 +40,6 @@ export const handleNotificationPress = async ({type, detail}: any) => {
 
 export const initializeNotifications = async () => {
   await messaging().requestPermission();
-  // createNotificationChannels().then(() => {
-  //   notifee.setNotificationCategories([
-  //     {
-  //       id: 'incoming_call',
-  //       actions: [
-  //         {id: 'accept_call', title: 'Nhận'},
-  //         {id: 'reject_call', title: 'Từ chối', destructive: true},
-  //       ],
-  //     },
-  //     {
-  //       id: 'incoming_message',
-  //       actions: [
-  //         {id: 'like_message', title: '👍 Like'},
-  //         {id: 'reply_message', title: '💬 Reply', input: {}},
-  //       ],
-  //     },
-  //   ]);
-  // });
 
   notifee.getInitialNotification().then(initialNotification => {
     if (initialNotification) {

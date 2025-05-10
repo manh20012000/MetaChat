@@ -1,21 +1,20 @@
 import { navigationRef } from "../../navigation/navigation"
 
 
-const HandlerIncommingVideoCall = (data: any, isCaller: boolean, status: string) => {
+const HandlerReciverVideoCall = (data: any, isCaller: boolean, status: string) => {
   try {
     const navigationData = {
       caller: JSON.parse(data.caller),
-      roomId: data.roomId,
-      participants: JSON.parse(data.participants),
+      converstationVideocall: JSON.parse(data.converstationVideocall),
       isOnpenCamera: false,
       isCaller: isCaller,
-      status: status,
+      status: status, // xem là video được chấp nhận hay chỉ là video thương thôi
     };
 
-    navigationRef.navigate('CommingVideoCall', navigationData);
+    navigationRef.navigate('ReciverScreen', navigationData);
   } catch (err) {
     console.log('lỗi điều hướng', err);
   }
 
 }
-export default HandlerIncommingVideoCall
+export default HandlerReciverVideoCall

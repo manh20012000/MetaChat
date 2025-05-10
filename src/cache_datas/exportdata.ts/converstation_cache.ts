@@ -131,6 +131,8 @@ const findAndconvertConversation = async (
       });
       return existingConversation;
     } else {
+      const type = participantIds.length > 2 ? 'group' : 'direct';
+
       const newConversation = {
         _id: new ObjectId().toString(),
         roomName: null,
@@ -142,6 +144,7 @@ const findAndconvertConversation = async (
         participants: participants,
         participantIds: participantIds,
         messages: [],
+        type: type,
         permission: 'lock',
         isDeleted: null,
         messageError: [],
@@ -250,14 +253,14 @@ const Converstation_Message = async (
         `participantIds.@size == ${conversation.participantIds.length} AND ${conditions}`,
         ...conversation.participantIds,
       );
-
+    console.log(conversation.totalMessage, 'dshjdshjdjsdjsj ');
     let existingConversation = conversations[0] || null;
     realm.write(() => {
       if (existingConversation) {
         (existingConversation.messages as Message_type[]).unshift(message);
         existingConversation.updatedAt = message.createdAt;
         existingConversation.lastSync = message.createdAt;
-        existingConversation.totalMessage = conversation.totalMessage | 1;
+        existingConversation.totalMessage = conversation.totalMessage || 1;
       } else {
         realm.create('Conversation', converstation(conversation, message));
       }

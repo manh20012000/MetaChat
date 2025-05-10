@@ -6,13 +6,12 @@ export type RootStackParamList = {
     userId: string
   };
   CameraChat: undefined;
-  VideoCallHome: any,
-  CommingVideoCall: {
+  CallerScreen: any,
+  ReciverScreen: {
     data?: any;
     caller: any;
-    roomId: string;
-    isOnpenCamera: boolean;
-    participants: any,
+    isOnpenCamera: boolean; // xem có đúng là trạng thái mở camera hay không 
+    converstationVideocall: any,
     isCaller: boolean,
     status: string,
   };

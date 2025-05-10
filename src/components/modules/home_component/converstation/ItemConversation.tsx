@@ -54,7 +54,12 @@ const MessageItem = ({
   navigation: any;
   socket: any;
   user_Status: any;
-  typingUsers: any;
+  typingUsers: {
+    userChat: userMessage;
+    isTyping: boolean;
+    deviceSend: string;
+    roomId: string;
+  };
   handlePresentModalPress: (item: Conversation) => void;
 }) => {
   const statusUser: boolean = item.participantIds.some(
@@ -244,7 +249,7 @@ const MessageItem = ({
                 .filter((name: string) => !!name)
                 .join(', ')}
           </Text>
-          {typingUsers?.isTyping ? (
+          {typingUsers?.isTyping && typingUsers.roomId === item._id ? (
             <TypingIndicator typingUsers={typingUsers} size={20} dotSize={12} />
           ) : (
             <View

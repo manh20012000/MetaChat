@@ -28,8 +28,8 @@ import SettingComponent from '../screens/User/UseComponent/Setting.tsx';
 import { useSocket } from '../provinders/socket.io.tsx';
 import { Status } from '../stores/reducer/status.User.ts';
 import DeviceInfo from 'react-native-device-info';
-import VideoCallHome from '../components/modules/home_component/video_call/VideoCallHome.tsx';
-import IncomingVideoCallScreen from '../components/modules/home_component/video_call/IncomingVideoCallScreen.tsx';
+import CallerScreen from '../components/modules/home_component/video_call/CallerScreen.tsx';
+import ReciverScreen from '../components/modules/home_component/video_call/ReciverScreen.tsx';
 import { RootStackParamList } from '../types/navigation_type/rootStackScreen.tsx';
 import { checkAndRefreshToken } from '../utils/checkingToken.ts';
 
@@ -44,8 +44,8 @@ const screens = [
   { name: 'HomeChatPersion', component: HomeChatPersion },
   { name: 'CameraChat', component: CameraChat },
   { name: 'Setting', component: SettingComponent },
-  { name: 'VideoCallHome', component: VideoCallHome },
-  { name: 'CommingVideoCall', component: IncomingVideoCallScreen },
+  { name: 'CallerScreen', component: CallerScreen },
+  { name: 'ReciverScreen', component: ReciverScreen },
 ];
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
 const Navigation: React.FC = () => {

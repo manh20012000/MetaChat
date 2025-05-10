@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Image,
@@ -9,12 +9,15 @@ import {
 } from 'react-native';
 import { itemuser } from '../../types/home_type/search_type';
 import { useDispatch, useSelector } from 'react-redux';
-import Statusbar from '../../components/commons/StatusBar';
+import Statusbar from '../../components/commons/share_components/StatusBar';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import GiftedChatView from '../../components/modules/home_component/chat_component/gifted_chat/GiftedChat';
 import { useSocket } from '../../provinders/socket.io';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { filterParticipants, MapParticipants } from '../../utils/util_chat/get_paticipants';
+import { mediaDevices } from 'react-native-webrtc';
+import Peer from 'simple-peer';
 const HomeChatPersion: React.FC<{ route: any; navigation: any }> = ({
   route,
   navigation,
@@ -26,13 +29,96 @@ const HomeChatPersion: React.FC<{ route: any; navigation: any }> = ({
   const { width, height } = useWindowDimensions();
   const isPortrait = height > width;
   const { conversation } = route.params;
-  const socket = useSocket();
+  const [stream, setStream] = useState<MediaStream | null>(null); // Video stream local
+  const [peer, setPeer] = useState<Peer.Instance | null>(null); // Peer connection
+  const [callEnded, setCallEnded] = useState(false); // Trạng thái cuộc gọi đã kết thúc hay chưa
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null); // Video stream của người nhận
 
+  const userVideoRef = useRef<HTMLVideoElement | null>(null); // Tham chiếu đến video local
+  const remoteVideoRef = useRef<HTMLVideoElement | null>(null); // Tham chiếu đến video remote
+  const socket = useSocket();
   const [userChat] = useState<any>(
     conversation.participants.find(
       (participant: any) => participant.user.user_id === user._id,
     ),
   );
+  // useEffect(() => {
+  //   const handleer = async () => {
+  //     const stream = await mediaDevices.getUserMedia({
+  //       audio: true,
+  //       video: {
+  //         width: 720,
+  //         height: 1080,
+  //         frameRate: 30,
+  //         facingMode: 'user',
+  //       },
+  //     });
+
+  //     stream.getVideoTracks().forEach(track => {
+  //       console.log('Video track:', track);
+  //       track.enabled = true;
+  //     });
+
+  //     stream.getAudioTracks().forEach(track => {
+
+  //       track.enabled = true;
+  //       console.log('Audio track:', track);
+  //     });
+  //   }
+  //   handleer()
+  // }, [])
+  // useEffect(() => {
+  //   const initWebRTC = async () => {
+  //     // Get local video stream
+  //     const localStream = await navigator.mediaDevices.getUserMedia({
+  //       video: true,
+  //       audio: true,
+  //     });
+  //     setStream(localStream);
+
+  //     // Set local video stream
+  //     if (userVideoRef.current) {
+  //       userVideoRef.current.srcObject = localStream;
+  //     }
+
+  //     // Thiết lập peer connection
+  //     const peerConnection = new Peer({
+  //       initiator: true,
+  //       trickle: false,
+  //       stream: localStream,
+  //     });
+
+  //     // Lắng nghe sự kiện stream từ remote
+  //     peerConnection.on('stream', (remoteStream) => {
+  //       setRemoteStream(remoteStream);
+  //       if (remoteVideoRef.current) {
+  //         remoteVideoRef.current.srcObject = remoteStream;
+  //       }
+  //     });
+
+  //     // Xử lý khi peer connection đóng
+  //     peerConnection.on('close', () => {
+  //       setCallEnded(true);
+  //     });
+
+  //     setPeer(peerConnection);
+
+  //     // Gửi tín hiệu lên server khi kết nối sẵn sàng
+
+  //   };
+
+  //   initWebRTC();
+
+  //   return () => {
+  //     // Dọn dẹp khi component bị unmount
+  //     if (peer) {
+  //       peer.destroy();
+  //     }
+  //     if (stream) {
+  //       stream.getTracks().forEach((track) => track.stop()); // Dừng stream khi kết thúc
+  //     }
+  //   };
+  // }, [socket]);
   const sendConnectCall = async () => {
     try {
       if (!networkConnect) {
@@ -41,32 +127,40 @@ const HomeChatPersion: React.FC<{ route: any; navigation: any }> = ({
       }
 
       // 👉 Xác định người nhận (participant) là những người khác user hiện tại
-      const participantIds = conversation.participantIds.filter(
-        (id: string) => id !== user.user_id,
-      );
 
-      // 👉 Thông tin người gọi (caller)
+      const participants = MapParticipants(conversation.participants)
+
+      //👉 Thông tin người gọi (caller)
       const callerData = {
-        _id: userChat._id, // đây là ID MongoDB của user hiện tại
-        user_id: userChat.user_id, // user_id chính là định danh trong hệ thống
-        name: conversation.roomName || userChat.name,
-        avatar: userChat.avatar,
-        socketId: socket?.id, // sẽ được server điền khi cần
+        _id: userChat.user._id, // đây là ID MongoDB của user hiện tại
+        user_id: userChat.user.user_id, // user_id chính là định danh trong hệ thống
+        name: userChat.user.name,
+        avatar: userChat.user.avatar,
+
       };
+      const converstationVideocall = {
+        roomId: conversation._id,
+        roomName: conversation.roomName || null,
+        avatar: conversation.avatar || null,
+        type: conversation.type, // Loại cuộc trò chuyện (vd: "group" hoặc "direct")
+        color: conversation.color, // Màu sắc của nhóm (nếu có)
+        icon: conversation.iconicon, //
+        background: conversation.background, // Background của nhóm (nếu có)
+        participants: participants,
+
+
+      }
       socket?.emit('startCall', {
         caller: callerData,
-        roomId: conversation._id,
-        participants: conversation.participants,
-        isCaller: true,
-        participantIds,
+        converstationVideocall,
+        participantIds: conversation.participantIds,
       }); // gửi mảng user_id người nhận
 
-      // 👉 Điều hướng sang màn hình cuộc gọi
-      navigation.navigate('VideoCallHome', {
+      //👉 Điều hướng sang màn hình cuộc gọi
+      navigation.navigate('CallerScreen', {
         caller: callerData,
-        roomId: conversation._id,
-        participants: conversation.participants,
-        participantIds,
+        converstationVideocall,
+        participantIds: conversation.participantIds,
         isOnpenCamera: false,
         conversation,
         isCaller: true,

@@ -1,6 +1,7 @@
 import {Message_type} from './Chat_type';
-export type participants = {
-  user: {
+
+export type TUser=
+  {
     _id: string;
     action_notifi: boolean;
     avatar: string;
@@ -9,6 +10,9 @@ export type participants = {
     status_read: boolean;
     user_id: string;
   };
+
+export type participants = {
+  user: TUser;
   message_readed_id: string;
   readAt: string;
 };

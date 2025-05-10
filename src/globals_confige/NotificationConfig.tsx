@@ -85,13 +85,12 @@ const handleNotificationPress = async ({ type, detail }: any) => {
           try {
             const navigationData = {
               caller: JSON.parse(data.caller),
-              roomId: data.roomId,
-              participants: JSON.parse(data.participants),
-              isOnpenCamera: true,
+              converstationVideocall: JSON.parse(data.converstationVideocall),
+              isOnpenCamera: false,
               isCaller: false,
               status: 'accept_call',
             };
-            navigationRef.navigate('CommingVideoCall', navigationData);
+            navigationRef.navigate('ReciverScreen', navigationData);
           } catch (err) {
             console.log(`Lỗi điều hướng ${data.type}:`, err);
           }
@@ -100,14 +99,13 @@ const handleNotificationPress = async ({ type, detail }: any) => {
         try {
           const navigationData = {
             caller: JSON.parse(data.caller),
-            roomId: data.roomId,
             nameCall: data.callerName,
-            isOnpenCamera: true,
-            participants: JSON.parse(data.participants),
+            isOnpenCamera: false, // xem có phải bật camera hay không 
+            converstationVideocall: JSON.parse(data.converstationVideocall),
             isCaller: false,
             status: 'reject',
           };
-          navigationRef.navigate('CommingVideoCall', navigationData);
+          navigationRef.navigate('ReciverScreen', navigationData);
         } catch (err) {
           console.log(`Lỗi điều hướng reject ${data.type}:`, err);
         }
