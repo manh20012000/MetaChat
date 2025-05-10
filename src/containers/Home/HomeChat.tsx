@@ -4,7 +4,7 @@ import { Backsvg } from "../../assets/svg/svgfile";
 import { useSelector, } from "react-redux";
 import Conversation from "../../types/home_type/Converstation_type";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Statusbar from "../../components/commons/StatusBar";
+import Statusbar from "../../components/commons/share_components/StatusBar";
 const ChatScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, route }) => {
     const color = useSelector((status: any) => status.colorApp.value)
     const user = useSelector((status: any) => status.auth.value)

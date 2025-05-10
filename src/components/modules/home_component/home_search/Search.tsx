@@ -10,7 +10,7 @@ import User_type from "../../../../types/home_type/user_type";
 import { API_ROUTE } from "../../../../services/api_enpoint";
 import { clearUserSearch, create_userSearch, get_userSearch } from "../../../../cache_datas/exportdata.ts/useSearch_cache";
 import { User_search } from "../../../../types/home_type/search_type";
-import Skeleton from "../../../../components/commons/Skeleton";
+import Skeleton from "../../../commons/share_components/Skeleton";
 import { itemuser } from "../../../../types/home_type/search_type";
 import SearchItemUser from "./Search_item_user";
 const SearchScreen: React.FC<{ navigation: any }> = ({ navigation }) => {

@@ -140,7 +140,7 @@ const GiftedChatView = ({
             ]}
             // isTyping={true}
             renderFooter={() =>
-              typingUsers?.isTyping ? (
+              typingUsers?.isTyping && typingUsers.roomId === conversation._id ? (
                 <TypingIndicator
                   typingUsers={typingUsers}
                   size={20}

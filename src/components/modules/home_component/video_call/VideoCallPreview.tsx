@@ -56,20 +56,47 @@ const VideoCallPreview: React.FC<PreviewVideoCallProps> = ({
   const renderMainView = () => {
     // Lấy danh sách remoteStreams, loại bỏ stream của user hiện tại
     const remoteEntries = Object.entries(remoteStreams).filter(([userId]) => userId !== user._id);
+    console.log(user.name, '🚀 ~ remoteEntries:', remoteEntries, remoteEntries[0], remoteEntries.length);
 
     // Nếu có remoteStreams, hiển thị video
     if (remoteEntries.length > 0) {
+      // Giới hạn tối đa 8 người
+      const limitedEntries = remoteEntries.slice(0, 8);
+      remoteEntries.forEach(([userId, stream]) => {
+        console.log(`[DEBUG] Stream for ${userId}:`, stream.getTracks().map(t => t.kind));
+      });
+      // Nếu chỉ có 1 người tham gia khác, hiển thị full màn hình
+      if (limitedEntries.length === 1) {
+        const [userId, stream] = limitedEntries[0];
+        const participant = participanteds.find(p => p.user_id === userId);
+        return (
+          <View style={styles.mainView}>
+            <View style={styles.fullScreenContainer}>
+              <RTCView
+                objectFit="cover"
+                mirror={false}
+                streamURL={stream.toURL()}
+                style={styles.fullScreenVideo}
+
+              />
+              <Text style={styles.userName}>{participant?.name ?? userId}</Text>
+            </View>
+          </View>
+        );
+      }
+
+      // Nếu có nhiều người tham gia, hiển thị dạng grid
       return (
         <View style={styles.mainView}>
-          {remoteEntries.map(([userId, stream]) => {
+          {limitedEntries.map(([userId, stream]) => {
             const participant = participanteds.find(p => p.user_id === userId);
             return (
-              <View key={userId} style={styles.remoteVideoContainer}>
+              <View key={userId} style={styles.gridVideoContainer}>
                 <RTCView
                   objectFit="cover"
                   mirror={false}
                   streamURL={stream.toURL()}
-                  style={styles.fullScreen}
+                  style={styles.gridVideo}
                 />
                 <Text style={styles.userName}>{participant?.name ?? userId}</Text>
               </View>
@@ -204,13 +231,14 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(139, 23, 23, 0.5)',
   },
   contentContainer: {
     flex: 0.7,
     justifyContent: 'flex-start',
     alignItems: 'center',
     marginTop: 50,
+
   },
   roomContainer: {
     alignItems: 'center',
@@ -277,18 +305,30 @@ const styles = StyleSheet.create({
   mainView: {
     width: '100%',
     height: '100%',
+    flex: 1,
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-around',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'black', // Đổi màu nền để dễ debug
   },
-  remoteVideoContainer: {
-    flex: 1,
+  fullScreenContainer: {
+    width: '100%',
+    height: '100%',
+    position: 'relative',
+  },
+  fullScreenVideo: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
+  },
+  gridVideoContainer: {
+    width: width / 2 - 10, // Chia đôi màn hình cho 2 người mỗi hàng
+    height: (height - 100) / 4, // Chia chiều cao thành 4 hàng (tối đa 8 người)
     position: 'relative',
     margin: 5,
-    width: '45%',
-    height: '45%',
   },
-  fullScreen: {
+  gridVideo: {
     width: '100%',
     height: '100%',
     borderRadius: 10,
@@ -309,7 +349,7 @@ const styles = StyleSheet.create({
   avatarContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#222',
+    backgroundColor: 'green',
     width: '100%',
     height: '100%',
     borderRadius: 10,

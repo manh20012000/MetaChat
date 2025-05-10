@@ -63,7 +63,6 @@ export const handleVideoCallNotification = async (remoteMessage: any) => {
 export const handleVideoCallNotificationPress = async ({type, detail}: any) => {
   const callStatus = await getCallStatus(); // thực hiện lấy ở localstorange
   if (type === EventType.DELIVERED) {
-    console.log('Notification delivered, no action required:', type);
     return; // Dừng lại, không tiếp tục xử lý nữa
   }
 

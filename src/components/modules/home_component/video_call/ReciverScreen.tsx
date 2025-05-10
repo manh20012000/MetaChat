@@ -133,7 +133,7 @@ const ReceiverScreen: React.FC = () => {
 
   // Log params and statusCamera
   useEffect(() => {
-    console.log('Initial statusCamera:', statusCamera);
+   
     if (status === CallNotifiButton.ACCEPT) {
       console.log('Auto-accepting call due to status');
       handleAccept();
@@ -168,52 +168,20 @@ const ReceiverScreen: React.FC = () => {
   // Setup WebRTC
   useEffect(() => {
     if (callStatus !== CallNotifiButton.ACCEPT || !localStream) return;
-
+  
     for (const participant of participanteds) {
       const userId = participant.user_id;
       const targetSocketId = participant.socketId;
       if (userId && targetSocketId && userId !== user._id) {
-        console.log(
-          `Setting up peer for ${userId} with socketId ${targetSocketId}`,
-        );
+        console.log(`Setting up peer for ${userId} with socketId ${targetSocketId}`);
         setupPeerConnection(userId, targetSocketId, localStream);
       }
     }
   }, []);
-
-  // Handle socket events
+  
   useEffect(() => {
     if (!socket) return;
-
-    const handleCallUpdate = (data: {
-      type: string;
-      participant: Participant;
-      allParticipants: Participant[];
-    }) => {
-    
-      setParticipanteds(prev => {
-        if (JSON.stringify(prev) === JSON.stringify(data.allParticipants)) {
-          return prev;
-        }
-        return data.allParticipants;
-      });
-
-      if (data.type === 'participant_joined' && localStream) {
-        const userId = data.participant.user_id;
-        const targetSocketId = data.participant.socketId;
-        if (userId && targetSocketId && userId !== user._id) {
-          console.log(
-            `New participant ${userId} joined with socketId ${targetSocketId}`,
-          );
-          const peer = setupPeerConnection(userId, targetSocketId, localStream);
-          if (isCaller) {
-            createOffer(peer, userId, targetSocketId);
-          }
-        }
-      }
-    };
-
-    socket.on('call_update', handleCallUpdate);
+  
     socket.on('call_ended', () => {
       console.log('Received call_ended from server');
       endCall();
@@ -222,7 +190,7 @@ const ReceiverScreen: React.FC = () => {
       console.log('Received call_cancelled from server');
       endCall();
     });
-    socket.on('force_end_call', ({reason}: any) => {
+    socket.on('force_end_call', ({ reason }: any) => {
       console.log('Received force_end_call:', reason);
       endCall();
     });
@@ -230,18 +198,14 @@ const ReceiverScreen: React.FC = () => {
       console.log('Socket reconnected');
       handleRejoin();
     });
-
+  
     return () => {
-      socket.off('call_update', handleCallUpdate);
       socket.off('call_ended');
       socket.off('call_cancelled');
       socket.off('force_end_call');
       socket.off('connect');
     };
-  }, [
-    socket,
-   
-  ]);
+  }, [socket]);
 
   return (
     <View style={styles.container}>

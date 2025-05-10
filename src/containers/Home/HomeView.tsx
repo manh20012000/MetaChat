@@ -18,7 +18,7 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useHomeLogic } from './use_home/use-home.tsx';
 import HeaderHome from '../../components/commons/home_components/HeaderHome.tsx';
-import Statusbar from '../../components/commons/StatusBar.tsx';
+import Statusbar from '../../components/commons/share_components/StatusBar.tsx';
 import BottonsheetHome from '../../components/commons/home_components/BottomsheetHome.tsx';
 import dayjs from 'dayjs';
 import Conversation from '../../types/home_type/Converstation_type.ts';

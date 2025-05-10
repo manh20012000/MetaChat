@@ -26,7 +26,7 @@ import Reanimated, {
   useSharedValue,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Statusbar from '../../../../commons/StatusBar';
+import Statusbar from '../../../../commons/share_components/StatusBar';
 import { useSelector } from 'react-redux';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';

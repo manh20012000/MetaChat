@@ -73,16 +73,7 @@ const CallerScreen: React.FC<CallerScreenProps> = ({ navigation, route }) => {
 
   useEffect(() => {
     if (!socket) return;
-
-    const handleCallUpdate = (data: {
-      type: string;
-      participant: any;
-      allParticipants: any[];
-    }) => {
-
-      setParticipanteds(data.allParticipants);
-    };
-
+  
     const handleUserLeft = ({ userId }: { userId: string }) => {
       console.log(`User left: ${userId}`);
       setRemoteStreams(prev => {
@@ -91,16 +82,14 @@ const CallerScreen: React.FC<CallerScreenProps> = ({ navigation, route }) => {
         return newStreams;
       });
     };
-
-    socket.on('call_update', handleCallUpdate);
+  
     socket.on('userLeftCall', handleUserLeft);
     socket.on('call_ended', endCall);
     socket.on('call_cancelled', endCall);
     socket.on('force_end_call', endCall);
     socket.on('connect', handleRejoin);
-
+  
     return () => {
-      socket.off('call_update');
       socket.off('userLeftCall');
       socket.off('call_ended');
       socket.off('call_cancelled');

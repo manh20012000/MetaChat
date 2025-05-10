@@ -25,26 +25,33 @@ const userActionButton = (
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
 
   const handleToggleMute = () => {
-
     if (localStream) {
       localStream.getAudioTracks().forEach(track => {
+        console.log(`[handleToggleMute] BEFORE: track.enabled=${track.enabled}`);
         track.enabled = !isMicOn;
+        console.log(`[handleToggleMute] AFTER: track.enabled=${track.enabled}`);
       });
-      setIsMicOn(prev => !prev);
+      setIsMicOn(prev => {
+        console.log(`[handleToggleMute] isMicOn changed: ${!prev}`);
+        return !prev;
+      });
+    } else {
+      console.log('[handleToggleMute] No localStream');
     }
   };
+  
 
   const handleToggleSpeaker = () => {
     setIsSpeakerOn(prev => !prev);
     // Lưu ý: react-native-webrtc không hỗ trợ trực tiếp toggle speaker, cần dùng thư viện âm thanh riêng nếu muốn điều khiển loa
   };
-  const toggleMute = () => {
-    console.log('Toggling mute:', isMicOn, localStream);
-    if (localStream) {
-      localStream.getAudioTracks().forEach(track => (track.enabled = !isMicOn));
-      setIsMicOn(prev => !prev);
-    }
-  };
+  // const toggleMute = () => {
+  //   console.log('Toggling mute:', isMicOn, localStream);
+  //   if (localStream) {
+  //     localStream.getAudioTracks().forEach(track => (track.enabled = !isMicOn));
+  //     setIsMicOn(prev => !prev);
+  //   }
+  // };
 
   const toggleSpeaker = () => {
     setIsSpeakerOn(prev => !prev);
@@ -84,11 +91,13 @@ const userActionButton = (
     isMuted,
     isSpeakerOn,
     isFrontCamera,
-    toggleMute,
+    // toggleMute,
     toggleSpeaker,
     toggleVideo,
     switchCamera,
-    remoteStream, handleToggleMute, handleToggleSpeaker
+    remoteStream, 
+    handleToggleMute, 
+    handleToggleSpeaker
   };
 };
 
