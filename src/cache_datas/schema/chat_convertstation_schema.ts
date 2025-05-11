@@ -36,6 +36,7 @@ const MessageSchema = {
   properties: {
     _id: 'string?', // ID của tin nhắn
     conversation_id: 'string', // ID cuộc hội thoại
+    participantKey: 'string',
     user: 'user?', // Người gửi
     messageType: 'string?', // Loại tin nhắn ("text", "attachment", ...)
     text: 'string?', // Nội dung tin nhắn văn bản

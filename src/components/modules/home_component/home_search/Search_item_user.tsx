@@ -54,11 +54,10 @@ const SearchItemUser: React.FC<{ item: itemuser; navigation: any }> = ({
           readAt: null,
         },
       ];
-
       const conversation: any = await findAndconvertConversation(
         participants,
         participantIds,
-        { dispatch, user },
+    
       );
 
       if (participantIds.length <= 2) {

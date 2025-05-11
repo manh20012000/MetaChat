@@ -23,6 +23,7 @@ type Conversation = {
   type: string; // Loại cuộc trò chuyện (vd: "group" hoặc "direct")
   color: string; // Màu sắc của nhóm (nếu có)
   icon: string; //
+  participantKey: string; // Khóa tham gia cuộc trò chuyện
   background: string; // Background của nhóm (nếu có)
   messages: Message_type[];
   participants: participants[]; // Danh sách người tham gia cuộc trò chuyện];

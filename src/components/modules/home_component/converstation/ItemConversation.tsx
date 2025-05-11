@@ -54,12 +54,7 @@ const MessageItem = ({
   navigation: any;
   socket: any;
   user_Status: any;
-  typingUsers: {
-    userChat: userMessage;
-    isTyping: boolean;
-    deviceSend: string;
-    roomId: string;
-  };
+  typingUsers: any;
   handlePresentModalPress: (item: Conversation) => void;
 }) => {
   const statusUser: boolean = item.participantIds.some(

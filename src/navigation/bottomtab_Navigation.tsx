@@ -18,6 +18,7 @@ import changeNavigationBarColor, {
   showNavigationBar,
 } from 'react-native-navigation-bar-color';
 import DrawerNavigation from './DrawerNavigation.tsx';
+import { HomeView } from '../containers/Home/HomeView.tsx';
 
 const Tab = createBottomTabNavigator();
 
@@ -91,7 +92,7 @@ const Bottomtab_Navigation: React.FC<{ navigation: any }> = ({ navigation }) => 
           return iconComponent;
         },
       })}>
-      <Tab.Screen name="Home" component={DrawerNavigation} />
+      <Tab.Screen name="Home" component={HomeView} />
       {/* <Tab.Screen name="Home" component={Home_screen} /> */}
       <Tab.Screen name="Watch" component={Watch} />
       <Tab.Screen

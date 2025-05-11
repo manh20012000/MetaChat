@@ -13,6 +13,8 @@ import { Search } from '../../../assets/svg/svgfile';
 import { useSocket } from '../../../provinders/socket.io';
 import { findAndconvertConversation } from '../../../cache_datas/exportdata.ts/converstation_cache';
 import userMessage from '../../../types/home_type/useMessage_type';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 const HeaderHome: React.FC<{ navigation: any; data_friend: userMessage[] }> = ({
   navigation,
   data_friend,
@@ -40,6 +42,7 @@ const HeaderHome: React.FC<{ navigation: any; data_friend: userMessage[] }> = ({
           flex: 1,
           marginHorizontal: 10,
         }}>
+
         <TouchableOpacity
           onPress={() => {
             navigation.navigate('User');
@@ -74,10 +77,8 @@ const HeaderHome: React.FC<{ navigation: any; data_friend: userMessage[] }> = ({
         alignItems: 'center',
         borderStartColor: 'pink',
       }}>
-      <Pressable
-        onPress={() => {
-          navigation.navigate('SearchScreen');
-        }}
+      <View
+
         style={{
           paddingLeft: '5%',
           alignItems: 'center',
@@ -85,15 +86,30 @@ const HeaderHome: React.FC<{ navigation: any; data_friend: userMessage[] }> = ({
           flexDirection: 'row',
           borderRadius: 30,
           width: '90%',
-          height: '30%',
+          height: 50,
         }}>
-        <View style={{ alignItems: 'center', flexDirection: 'row' }}>
-          <Search width={30} color={'pink'} stroke={'white'} />
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('Ask_AI');
+          }}
+          style={{ alignItems: 'center', flexDirection: 'row', gap: 10, flex: 0.2, height: "100%" }}>
+          <AntDesign name='API' size={20} color={color.white} />
+          <Text style={{ color: color.light, fontSize: 15, fontWeight: '500' }}>
+            AI
+
+          </Text>
+        </TouchableOpacity >
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('SearchScreen');
+          }}
+          style={{ alignItems: 'center', flexDirection: 'row', gap: 10, flex: 0.8, height: "100%" }}>
+          <FontAwesome name='search' size={20} color={color.white} />
           <Text style={{ color: color.light, fontSize: 15, fontWeight: '500' }}>
             Tìm kiếm
           </Text>
-        </View>
-      </Pressable>
+        </TouchableOpacity>
+      </View>
       <View style={{ flex: 1, width: width, marginTop: 5 }}>
         <FlatList
           ListHeaderComponent={<HeaderTop_Chat />}
