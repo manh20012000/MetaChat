@@ -1,13 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { Modal, Text, TouchableOpacity, View, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  Modal,
+  Text,
+  TouchableOpacity,
+  View,
+  StyleSheet,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 import MapView, { Marker } from 'react-native-maps';
-import Conversation from '../../../../type/Home/Converstation_type';
-import { Message_type } from '../../../../type/Home/Chat_type';
-import userMessage from '../../../../type/Home/useMessage_type';
+import Conversation from '../../../../../types/home_type/Converstation_type';
+import { Message_type } from '../../../../../types/home_type/Chat_type';
+import userMessage from '../../../../../types/home_type/useMessage_type';
 import UseModalMap from './useMapShare';
 import Ionicons from 'react-native-vector-icons/Ionicons'; // Import icon
-
+//const googleMapsLink = `https://www.google.com/maps?q=${location.latitude},${location.longitude}`;
 type TMap = {
   onClose: () => void;
   onSend: any;
@@ -16,14 +24,26 @@ type TMap = {
   userChat: userMessage;
 };
 
-  Geolocation.setRNConfiguration({
-    skipPermissionRequests: false, 
-    authorizationLevel: 'whenInUse',
-  });
+Geolocation.setRNConfiguration({
+  skipPermissionRequests: true,
+  authorizationLevel: 'auto',
+  enableBackgroundLocationUpdates: true,
+  locationProvider: 'auto',
+});
 
-const ModalMap: React.FC<TMap> = ({ onClose, onSend, conversation, replyMessage, userChat }) => {
-  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [isLoading, setIsLoading] = useState(true); 
+const ModalMap: React.FC<TMap> = ({
+  onClose,
+  onSend,
+  conversation,
+  replyMessage,
+  userChat,
+}) => {
+  const [location, setLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const mapRef = useRef<MapView>(null);
   const { onSendMessage } = UseModalMap({
     onSend,
     conversation,
@@ -32,33 +52,47 @@ const ModalMap: React.FC<TMap> = ({ onClose, onSend, conversation, replyMessage,
   });
 
   useEffect(() => {
-    
-    try{
+    Geolocation.getCurrentPosition(info => console.log('dshdjsds', info));
+    try {
       // Geolocation.getCurrentPosition(info => console.log(info));
       Geolocation.getCurrentPosition(
-        (position) => {
+        position => {
           const { latitude, longitude } = position.coords;
-     
+
           setLocation({ latitude, longitude });
           setIsLoading(false);
         },
-        (error) => {
-          Alert.alert("Lỗi", `Không thể lấy vị trí: ${error.message}`);
+        error => {
+          Alert.alert('Lỗi', `Không thể lấy vị trí: ${error.message}`);
           console.log(error);
           setIsLoading(false);
         },
-        { enableHighAccuracy: false ,timeout: 20000, maximumAge: 10000 }
-    
-    );
-
-    }catch(err){
-      Alert.alert("Lỗi", "Không thể lấy vị trí. Hãy kiểm tra cài đặt GPS.");
-      console.log(err)
-    }finally{
+        { enableHighAccuracy: false, timeout: 20000, maximumAge: 10000 },
+      );
+    } catch (err) {
+      Alert.alert('Lỗi', 'Không thể lấy vị trí. Hãy kiểm tra cài đặt GPS.');
+      console.log(err);
+    } finally {
       setIsLoading(false);
     }
-    
   }, []);
+
+  useEffect(() => {
+    if (location && mapRef.current) {
+      mapRef.current.animateToRegion(
+        {
+          latitude: location.latitude,
+          longitude: location.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        1000,
+      );
+    }
+  }, [location]);
+  const onRegionChange = (region: any) => {
+    setLocation(region);
+  }
 
   return (
     <Modal transparent animationType="slide">
@@ -78,24 +112,29 @@ const ModalMap: React.FC<TMap> = ({ onClose, onSend, conversation, replyMessage,
             <>
               {/* Hiển thị bản đồ nếu có vị trí */}
               <MapView
+                onRegionChange={onRegionChange}
+                ref={mapRef}
+                provider="google" // ⚠️ Thêm dòng này
                 style={styles.map}
-                initialRegion={{
+                region={{
                   latitude: location.latitude,
                   longitude: location.longitude,
                   latitudeDelta: 0.01,
                   longitudeDelta: 0.01,
                 }}
+                showsUserLocation={true}
+                followsUserLocation={true}
+                onMapReady={() => console.log('Map is ready')} // Debug
               >
                 <Marker coordinate={location} title="Vị trí của bạn" />
               </MapView>
 
               {/* Nút "Send" nằm ở dưới cùng */}
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={styles.sendButton}
-                onPress={() => onSendMessage(location)}
-              >
+                onPress={() => onSendMessage(location)}>
                 <Text style={styles.sendButtonText}>Send</Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </>
           )}
         </View>
@@ -124,7 +163,7 @@ const styles = StyleSheet.create({
   closeButton: {
     position: 'absolute',
     top: 10,
-    right: 10,
+    left: 10,
     zIndex: 1, // Đảm bảo nút đóng nằm trên cùng
   },
   loadingContainer: {
@@ -133,7 +172,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   map: {
-    flex: 1,
+    width: '100%',
+    height: '100%',
   },
   sendButton: {
     width: '90%',

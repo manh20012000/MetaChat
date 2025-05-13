@@ -178,6 +178,7 @@ const useRenderInput = (props: any) => {
     inputHeight,
     setInputHeight,
     setChangeIcon,
+    setOpenMap
   };
 };
 export default useRenderInput;

@@ -56,29 +56,17 @@ export const useWebRTC = ({
   const localStreamRef = useRef<MediaStream | null>(null);
 
   const iceServers = [
-    // Google STUN servers
+    // STUN servers
     {urls: 'stun:stun.l.google.com:19302'},
     {urls: 'stun:stun1.l.google.com:19302'},
     {urls: 'stun:stun2.l.google.com:19302'},
-    {urls: 'stun:stun3.l.google.com:19302'},
-    {urls: 'stun:stun4.l.google.com:19302'},
-
-    // OpenRelay TURN servers
+  
+    // TURN server
     {
-      urls: 'turn:openrelay.metered.ca:80',
-      username: 'openrelayproject',
-      credential: 'openrelayproject',
-    },
-    {
-      urls: 'turn:openrelay.metered.ca:443',
-      username: 'openrelayproject',
-      credential: 'openrelayproject',
-    },
-    {
-      urls: 'turn:openrelay.metered.ca:443?transport=tcp',
-      username: 'openrelayproject',
-      credential: 'openrelayproject',
-    },
+      urls: 'turn:103.90.226.168:3478',  // Địa chỉ TURN server của bạn
+      username: 'lemanh',               // Tên người dùng bạn đã cấu hình
+      credential: 'levanmanh2/',        // Mật khẩu người dùng bạn đã cấu hình
+    }
   ];
 
   const setupMedia = useCallback(async () => {

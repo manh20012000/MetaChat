@@ -20,7 +20,7 @@ const createConversation = async (Conversation: Conversation) => {
     if (existingConversation) {
       return; // Dừng lại nếu đã tồn tại
     }
-    console.log(Conversation.participantIds);
+
     if (Conversation.participants.length > 0) {
       realm.write(() => {
         realm.create('Conversation', {
