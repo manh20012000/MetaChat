@@ -4,9 +4,9 @@ import { View, Text, TouchableOpacity, KeyboardAvoidingView, useWindowDimensions
 import { TextInput } from 'react-native-gesture-handler';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useDispatch, useSelector } from 'react-redux';
-import { getListfriend } from '../../cache_datas/exportdata.ts/friend_cache';
-import { getData } from '../../services/resfull_api';
-import { API_ROUTE } from '../../services/api_enpoint';
+import { getListfriend } from '../../../../cache_datas/exportdata.ts/friend_cache';
+import { getData } from '../../../../services/resfull_api';
+import { API_ROUTE } from '../../../../services/api_enpoint';
 import React from 'react';
 const Create_Group = () => {
   const user = useSelector((state: any) => state.auth.value);

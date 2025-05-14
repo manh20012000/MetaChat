@@ -20,8 +20,7 @@ const createConversation = async (Conversation: Conversation) => {
     if (existingConversation) {
       return; // Dừng lại nếu đã tồn tại
     }
-    console.log(Conversation.totalMessage);
-    // Nếu không tồn tại, thêm vào Realm
+
     if (Conversation.participants.length > 0) {
       realm.write(() => {
         realm.create('Conversation', {
@@ -38,6 +37,7 @@ const createConversation = async (Conversation: Conversation) => {
           isDeleted: Conversation.isDeleted,
           createdAt: Conversation.createdAt,
           lastSync: Conversation.lastSync,
+          participantKey: Conversation.participantIds.slice().sort().join(','),
           totalMessage:
             Conversation.totalMessage ?? Conversation.messages.length,
         });
@@ -102,24 +102,19 @@ const update_Converstation = async (
 };
 
 //
-let isProcessing = false;
+
 const findAndconvertConversation = async (
   participants: any,
   participantIds: string[],
-  checking: any,
 ) => {
   try {
-    // Tạo query lọc các cuộc hội thoại có đủ participantIds
-    const conditions = participantIds
-      .map((id, index) => `participantIds CONTAINS $${index}`)
-      .join(' AND ');
+    // 👉 Tạo participantKey (sort ids để đảm bảo cùng id nhưng khác thứ tự vẫn giống nhau)
+    const participantKey = participantIds.slice().sort().join(',');
 
+    // 👉 Query conversation theo participantKey
     const conversations = realm
       .objects('Conversation')
-      .filtered(
-        `participantIds.@size == ${participantIds.length} AND ${conditions}`,
-        ...participantIds,
-      );
+      .filtered('participantKey == $0', participantKey);
 
     let existingConversation = conversations[0] || null; // Lấy cuộc hội thoại đầu tiên nếu có
 
@@ -140,9 +135,10 @@ const findAndconvertConversation = async (
         color: 'black',
         icon: '👍',
         background: 'blue',
-        createAt: new Date().toISOString(), // Chuyển Date thành chuỗi
+        createAt: new Date().toISOString(),
         participants: participants,
         participantIds: participantIds,
+        participantKey: participantKey, // 👉 thêm key này để lưu
         messages: [],
         type: type,
         permission: 'lock',
@@ -150,6 +146,7 @@ const findAndconvertConversation = async (
         messageError: [],
         lastSync: new Date().toISOString(),
       };
+
       return newConversation;
     }
   } catch (error) {
@@ -247,14 +244,22 @@ const Converstation_Message = async (
     const conditions = conversation.participantIds
       .map((id: any, index: any) => `participantIds CONTAINS $${index}`)
       .join(' AND ');
+
     const conversations = realm
       .objects('Conversation')
       .filtered(
         `participantIds.@size == ${conversation.participantIds.length} AND ${conditions}`,
         ...conversation.participantIds,
       );
-    console.log(conversation.totalMessage, 'dshjdshjdjsdjsj ');
+
+    console.log(
+      conversation.totalMessage,
+      'dshjdshjdjsdjsj ',
+      typeof conversation.totalMessage,
+    );
+
     let existingConversation = conversations[0] || null;
+
     realm.write(() => {
       if (existingConversation) {
         (existingConversation.messages as Message_type[]).unshift(message);
@@ -262,7 +267,12 @@ const Converstation_Message = async (
         existingConversation.lastSync = message.createdAt;
         existingConversation.totalMessage = conversation.totalMessage || 1;
       } else {
-        realm.create('Conversation', converstation(conversation, message));
+        const newConversationData = {
+          ...converstation(conversation, message), // object từ hàm converstation
+          totalMessage: conversation.totalMessage || 1, // ✅ đảm bảo thêm totalMessage
+        };
+
+        realm.create('Conversation', newConversationData);
       }
     });
   } catch (error) {

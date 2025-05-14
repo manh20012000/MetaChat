@@ -89,6 +89,8 @@ const ConversationSchema = {
     icon: 'string?',
     background: 'string?',
     messages: 'Message[]',
+    participantKey: 'string',
+
     updatedAt: 'string?', // Thời gian sửa đổi gần nhất
     permission: 'string?',
     participantIds: 'string[]',

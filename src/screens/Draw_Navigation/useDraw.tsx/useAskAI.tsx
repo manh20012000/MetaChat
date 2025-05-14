@@ -1,21 +1,23 @@
 import { useState } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { useSelector } from 'react-redux';
-import { GEMINI_KEY } from '@env';
+
 import axios from 'axios';
 const UseAskAI = () => {
-  const [messages, setMessages] = useState<{id:string, text: string; sender: string }[]>([]);
-  const[loading,setLoading]=useState(false)
+  const GEMINI_KEY = process.env.GEMINI_KEY;
+  const [messages, setMessages] = useState<{ id: string, text: string; sender: string }[]>([]);
+  const [loading, setLoading] = useState(false)
   const user = useSelector((state: any) => state.auth.value);
+  const color = useSelector((state: any) => state.colorApp.value)
   const { width, height } = useWindowDimensions();
   const [inputText, setInputText] = useState('');
   const [inputHeight, setInputHeight] = useState(40); // Chiều cao ban đầu của TextInput
   const handleSend = async () => {
-     setLoading(true)
+    setLoading(true)
     const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
 
     if (inputText.trim() === '') return;
-    const textsend=inputText
+    const textsend = inputText
     const userMessage = { id: new Date().toISOString(), text: inputText, sender: "user" };
     setMessages(prevMessages => [...prevMessages, userMessage]);
     setInputText('');
@@ -36,8 +38,8 @@ const UseAskAI = () => {
 
       setMessages(prevMessages => [...prevMessages, botMessage]);
     } catch (error) {
-      console.log(error,'lỗi gữi yêu cầu AI')
-    }finally{
+      console.log(error, 'lỗi gữi yêu cầu AI')
+    } finally {
       setLoading(false)
     }
   };
@@ -53,13 +55,14 @@ const UseAskAI = () => {
   };
 
   return {
+    color,
     messages,
     inputText,
     setInputText,
     handleSend,
     inputHeight,
     user,
-    handleContentSizeChange,loading
+    handleContentSizeChange, loading
   };
 };
 export default UseAskAI;

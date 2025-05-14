@@ -16,7 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
 import SearchScreen from '../components/modules/home_component/home_search/Search.tsx';
 import HomeChatPersion from '../containers/Home/ScreenChat.tsx';
-import Create_Group from '../screens/Draw_Navigation/Create_Group.tsx';
+import Create_Group from '../components/modules/home_component/converstation/Create_Group.tsx';
 import friendSchema from '../cache_datas/schema/schema_user.ts';
 import Setting_Chat from '../screens/Draw_Navigation/Setting_Chat.tsx';
 import Adttenment from '../screens/Draw_Navigation/Adttenment.tsx';
@@ -32,6 +32,9 @@ import CallerScreen from '../components/modules/home_component/video_call/Caller
 import ReciverScreen from '../components/modules/home_component/video_call/ReciverScreen.tsx';
 import { RootStackParamList } from '../types/navigation_type/rootStackScreen.tsx';
 import { checkAndRefreshToken } from '../utils/checkingToken.ts';
+import FriendSearch from '../components/modules/home_component/home_search/FriendSearch.tsx';
+import AskToAI from '../screens/Draw_Navigation/Ask_to_AI.tsx';
+import FindUser from '../components/modules/home_component/home_search/FindUser.tsx';
 
 const Stack = createNativeStackNavigator();
 
@@ -46,6 +49,10 @@ const screens = [
   { name: 'Setting', component: SettingComponent },
   { name: 'CallerScreen', component: CallerScreen },
   { name: 'ReciverScreen', component: ReciverScreen },
+  { name: 'FriendSearch', component: FriendSearch },
+  {name: 'Create_Group', component: Create_Group},
+  { name: 'Ask_AI', component: AskToAI },
+  { name: 'FindUser', component: FindUser },
 ];
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
 const Navigation: React.FC = () => {

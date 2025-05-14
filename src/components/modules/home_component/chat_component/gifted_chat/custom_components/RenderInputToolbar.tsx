@@ -28,6 +28,7 @@ import MicrophonePermission from '../../../../../../utils/permision_app/Micropho
 
 import MapLocaltedPermission from '../../../../../../utils/permision_app/MapPermission';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import ModalMap from '../../share_map_chat/ShareMap';
 type NavigationProps = NavigationProp<RootStackParamList>;
 type TCusttomTypeInput = {
   onSend: any;
@@ -59,7 +60,7 @@ const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
 
   const {
     handlePress,
-    text,
+    text, setOpenMap,
     handleSend,
     changeIcon,
     isShowSendText,
@@ -144,9 +145,10 @@ const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
               }}>
               <TouchableOpacity
                 onPress={async () => {
-                  console.log(await MapLocaltedPermission())
+                  console.log(await MapLocaltedPermission(), 'kedjjdsjds')
                   if (await MapLocaltedPermission()) {
-                    onClose()
+                    setOpenMap(true)
+                    // onClose()
                   } else {
                     Linking.openSettings();
                     console.log('cấp quyền thất bại ');
@@ -269,7 +271,7 @@ const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
           setTurnOnMic={setTurnOnMic}
         />
       )}
-      {/* {openMap && (
+      {openMap && (
         <ModalMap
           onClose={onClose}
           onSend={onSend}
@@ -277,7 +279,7 @@ const CustomInputToolbar: React.FC<TCusttomTypeInput> = (props: any) => {
           replyMessage={replyMessage}
           conversation={conversation}
         />
-      )} */}
+      )}
     </View>
   );
 };

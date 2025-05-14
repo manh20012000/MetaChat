@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Modal,
   RefreshControl,
+  useWindowDimensions,
 } from 'react-native';
 import {
   BottomSheetModalProvider,
@@ -21,11 +22,13 @@ import HeaderHome from '../../components/commons/home_components/HeaderHome.tsx'
 import Statusbar from '../../components/commons/share_components/StatusBar.tsx';
 import BottonsheetHome from '../../components/commons/home_components/BottomsheetHome.tsx';
 import dayjs from 'dayjs';
+import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import Conversation from '../../types/home_type/Converstation_type.ts';
 import MessageItem from '../../components/modules/home_component/converstation/ItemConversation.tsx';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 export const HomeView = ({ navigation }: { navigation: any }) => {
-
+  const { width, height } = useWindowDimensions();
   const {
     color,
     user,
@@ -49,12 +52,26 @@ export const HomeView = ({ navigation }: { navigation: any }) => {
 
   return (
     <BottomSheetModalProvider>
-      <View style={{ flex: 1, backgroundColor: color.dark }}>
+      <View style={{ flex: 1, backgroundColor: color.dark, top: insets.top }}>
         <Statusbar
           bgrstatus={color.dark}
           bgrcolor={color.light}
           translucent={true}
         />
+
+        <View style={{ paddingHorizontal: 20, width: width, height: 50, justifyContent: 'space-between', flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={{ fontWeight: 'bold', fontSize: 20, color: color.white }}>messages</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <TouchableOpacity style={{ padding: 10 }} onPress={() => navigation.navigate('Create_Group')}>
+              <FontAwesome5Icon name='user-friends' size={25} color={color.white} />
+            </TouchableOpacity>
+            <TouchableOpacity style={{ padding: 10 }} onPress={() => navigation.navigate('FindUser')}>
+              <FontAwesome name='edit' size={25} color={color.white} />
+            </TouchableOpacity>
+          </View>
+
+        </View>
+
         {onloading === true ? (
           <ActivityIndicator size="large" color="#00ff00" />
         ) : (
